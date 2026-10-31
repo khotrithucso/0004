@@ -1,0 +1,1188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Fast English 1000 Sentence Puzzle</title>
+  <style>
+    /* ==========================================================================
+       1. CORE SYSTEM TOKENS & RESET
+       ========================================================================== */
+    :root {
+      --bg-dark: #090d16;
+      --card-bg: #0f172a;
+      --surface-bg: #1e293b;
+      --accent-green: #10b981;
+      --accent-green-hover: #059669;
+      --accent-cyan: #0284c7;
+      --accent-yellow: #f59e0b;
+      --accent-red: #ef4444;
+      --accent-purple: #8b5cf6;
+      --text-light: #f8fafc;
+      --text-muted: #94a3b8;
+      --border-color: #334155;
+      --shadow-neon: 0 0 15px rgba(16, 185, 129, 0.3);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text-light);
+      min-height: 100vh;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ==========================================================================
+       2. TOP BAR & HAMBURGER SIDEBAR
+       ========================================================================== */
+    .app-topbar {
+      background: var(--card-bg);
+      border-bottom: 1px solid var(--border-color);
+      padding: 12px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 90;
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn-hamburger {
+      background: none;
+      border: none;
+      color: var(--text-light);
+      font-size: 22px;
+      cursor: pointer;
+      padding: 4px;
+    }
+
+    .app-logo-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--accent-cyan);
+      letter-spacing: 0.5px;
+    }
+
+    .user-hud-stats {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .hud-chip {
+      background: var(--surface-bg);
+      border: 1px solid var(--border-color);
+      padding: 4px 10px;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .hud-coins { color: var(--accent-yellow); }
+    .hud-stars { color: #facc15; }
+
+    /* SIDEBAR DRAWER */
+    .sidebar-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 200;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .sidebar-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .sidebar-drawer {
+      position: fixed;
+      top: 0; left: 0;
+      width: 280px; height: 100%;
+      background: var(--card-bg);
+      border-right: 1px solid var(--border-color);
+      z-index: 201;
+      transform: translateX(-100%);
+      transition: transform 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      padding: 20px 16px;
+    }
+
+    .sidebar-overlay.active .sidebar-drawer {
+      transform: translateX(0);
+    }
+
+    .sidebar-header {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--accent-green);
+      margin-bottom: 24px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .sidebar-menu {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .sidebar-btn {
+      background: var(--surface-bg);
+      color: var(--text-light);
+      border: 1px solid var(--border-color);
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      text-align: left;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: background 0.2s;
+    }
+
+    .sidebar-btn:active {
+      background: var(--accent-cyan);
+    }
+
+    /* ==========================================================================
+       3. ACTIVITY SCREENS SYSTEM (NO TABS)
+       ========================================================================== */
+    .screen {
+      display: none;
+      flex: 1;
+      padding: 16px;
+      max-width: 600px;
+      margin: 0 auto;
+      width: 100%;
+      animation: fadeIn 0.25s ease-in-out;
+    }
+
+    .screen.active {
+      display: flex;
+      flex-direction: column;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* SCREEN 1: HOME SCREEN */
+    .home-hero-card {
+      background: linear-gradient(135deg, #0284c7 0%, #0f172a 100%);
+      border-radius: 16px;
+      padding: 24px 16px;
+      text-align: center;
+      margin-bottom: 20px;
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-neon);
+    }
+
+    .home-hero-card h1 {
+      font-size: 24px;
+      font-weight: 800;
+      margin-bottom: 8px;
+      color: #fff;
+    }
+
+    .home-hero-card p {
+      font-size: 13px;
+      color: #e2e8f0;
+      margin-bottom: 16px;
+    }
+
+    .player-input-group {
+      margin-bottom: 20px;
+    }
+
+    .player-input-group label {
+      display: block;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      text-align: left;
+    }
+
+    .form-control {
+      width: 100%;
+      background: var(--surface-bg);
+      border: 1px solid var(--border-color);
+      color: var(--text-light);
+      padding: 12px 14px;
+      border-radius: 8px;
+      font-size: 15px;
+      outline: none;
+    }
+
+    .form-control:focus {
+      border-color: var(--accent-green);
+    }
+
+    .btn-main-action {
+      background: var(--accent-green);
+      color: #fff;
+      border: none;
+      padding: 14px;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 800;
+      cursor: pointer;
+      width: 100%;
+      margin-bottom: 10px;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+      transition: transform 0.1s, background 0.2s;
+    }
+
+    .btn-main-action:active {
+      transform: scale(0.98);
+      background: var(--accent-green-hover);
+    }
+
+    .btn-secondary-action {
+      background: var(--surface-bg);
+      color: var(--text-light);
+      border: 1px solid var(--border-color);
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      width: 100%;
+      margin-bottom: 10px;
+    }
+
+    /* SCREEN 2: LEVEL MAP GRID */
+    .map-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .map-pagination {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .map-grid-container {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+      max-height: 65vh;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .level-node {
+      background: var(--surface-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      aspect-ratio: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 13px;
+      position: relative;
+    }
+
+    .level-node.locked {
+      opacity: 0.4;
+      cursor: not-allowed;
+      background: #090d16;
+    }
+
+    .level-node.active-stage {
+      border-color: var(--accent-green);
+      box-shadow: 0 0 10px rgba(16, 185, 129, 0.6);
+      background: rgba(16, 185, 129, 0.1);
+    }
+
+    .level-stars-mini {
+      font-size: 9px;
+      color: #facc15;
+      margin-top: 2px;
+    }
+
+    /* SCREEN 3: GAMEPLAY SCREEN */
+    .gameplay-hud {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      background: var(--card-bg);
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: 1px solid var(--border-color);
+    }
+
+    .timer-badge {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--accent-yellow);
+    }
+
+    .timer-badge.warning {
+      color: var(--accent-red);
+      animation: pulse 0.5s infinite alternate;
+    }
+
+    @keyframes pulse {
+      from { transform: scale(1); }
+      to { transform: scale(1.1); }
+    }
+
+    .audio-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+      margin-bottom: 14px;
+    }
+
+    .btn-speaker {
+      background: var(--accent-cyan);
+      color: #fff;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .drop-zone-box {
+      background: rgba(15, 23, 42, 0.8);
+      border: 2px dashed var(--border-color);
+      border-radius: 12px;
+      min-height: 90px;
+      padding: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-content: flex-start;
+      margin-bottom: 14px;
+      transition: border-color 0.2s;
+    }
+
+    .drop-zone-box.wrong-shake {
+      border-color: var(--accent-red);
+      animation: shake 0.4s ease-in-out;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-6px); }
+      40%, 80% { transform: translateX(6px); }
+    }
+
+    .word-pool-box {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 16px;
+      min-height: 80px;
+    }
+
+    .word-chip {
+      background: var(--surface-bg);
+      border: 1px solid var(--border-color);
+      color: var(--text-light);
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+      transition: transform 0.1s, background 0.2s;
+    }
+
+    .word-chip:active {
+      transform: scale(0.95);
+      background: var(--accent-cyan);
+    }
+
+    .powerups-bar {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .btn-powerup {
+      flex: 1;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      color: var(--text-light);
+      padding: 8px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .btn-powerup span { color: var(--accent-yellow); font-size: 10px; }
+
+    .gameplay-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    /* SCREEN 4: SHOP SCREEN */
+    .shop-item-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .shop-item-info h4 { font-size: 14px; color: var(--accent-cyan); margin-bottom: 2px; }
+    .shop-item-info p { font-size: 11px; color: var(--text-muted); }
+
+    /* SCREEN 5: LEADERBOARD SCREEN */
+    .leaderboard-list {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .leaderboard-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border-color);
+      font-size: 13px;
+    }
+
+    .leaderboard-row:last-child { border-bottom: none; }
+    .rank-num { font-weight: 800; width: 24px; color: var(--accent-yellow); }
+
+    /* ==========================================================================
+       4. POPUP MODALS SYSTEM
+       ========================================================================== */
+    .modal-backdrop {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 300;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .modal-backdrop.active { display: flex; }
+
+    .modal-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 20px;
+      width: 100%;
+      max-width: 380px;
+      text-align: center;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      animation: popIn 0.2s ease-out;
+    }
+
+    @keyframes popIn {
+      from { transform: scale(0.85); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .modal-stars-win {
+      font-size: 32px;
+      margin: 10px 0;
+    }
+
+    .timer-delay-text {
+      font-size: 12px;
+      color: var(--accent-yellow);
+      margin: 10px 0;
+    }
+
+    /* ADMOB BANNER PLACEHOLDER */
+    .admob-banner-stub {
+      background: #020617;
+      border-top: 1px solid var(--border-color);
+      color: var(--text-muted);
+      font-size: 10px;
+      text-align: center;
+      padding: 8px;
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      z-index: 80;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TOP BAR HUD -->
+  <header class="app-topbar">
+    <div class="topbar-left">
+      <button class="btn-hamburger" id="btn-open-sidebar">☰</button>
+      <div class="app-logo-title">⚡ FAST ENGLISH</div>
+    </div>
+    <div class="user-hud-stats">
+      <div class="hud-chip hud-coins">🪙 <span id="hud-coins-val">100</span></div>
+      <div class="hud-chip hud-stars">⭐ <span id="hud-stars-val">0</span></div>
+    </div>
+  </header>
+
+  <!-- SIDEBAR DRAWER MENU -->
+  <div class="sidebar-overlay" id="sidebar-overlay">
+    <div class="sidebar-drawer">
+      <div class="sidebar-header">
+        <span>NAVIGATION</span>
+        <button class="btn-hamburger" id="btn-close-sidebar">✖</button>
+      </div>
+      <div class="sidebar-menu">
+        <button class="sidebar-btn" onclick="navigateTo('screen-home')">🏠 Home Screen</button>
+        <button class="sidebar-btn" onclick="navigateTo('screen-map')">🗺️ 1000 Level Map</button>
+        <button class="sidebar-btn" onclick="navigateTo('screen-shop')">🛒 Power-Up Shop</button>
+        <button class="sidebar-btn" onclick="navigateTo('screen-leaderboard')">🏆 Leaderboard</button>
+        <button class="sidebar-btn" onclick="resetGameProgress()">🔄 Reset All Progress</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN CONTAINER WITH ACTIVITY SCREENS -->
+  <main style="flex: 1; padding-bottom: 40px;">
+
+    <!-- SCREEN 1: HOME SCREEN -->
+    <section class="screen active" id="screen-home">
+      <div class="home-hero-card">
+        <h1>1,000 SENTENCE PUZZLES</h1>
+        <p>Master English sentence reflex in 10 seconds per stage!</p>
+      </div>
+
+      <div class="player-input-group">
+        <label for="player-name-input">PLAYER NAME:</label>
+        <input type="text" id="player-name-input" class="form-control" placeholder="Enter your player name..." value="ProGamer">
+      </div>
+
+      <button class="btn-main-action" id="btn-quick-play">🚀 PLAY CURRENT LEVEL</button>
+      <button class="btn-secondary-action" onclick="navigateTo('screen-map')">🗺️ SELECT LEVEL MAP</button>
+      <button class="btn-secondary-action" onclick="navigateTo('screen-leaderboard')">🏆 LEADERBOARD</button>
+      <button class="btn-secondary-action" onclick="navigateTo('screen-shop')">🛒 POWER-UP SHOP</button>
+    </section>
+
+    <!-- SCREEN 2: LEVEL MAP GRID -->
+    <section class="screen" id="screen-map">
+      <div class="map-header">
+        <h3 style="font-size: 15px; color: var(--accent-cyan);">1,000 STAGES MAP</h3>
+        <div class="map-pagination">
+          <button class="btn-secondary-action" id="btn-map-prev" style="padding: 4px 10px; margin:0;">« Prev</button>
+          <span id="map-page-num" style="font-size:12px; font-weight:700;">Page 1/20</span>
+          <button class="btn-secondary-action" id="btn-map-next" style="padding: 4px 10px; margin:0;">Next »</button>
+        </div>
+      </div>
+      <div class="map-grid-container" id="map-grid-container"></div>
+    </section>
+
+    <!-- SCREEN 3: GAMEPLAY SCREEN -->
+    <section class="screen" id="screen-game">
+      <div class="gameplay-hud">
+        <span style="font-weight: 800; color: var(--accent-cyan);" id="game-level-title">LEVEL 001</span>
+        <div class="timer-badge" id="game-timer-display">⏱️ 10s</div>
+      </div>
+
+      <div class="audio-card">
+        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px;">TAP TO LISTEN AUDIO</p>
+        <button class="btn-speaker" id="btn-play-audio">🔊 LISTEN SENTENCE (1.0x)</button>
+      </div>
+
+      <div class="drop-zone-box" id="drop-zone-container">
+        <span class="placeholder-text" style="font-size: 12px; color: var(--text-muted);" id="drop-placeholder">Tap words below to assemble sentence...</span>
+      </div>
+
+      <div class="word-pool-box" id="word-pool-container"></div>
+
+      <!-- POWER-UP ASSISTS -->
+      <div class="powerups-bar">
+        <button class="btn-powerup" id="btn-powerup-time">
+          ⌛ +10s Time <span>(30🪙)</span>
+        </button>
+        <button class="btn-powerup" id="btn-powerup-hint">
+          🧲 Smart Hint <span>(40🪙)</span>
+        </button>
+        <button class="btn-powerup" id="btn-powerup-slow">
+          🐢 Slow Audio <span>(50🪙)</span>
+        </button>
+      </div>
+
+      <div class="gameplay-actions">
+        <button class="btn-secondary-action" id="btn-game-clear" style="flex: 1;">🔄 CLEAR</button>
+        <button class="btn-main-action" id="btn-game-check" style="flex: 2; margin: 0;">✨ CHECK ANSWER</button>
+      </div>
+    </section>
+
+    <!-- SCREEN 4: SHOP SCREEN -->
+    <section class="screen" id="screen-shop">
+      <h3 style="font-size: 16px; color: var(--accent-cyan); margin-bottom: 12px;">POWER-UP SHOP</h3>
+      
+      <div class="shop-item-card">
+        <div class="shop-item-info">
+          <h4>⌛ Extra Time +10s</h4>
+          <p>Add 10 seconds to gameplay timer</p>
+        </div>
+        <button class="btn-secondary-action" style="width: auto; margin:0;" onclick="buyPowerup('time', 30)">30 🪙</button>
+      </div>
+
+      <div class="shop-item-card">
+        <div class="shop-item-info">
+          <h4>🧲 Smart Hint Word</h4>
+          <p>Auto-place the next correct word</p>
+        </div>
+        <button class="btn-secondary-action" style="width: auto; margin:0;" onclick="buyPowerup('hint', 40)">40 🪙</button>
+      </div>
+
+      <div class="shop-item-card">
+        <div class="shop-item-info">
+          <h4>🐢 Slow Audio Assist (0.75x)</h4>
+          <p>Listen sentence at slow speed once</p>
+        </div>
+        <button class="btn-secondary-action" style="width: auto; margin:0;" onclick="buyPowerup('slow', 50)">50 🪙</button>
+      </div>
+
+      <div class="shop-item-card">
+        <div class="shop-item-info">
+          <h4>🎬 Free 100 Coins</h4>
+          <p>Watch a short video ad to claim bonus coins</p>
+        </div>
+        <button class="btn-main-action" style="width: auto; margin:0; padding:8px 14px; font-size:12px;" onclick="watchAdForCoins()">WATCH AD</button>
+      </div>
+    </section>
+
+    <!-- SCREEN 5: LEADERBOARD SCREEN -->
+    <section class="screen" id="screen-leaderboard">
+      <h3 style="font-size: 16px; color: var(--accent-cyan); margin-bottom: 12px;">GLOBAL TOP 100 LEADERBOARD</h3>
+      <div class="leaderboard-list" id="leaderboard-container"></div>
+    </section>
+
+  </main>
+
+  <!-- RESULT POPUP MODAL -->
+  <div class="modal-backdrop" id="modal-result">
+    <div class="modal-card">
+      <h2 id="modal-result-title" style="color: var(--accent-green); font-size: 20px;">STAGE COMPLETED!</h2>
+      <div class="modal-stars-win" id="modal-stars-display">⭐⭐⭐</div>
+      <p id="modal-result-msg" style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">Earned +30 Coins!</p>
+
+      <div class="timer-delay-text" id="modal-delay-timer">Next Level Unlocks in: 10s</div>
+
+      <button class="btn-main-action" id="btn-next-level" disabled style="opacity: 0.5;">NEXT LEVEL ➔</button>
+      <button class="btn-secondary-action" id="btn-skip-wait">🎬 SKIP WAIT (WATCH AD)</button>
+    </div>
+  </div>
+
+  <!-- ADMOB BANNER PLACEHOLDER -->
+  <div class="admob-banner-stub">[AdMob Adaptive Bottom Banner Placeholder]</div>
+
+  <!-- GAME LOGIC ENGINE -->
+  <script>
+    /* ==========================================================================
+       1. 1,000 SENTENCES GENERATOR (LIGHTWEIGHT ARRAY DATA)
+       ========================================================================== */
+    const BASE_SENTENCES = [
+      "Hello how are you today", "What is your name", "Nice to meet you", "Where are you from",
+      "I love learning English", "Have a wonderful day", "See you again soon", "What time is it now",
+      "Thank you very much", "Can you help me please", "Where is the bathroom", "How much does this cost",
+      "I would like a coffee", "What do you do for work", "The weather is very nice", "Let us go for a walk",
+      "Where is the nearest bank", "I need to study hard", "She is my best friend", "He plays guitar very well",
+      "What is your favorite food", "I am learning to code", "Please open the window", "It is time to sleep",
+      "Call me when you arrive", "I agree with your opinion", "Where did you buy this", "This movie is awesome",
+      "Listen to your teacher", "Practice makes perfect every day"
+    ];
+
+    // Tự động sinh danh sách 1,000 câu tiếng Anh cơ bản
+    const RAW_SENTENCES = [];
+    for (let i = 0; i < 1000; i++) {
+      const base = BASE_SENTENCES[i % BASE_SENTENCES.length];
+      RAW_SENTENCES.push(`${base}`);
+    }
+
+    /* ==========================================================================
+       2. WEB AUDIO API SYNTHESIZER (ZERO EXTERNAL MP3 DEPENDENCIES)
+       ========================================================================== */
+    class SoundFX {
+      constructor() {
+        this.ctx = null;
+      }
+      init() {
+        if (!this.ctx) {
+          this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+      }
+      playTone(freq, type, duration) {
+        this.init();
+        if (!this.ctx) return;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = type;
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0.15, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start();
+        osc.stop(this.ctx.currentTime + duration);
+      }
+      tap() { this.playTone(600, 'sine', 0.08); }
+      correct() {
+        this.playTone(523.25, 'sine', 0.1);
+        setTimeout(() => this.playTone(659.25, 'sine', 0.1), 100);
+        setTimeout(() => this.playTone(783.99, 'sine', 0.2), 200);
+      }
+      wrong() {
+        this.playTone(200, 'sawtooth', 0.15);
+        setTimeout(() => this.playTone(150, 'sawtooth', 0.2), 150);
+      }
+    }
+    const sfx = new SoundFX();
+
+    /* ==========================================================================
+       3. GAME STATE MANAGEMENT
+       ========================================================================== */
+    const State = {
+      playerName: localStorage.getItem('fe_player_name') || 'ProGamer',
+      coins: parseInt(localStorage.getItem('fe_coins') || '100'),
+      unlockedLevel: parseInt(localStorage.getItem('fe_unlocked_level') || '1'),
+      levelStars: JSON.parse(localStorage.getItem('fe_level_stars') || '{}'),
+      currentLevel: 1,
+      timerSec: 10,
+      timerInterval: null,
+      timeElapsed: 0,
+      selectedWords: [],
+      shuffledWords: [],
+      targetSentence: '',
+      delayTimerInterval: null,
+      delaySec: 10,
+      mapPage: 0
+    };
+
+    /* ==========================================================================
+       4. INITIALIZATION & NAVIGATION
+       ========================================================================== */
+    document.addEventListener('DOMContentLoaded', () => {
+      updateHUD();
+      document.getElementById('player-name-input').value = State.playerName;
+      document.getElementById('player-name-input').addEventListener('change', (e) => {
+        State.playerName = e.target.value || 'ProGamer';
+        localStorage.setItem('fe_player_name', State.playerName);
+      });
+
+      setupEventListeners();
+      renderMapGrid();
+      renderLeaderboard();
+    });
+
+    function updateHUD() {
+      document.getElementById('hud-coins-val').innerText = State.coins;
+      let totalStars = 0;
+      Object.values(State.levelStars).forEach(s => totalStars += s);
+      document.getElementById('hud-stars-val').innerText = totalStars;
+      
+      localStorage.setItem('fe_coins', State.coins);
+      localStorage.setItem('fe_unlocked_level', State.unlockedLevel);
+      localStorage.setItem('fe_level_stars', JSON.stringify(State.levelStars));
+    }
+
+    function navigateTo(screenId) {
+      clearInterval(State.timerInterval);
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById(screenId).classList.add('active');
+      document.getElementById('sidebar-overlay').classList.remove('active');
+
+      if (screenId === 'screen-map') renderMapGrid();
+      if (screenId === 'screen-leaderboard') renderLeaderboard();
+    }
+
+    /* ==========================================================================
+       5. GAMEPLAY LOGIC
+       ========================================================================== */
+    function startLevel(levelNum) {
+      State.currentLevel = levelNum;
+      State.targetSentence = RAW_SENTENCES[levelNum - 1];
+      State.selectedWords = [];
+      State.timerSec = 10;
+      State.timeElapsed = 0;
+
+      const words = State.targetSentence.replace(/[.,?!]/g, '').split(' ');
+      State.shuffledWords = [...words].sort(() => Math.random() - 0.5);
+
+      document.getElementById('game-level-title').innerText = `LEVEL ${String(levelNum).padStart(3, '0')}`;
+      navigateTo('screen-game');
+      renderWordChips();
+      playTTS(State.targetSentence, 1.0);
+
+      // Reset and Start Timer
+      clearInterval(State.timerInterval);
+      const timerDisplay = document.getElementById('game-timer-display');
+      timerDisplay.classList.remove('warning');
+      timerDisplay.innerText = `⏱️ ${State.timerSec}s`;
+
+      State.timerInterval = setInterval(() => {
+        State.timerSec--;
+        State.timeElapsed++;
+        timerDisplay.innerText = `⏱️ ${State.timerSec}s`;
+
+        if (State.timerSec <= 3) timerDisplay.classList.add('warning');
+
+        if (State.timerSec <= 0) {
+          clearInterval(State.timerInterval);
+          sfx.wrong();
+          showResultModal(false, 0, 0);
+        }
+      }, 1000);
+    }
+
+    function renderWordChips() {
+      const dropZone = document.getElementById('drop-zone-container');
+      const wordPool = document.getElementById('word-pool-container');
+
+      dropZone.innerHTML = '';
+      wordPool.innerHTML = '';
+
+      if (State.selectedWords.length === 0) {
+        dropZone.innerHTML = '<span style="font-size: 12px; color: var(--text-muted);">Tap words below to assemble sentence...</span>';
+      } else {
+        State.selectedWords.forEach((word, idx) => {
+          const chip = document.createElement('div');
+          chip.className = 'word-chip';
+          chip.innerText = word;
+          chip.onclick = () => {
+            sfx.tap();
+            State.shuffledWords.push(State.selectedWords.splice(idx, 1)[0]);
+            renderWordChips();
+          };
+          dropZone.appendChild(chip);
+        });
+      }
+
+      State.shuffledWords.forEach((word, idx) => {
+        const chip = document.createElement('div');
+        chip.className = 'word-chip';
+        chip.innerText = word;
+        chip.onclick = () => {
+          sfx.tap();
+          State.selectedWords.push(State.shuffledWords.splice(idx, 1)[0]);
+          renderWordChips();
+        };
+        wordPool.appendChild(chip);
+      });
+    }
+
+    function checkAnswer() {
+      clearInterval(State.timerInterval);
+      const userAns = State.selectedWords.join(' ').toLowerCase();
+      const targetAns = State.targetSentence.replace(/[.,?!]/g, '').toLowerCase();
+
+      if (userAns === targetAns) {
+        sfx.correct();
+        playTTS(State.targetSentence, 1.0);
+
+        // Tính sao dựa trên thời gian hoàn thành
+        let stars = 1;
+        if (State.timeElapsed <= 3) stars = 3;
+        else if (State.timeElapsed <= 7) stars = 2;
+
+        // Quy tắc Anti-Inflation Replay
+        const oldStars = State.levelStars[State.currentLevel] || 0;
+        let earnedCoins = 0;
+
+        if (stars > oldStars) {
+          const coinTable = { 1: 10, 2: 20, 3: 30 };
+          const oldCoins = coinTable[oldStars] || 0;
+          earnedCoins = coinTable[stars] - oldCoins;
+          State.levelStars[State.currentLevel] = stars;
+          State.coins += earnedCoins;
+        }
+
+        if (State.currentLevel === State.unlockedLevel) {
+          State.unlockedLevel = Math.min(1000, State.unlockedLevel + 1);
+        }
+
+        updateHUD();
+        showResultModal(true, stars, earnedCoins);
+      } else {
+        sfx.wrong();
+        const dropBox = document.getElementById('drop-zone-container');
+        dropBox.classList.add('wrong-shake');
+        setTimeout(() => dropBox.classList.remove('wrong-shake'), 400);
+      }
+    }
+
+    /* ==========================================================================
+       6. MODAL & DELAY TIMER (10s DELAY / SKIP WAIT)
+       ========================================================================== */
+    function showResultModal(isWin, stars, coins) {
+      const modal = document.getElementById('modal-result');
+      const title = document.getElementById('modal-result-title');
+      const starsDisp = document.getElementById('modal-stars-display');
+      const msg = document.getElementById('modal-result-msg');
+      const btnNext = document.getElementById('btn-next-level');
+      const delayTxt = document.getElementById('modal-delay-timer');
+
+      modal.classList.add('active');
+      clearInterval(State.delayTimerInterval);
+
+      if (isWin) {
+        title.innerText = 'STAGE COMPLETED!';
+        title.style.color = 'var(--accent-green)';
+        starsDisp.innerText = '⭐'.repeat(stars);
+        msg.innerText = earnedCoinsText(coins);
+
+        State.delaySec = 10;
+        btnNext.disabled = true;
+        btnNext.style.opacity = '0.5';
+        delayTxt.innerText = `Next Level Unlocks in: ${State.delaySec}s`;
+
+        State.delayTimerInterval = setInterval(() => {
+          State.delaySec--;
+          delayTxt.innerText = `Next Level Unlocks in: ${State.delaySec}s`;
+          if (State.delaySec <= 0) {
+            clearInterval(State.delayTimerInterval);
+            btnNext.disabled = false;
+            btnNext.style.opacity = '1';
+            delayTxt.innerText = 'Ready for Next Level!';
+          }
+        }, 1000);
+      } else {
+        title.innerText = 'TIME OUT / FAILED!';
+        title.style.color = 'var(--accent-red)';
+        starsDisp.innerText = '❌❌❌';
+        msg.innerText = 'Try again to complete this stage!';
+        btnNext.disabled = false;
+        btnNext.style.opacity = '1';
+        delayTxt.innerText = 'You can retry immediately.';
+      }
+    }
+
+    function earnedCoinsText(coins) {
+      if (coins > 0) return `Awesome! Earned +${coins} Coins!`;
+      return `Already completed with maximum stars. (0 Coins)`;
+    }
+
+    /* ==========================================================================
+       7. POWER-UPS & SHOP SYSTEM
+       ========================================================================== */
+    function buyPowerup(type, cost) {
+      if (State.coins < cost) {
+        alert('Not enough coins! Earn coins by completing levels or watching ads.');
+        return;
+      }
+      State.coins -= cost;
+      updateHUD();
+
+      if (type === 'time') {
+        State.timerSec += 10;
+        document.getElementById('game-timer-display').innerText = `⏱️ ${State.timerSec}s`;
+      } else if (type === 'hint') {
+        autoPlaceNextHint();
+      } else if (type === 'slow') {
+        playTTS(State.targetSentence, 0.75);
+      }
+    }
+
+    function autoPlaceNextHint() {
+      const words = State.targetSentence.replace(/[.,?!]/g, '').split(' ');
+      const currentIdx = State.selectedWords.length;
+      if (currentIdx < words.length) {
+        const targetWord = words[currentIdx];
+        const poolIdx = State.shuffledWords.findIndex(w => w.toLowerCase() === targetWord.toLowerCase());
+        if (poolIdx !== -1) {
+          State.selectedWords.push(State.shuffledWords.splice(poolIdx, 1)[0]);
+          renderWordChips();
+        }
+      }
+    }
+
+    function watchAdForCoins() {
+      alert('🎬 AdMob Rewarded Video played! Granted +100 Coins.');
+      State.coins += 100;
+      updateHUD();
+    }
+
+    /* ==========================================================================
+       8. MAP GRID & LEADERBOARD RENDERING
+       ========================================================================== */
+    function renderMapGrid() {
+      const container = document.getElementById('map-grid-container');
+      container.innerHTML = '';
+      const pageSize = 50;
+      const startIdx = State.mapPage * pageSize;
+      const endIdx = Math.min(1000, startIdx + pageSize);
+
+      document.getElementById('map-page-num').innerText = `Page ${State.mapPage + 1}/20`;
+
+      for (let i = startIdx + 1; i <= endIdx; i++) {
+        const node = document.createElement('div');
+        const isLocked = i > State.unlockedLevel;
+        const stars = State.levelStars[i] || 0;
+
+        node.className = `level-node ${isLocked ? 'locked' : ''} ${i === State.unlockedLevel ? 'active-stage' : ''}`;
+        node.innerHTML = `
+          <span>${isLocked ? '🔒' : i}</span>
+          ${stars > 0 ? `<div class="level-stars-mini">${'⭐'.repeat(stars)}</div>` : ''}
+        `;
+
+        if (!isLocked) {
+          node.onclick = () => {
+            sfx.tap();
+            startLevel(i);
+          };
+        }
+        container.appendChild(node);
+      }
+    }
+
+    function renderLeaderboard() {
+      const container = document.getElementById('leaderboard-container');
+      const mockBoard = [
+        { name: State.playerName, level: State.unlockedLevel, stars: getTotalStars() },
+        { name: 'Alex_USA', level: 850, stars: 2400 },
+        { name: 'Kenji_JP', level: 720, stars: 2100 },
+        { name: 'Elena_ES', level: 640, stars: 1850 },
+        { name: 'Minho_KR', level: 510, stars: 1400 }
+      ].sort((a, b) => b.stars - a.stars);
+
+      container.innerHTML = mockBoard.map((u, idx) => `
+        <div class="leaderboard-row">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span class="rank-num">#${idx + 1}</span>
+            <span style="font-weight:700;">${u.name}</span>
+          </div>
+          <div>
+            <span style="color:var(--accent-cyan); margin-right:8px;">Lvl ${u.level}</span>
+            <span style="color:#facc15; font-weight:700;">⭐ ${u.stars}</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function getTotalStars() {
+      let total = 0;
+      Object.values(State.levelStars).forEach(s => total += s);
+      return total;
+    }
+
+    /* ==========================================================================
+       9. WEB SPEECH API TTS ENGINE
+       ========================================================================== */
+    function playTTS(text, rate = 1.0) {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.lang = 'en-US';
+        utter.rate = rate;
+        window.speechSynthesis.speak(utter);
+      }
+    }
+
+    function resetGameProgress() {
+      if (confirm('Are you sure you want to reset all game progress?')) {
+        localStorage.clear();
+        location.reload();
+      }
+    }
+
+    /* ==========================================================================
+       10. EVENT LISTENERS
+       ========================================================================== */
+    function setupEventListeners() {
+      document.getElementById('btn-open-sidebar').onclick = () => {
+        document.getElementById('sidebar-overlay').classList.add('active');
+      };
+      document.getElementById('btn-close-sidebar').onclick = () => {
+        document.getElementById('sidebar-overlay').classList.remove('active');
+      };
+      document.getElementById('sidebar-overlay').onclick = (e) => {
+        if (e.target.id === 'sidebar-overlay') {
+          document.getElementById('sidebar-overlay').classList.remove('active');
+        }
+      };
+
+      document.getElementById('btn-quick-play').onclick = () => startLevel(State.unlockedLevel);
+      document.getElementById('btn-play-audio').onclick = () => playTTS(State.targetSentence, 1.0);
+      document.getElementById('btn-game-clear').onclick = () => {
+        sfx.tap();
+        State.shuffledWords = [...State.shuffledWords, ...State.selectedWords];
+        State.selectedWords = [];
+        renderWordChips();
+      };
+      document.getElementById('btn-game-check').onclick = checkAnswer;
+
+      // Powerups
+      document.getElementById('btn-powerup-time').onclick = () => buyPowerup('time', 30);
+      document.getElementById('btn-powerup-hint').onclick = () => buyPowerup('hint', 40);
+      document.getElementById('btn-powerup-slow').onclick = () => buyPowerup('slow', 50);
+
+      // Pagination Map
+      document.getElementById('btn-map-prev').onclick = () => {
+        if (State.mapPage > 0) { State.mapPage--; renderMapGrid(); }
+      };
+      document.getElementById('btn-map-next').onclick = () => {
+        if (State.mapPage < 19) { State.mapPage++; renderMapGrid(); }
+      };
+
+      // Modal Next Level
+      document.getElementById('btn-next-level').onclick = () => {
+        document.getElementById('modal-result').classList.remove('active');
+        startLevel(State.currentLevel + 1);
+      };
+      document.getElementById('btn-skip-wait').onclick = () => {
+        clearInterval(State.delayTimerInterval);
+        document.getElementById('btn-next-level').disabled = false;
+        document.getElementById('btn-next-level').style.opacity = '1';
+        document.getElementById('modal-delay-timer').innerText = 'Wait skipped! Ready to play.';
+      };
+    }
+  </script>
+</body>
+</html>
+ 
