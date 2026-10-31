@@ -3,11 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Fast English 1000 Sentence Puzzle</title>
+  <title>Fast English 1000 Sentence Puzzle Pro</title>
   <style>
-    /* ==========================================================================
-       1. CORE SYSTEM TOKENS & RESET
-       ========================================================================== */
     :root {
       --bg-dark: #090d16;
       --card-bg: #0f172a;
@@ -17,7 +14,6 @@
       --accent-cyan: #0284c7;
       --accent-yellow: #f59e0b;
       --accent-red: #ef4444;
-      --accent-purple: #8b5cf6;
       --text-light: #f8fafc;
       --text-muted: #94a3b8;
       --border-color: #334155;
@@ -42,9 +38,7 @@
       flex-direction: column;
     }
 
-    /* ==========================================================================
-       2. TOP BAR & HAMBURGER SIDEBAR
-       ========================================================================== */
+    /* TOP BAR HUD */
     .app-topbar {
       background: var(--card-bg);
       border-bottom: 1px solid var(--border-color);
@@ -73,7 +67,7 @@
     }
 
     .app-logo-title {
-      font-size: 16px;
+      font-size: 15px;
       font-weight: 800;
       color: var(--accent-cyan);
       letter-spacing: 0.5px;
@@ -82,7 +76,7 @@
     .user-hud-stats {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
       font-size: 13px;
       font-weight: 700;
     }
@@ -104,7 +98,7 @@
     .sidebar-overlay {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0, 0, 0, 0.7);
+      background: rgba(0, 0, 0, 0.75);
       z-index: 200;
       opacity: 0;
       pointer-events: none;
@@ -149,7 +143,7 @@
     .sidebar-menu {
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 10px;
     }
 
     .sidebar-btn {
@@ -165,16 +159,9 @@
       display: flex;
       align-items: center;
       gap: 12px;
-      transition: background 0.2s;
     }
 
-    .sidebar-btn:active {
-      background: var(--accent-cyan);
-    }
-
-    /* ==========================================================================
-       3. ACTIVITY SCREENS SYSTEM (NO TABS)
-       ========================================================================== */
+    /* ACTIVITY SCREENS SYSTEM */
     .screen {
       display: none;
       flex: 1;
@@ -195,11 +182,11 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    /* SCREEN 1: HOME SCREEN */
+    /* SCREEN 1: HOME */
     .home-hero-card {
       background: linear-gradient(135deg, #0284c7 0%, #0f172a 100%);
       border-radius: 16px;
-      padding: 24px 16px;
+      padding: 20px 16px;
       text-align: center;
       margin-bottom: 20px;
       border: 1px solid var(--border-color);
@@ -207,27 +194,26 @@
     }
 
     .home-hero-card h1 {
-      font-size: 24px;
+      font-size: 22px;
       font-weight: 800;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
       color: #fff;
     }
 
     .home-hero-card p {
-      font-size: 13px;
+      font-size: 12px;
       color: #e2e8f0;
-      margin-bottom: 16px;
     }
 
     .player-input-group {
-      margin-bottom: 20px;
+      margin-bottom: 14px;
     }
 
     .player-input-group label {
       display: block;
       font-size: 12px;
       color: var(--text-muted);
-      margin-bottom: 6px;
+      margin-bottom: 4px;
       text-align: left;
     }
 
@@ -238,12 +224,8 @@
       color: var(--text-light);
       padding: 12px 14px;
       border-radius: 8px;
-      font-size: 15px;
+      font-size: 14px;
       outline: none;
-    }
-
-    .form-control:focus {
-      border-color: var(--accent-green);
     }
 
     .btn-main-action {
@@ -252,18 +234,12 @@
       border: none;
       padding: 14px;
       border-radius: 10px;
-      font-size: 16px;
+      font-size: 15px;
       font-weight: 800;
       cursor: pointer;
       width: 100%;
       margin-bottom: 10px;
       box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
-      transition: transform 0.1s, background 0.2s;
-    }
-
-    .btn-main-action:active {
-      transform: scale(0.98);
-      background: var(--accent-green-hover);
     }
 
     .btn-secondary-action {
@@ -279,18 +255,12 @@
       margin-bottom: 10px;
     }
 
-    /* SCREEN 2: LEVEL MAP GRID */
+    /* SCREEN 2: LEVEL MAP */
     .map-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       margin-bottom: 12px;
-    }
-
-    .map-pagination {
-      display: flex;
-      gap: 8px;
-      align-items: center;
     }
 
     .map-grid-container {
@@ -314,11 +284,10 @@
       cursor: pointer;
       font-weight: 700;
       font-size: 13px;
-      position: relative;
     }
 
     .level-node.locked {
-      opacity: 0.4;
+      opacity: 0.35;
       cursor: not-allowed;
       background: #090d16;
     }
@@ -326,7 +295,7 @@
     .level-node.active-stage {
       border-color: var(--accent-green);
       box-shadow: 0 0 10px rgba(16, 185, 129, 0.6);
-      background: rgba(16, 185, 129, 0.1);
+      background: rgba(16, 185, 129, 0.15);
     }
 
     .level-stars-mini {
@@ -335,12 +304,12 @@
       margin-top: 2px;
     }
 
-    /* SCREEN 3: GAMEPLAY SCREEN */
+    /* SCREEN 3: GAMEPLAY */
     .gameplay-hud {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 14px;
+      margin-bottom: 12px;
       background: var(--card-bg);
       padding: 10px 14px;
       border-radius: 10px;
@@ -367,9 +336,9 @@
       background: var(--card-bg);
       border: 1px solid var(--border-color);
       border-radius: 12px;
-      padding: 16px;
+      padding: 14px;
       text-align: center;
-      margin-bottom: 14px;
+      margin-bottom: 12px;
     }
 
     .btn-speaker {
@@ -396,8 +365,7 @@
       flex-wrap: wrap;
       gap: 8px;
       align-content: flex-start;
-      margin-bottom: 14px;
-      transition: border-color 0.2s;
+      margin-bottom: 12px;
     }
 
     .drop-zone-box.wrong-shake {
@@ -415,7 +383,7 @@
       display: flex;
       flex-wrap: wrap;
       gap: 8px;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
       min-height: 80px;
     }
 
@@ -429,18 +397,12 @@
       font-weight: 600;
       cursor: pointer;
       box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-      transition: transform 0.1s, background 0.2s;
-    }
-
-    .word-chip:active {
-      transform: scale(0.95);
-      background: var(--accent-cyan);
     }
 
     .powerups-bar {
       display: flex;
       gap: 8px;
-      margin-bottom: 14px;
+      margin-bottom: 12px;
     }
 
     .btn-powerup {
@@ -463,10 +425,10 @@
 
     .gameplay-actions {
       display: flex;
-      gap: 10px;
+      gap: 8px;
     }
 
-    /* SCREEN 4: SHOP SCREEN */
+    /* SCREEN 4: SHOP */
     .shop-item-card {
       background: var(--card-bg);
       border: 1px solid var(--border-color);
@@ -481,7 +443,32 @@
     .shop-item-info h4 { font-size: 14px; color: var(--accent-cyan); margin-bottom: 2px; }
     .shop-item-info p { font-size: 11px; color: var(--text-muted); }
 
-    /* SCREEN 5: LEADERBOARD SCREEN */
+    /* SCREEN 5: LEADERBOARD SYSTEM */
+    .leaderboard-tabs {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+
+    .lb-tab-btn {
+      flex: 1;
+      background: var(--surface-bg);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      padding: 8px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      text-align: center;
+    }
+
+    .lb-tab-btn.active {
+      background: var(--accent-cyan);
+      color: #fff;
+      border-color: var(--accent-cyan);
+    }
+
     .leaderboard-list {
       background: var(--card-bg);
       border: 1px solid var(--border-color);
@@ -493,21 +480,19 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 12px 16px;
+      padding: 12px 14px;
       border-bottom: 1px solid var(--border-color);
       font-size: 13px;
     }
 
     .leaderboard-row:last-child { border-bottom: none; }
-    .rank-num { font-weight: 800; width: 24px; color: var(--accent-yellow); }
+    .rank-num { font-weight: 800; width: 26px; color: var(--accent-yellow); }
 
-    /* ==========================================================================
-       4. POPUP MODALS SYSTEM
-       ========================================================================== */
+    /* POPUP MODAL SYSTEM */
     .modal-backdrop {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0, 0, 0, 0.8);
+      background: rgba(0, 0, 0, 0.85);
       z-index: 300;
       display: none;
       align-items: center;
@@ -534,18 +519,9 @@
       to { transform: scale(1); opacity: 1; }
     }
 
-    .modal-stars-win {
-      font-size: 32px;
-      margin: 10px 0;
-    }
+    .modal-stars-win { font-size: 32px; margin: 10px 0; }
+    .timer-delay-text { font-size: 12px; color: var(--accent-yellow); margin: 10px 0; }
 
-    .timer-delay-text {
-      font-size: 12px;
-      color: var(--accent-yellow);
-      margin: 10px 0;
-    }
-
-    /* ADMOB BANNER PLACEHOLDER */
     .admob-banner-stub {
       background: #020617;
       border-top: 1px solid var(--border-color);
@@ -565,7 +541,7 @@
   <header class="app-topbar">
     <div class="topbar-left">
       <button class="btn-hamburger" id="btn-open-sidebar">☰</button>
-      <div class="app-logo-title">⚡ FAST ENGLISH</div>
+      <div class="app-logo-title">⚡ FAST ENGLISH V2</div>
     </div>
     <div class="user-hud-stats">
       <div class="hud-chip hud-coins">🪙 <span id="hud-coins-val">100</span></div>
@@ -573,7 +549,7 @@
     </div>
   </header>
 
-  <!-- SIDEBAR DRAWER MENU -->
+  <!-- SIDEBAR MENU -->
   <div class="sidebar-overlay" id="sidebar-overlay">
     <div class="sidebar-drawer">
       <div class="sidebar-header">
@@ -582,32 +558,36 @@
       </div>
       <div class="sidebar-menu">
         <button class="sidebar-btn" onclick="navigateTo('screen-home')">🏠 Home Screen</button>
-        <button class="sidebar-btn" onclick="navigateTo('screen-map')">🗺️ 1000 Level Map</button>
+        <button class="sidebar-btn" onclick="navigateTo('screen-map')">🗺️ 1,000 Level Map</button>
         <button class="sidebar-btn" onclick="navigateTo('screen-shop')">🛒 Power-Up Shop</button>
-        <button class="sidebar-btn" onclick="navigateTo('screen-leaderboard')">🏆 Leaderboard</button>
-        <button class="sidebar-btn" onclick="resetGameProgress()">🔄 Reset All Progress</button>
+        <button class="sidebar-btn" onclick="navigateTo('screen-leaderboard')">🏆 Online Leaderboard</button>
+        <button class="sidebar-btn" onclick="resetGameProgress()">🔄 Reset Game Progress</button>
       </div>
     </div>
   </div>
 
-  <!-- MAIN CONTAINER WITH ACTIVITY SCREENS -->
   <main style="flex: 1; padding-bottom: 40px;">
 
-    <!-- SCREEN 1: HOME SCREEN -->
+    <!-- SCREEN 1: HOME -->
     <section class="screen active" id="screen-home">
       <div class="home-hero-card">
         <h1>1,000 SENTENCE PUZZLES</h1>
-        <p>Master English sentence reflex in 10 seconds per stage!</p>
+        <p>Reflex English sentence assembly in 10s per stage!</p>
       </div>
 
       <div class="player-input-group">
         <label for="player-name-input">PLAYER NAME:</label>
-        <input type="text" id="player-name-input" class="form-control" placeholder="Enter your player name..." value="ProGamer">
+        <input type="text" id="player-name-input" class="form-control" placeholder="Enter your name..." value="Learner">
+      </div>
+
+      <div class="player-input-group">
+        <label for="player-email-input">STUDENT EMAIL (FOR REWARDS & COURSE NOTIFICATIONS):</label>
+        <input type="email" id="player-email-input" class="form-control" placeholder="example@gmail.com">
       </div>
 
       <button class="btn-main-action" id="btn-quick-play">🚀 PLAY CURRENT LEVEL</button>
       <button class="btn-secondary-action" onclick="navigateTo('screen-map')">🗺️ SELECT LEVEL MAP</button>
-      <button class="btn-secondary-action" onclick="navigateTo('screen-leaderboard')">🏆 LEADERBOARD</button>
+      <button class="btn-secondary-action" onclick="navigateTo('screen-leaderboard')">🏆 ONLINE LEADERBOARD</button>
       <button class="btn-secondary-action" onclick="navigateTo('screen-shop')">🛒 POWER-UP SHOP</button>
     </section>
 
@@ -615,16 +595,16 @@
     <section class="screen" id="screen-map">
       <div class="map-header">
         <h3 style="font-size: 15px; color: var(--accent-cyan);">1,000 STAGES MAP</h3>
-        <div class="map-pagination">
-          <button class="btn-secondary-action" id="btn-map-prev" style="padding: 4px 10px; margin:0;">« Prev</button>
+        <div style="display:flex; gap:6px; align-items:center;">
+          <button class="btn-secondary-action" id="btn-map-prev" style="padding:4px 10px; margin:0;">« Prev</button>
           <span id="map-page-num" style="font-size:12px; font-weight:700;">Page 1/20</span>
-          <button class="btn-secondary-action" id="btn-map-next" style="padding: 4px 10px; margin:0;">Next »</button>
+          <button class="btn-secondary-action" id="btn-map-next" style="padding:4px 10px; margin:0;">Next »</button>
         </div>
       </div>
       <div class="map-grid-container" id="map-grid-container"></div>
     </section>
 
-    <!-- SCREEN 3: GAMEPLAY SCREEN -->
+    <!-- SCREEN 3: GAMEPLAY -->
     <section class="screen" id="screen-game">
       <div class="gameplay-hud">
         <span style="font-weight: 800; color: var(--accent-cyan);" id="game-level-title">LEVEL 001</span>
@@ -632,43 +612,34 @@
       </div>
 
       <div class="audio-card">
-        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px;">TAP TO LISTEN AUDIO</p>
+        <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 6px;">TAP TO LISTEN SENTENCE AUDIO</p>
         <button class="btn-speaker" id="btn-play-audio">🔊 LISTEN SENTENCE (1.0x)</button>
       </div>
 
-      <div class="drop-zone-box" id="drop-zone-container">
-        <span class="placeholder-text" style="font-size: 12px; color: var(--text-muted);" id="drop-placeholder">Tap words below to assemble sentence...</span>
-      </div>
-
+      <div class="drop-zone-box" id="drop-zone-container"></div>
       <div class="word-pool-box" id="word-pool-container"></div>
 
-      <!-- POWER-UP ASSISTS -->
       <div class="powerups-bar">
-        <button class="btn-powerup" id="btn-powerup-time">
-          ⌛ +10s Time <span>(30🪙)</span>
-        </button>
-        <button class="btn-powerup" id="btn-powerup-hint">
-          🧲 Smart Hint <span>(40🪙)</span>
-        </button>
-        <button class="btn-powerup" id="btn-powerup-slow">
-          🐢 Slow Audio <span>(50🪙)</span>
-        </button>
+        <button class="btn-powerup" id="btn-powerup-time">⌛ +10s Time <span>(30🪙)</span></button>
+        <button class="btn-powerup" id="btn-powerup-hint">🧲 Smart Hint <span>(40🪙)</span></button>
+        <button class="btn-powerup" id="btn-powerup-slow">🐢 Slow Audio <span>(50🪙)</span></button>
       </div>
 
       <div class="gameplay-actions">
-        <button class="btn-secondary-action" id="btn-game-clear" style="flex: 1;">🔄 CLEAR</button>
-        <button class="btn-main-action" id="btn-game-check" style="flex: 2; margin: 0;">✨ CHECK ANSWER</button>
+        <button class="btn-secondary-action" id="btn-game-retry" style="flex: 1;">🔄 RETRY</button>
+        <button class="btn-secondary-action" id="btn-game-clear" style="flex: 1;">❌ CLEAR</button>
+        <button class="btn-main-action" id="btn-game-check" style="flex: 2; margin: 0;">✨ CHECK</button>
       </div>
     </section>
 
-    <!-- SCREEN 4: SHOP SCREEN -->
+    <!-- SCREEN 4: SHOP -->
     <section class="screen" id="screen-shop">
       <h3 style="font-size: 16px; color: var(--accent-cyan); margin-bottom: 12px;">POWER-UP SHOP</h3>
       
       <div class="shop-item-card">
         <div class="shop-item-info">
           <h4>⌛ Extra Time +10s</h4>
-          <p>Add 10 seconds to gameplay timer</p>
+          <p>Add 10 seconds to current level timer</p>
         </div>
         <button class="btn-secondary-action" style="width: auto; margin:0;" onclick="buyPowerup('time', 30)">30 🪙</button>
       </div>
@@ -676,7 +647,7 @@
       <div class="shop-item-card">
         <div class="shop-item-info">
           <h4>🧲 Smart Hint Word</h4>
-          <p>Auto-place the next correct word</p>
+          <p>Auto-place the next correct word into slot</p>
         </div>
         <button class="btn-secondary-action" style="width: auto; margin:0;" onclick="buyPowerup('hint', 40)">40 🪙</button>
       </div>
@@ -684,29 +655,44 @@
       <div class="shop-item-card">
         <div class="shop-item-info">
           <h4>🐢 Slow Audio Assist (0.75x)</h4>
-          <p>Listen sentence at slow speed once</p>
+          <p>Listen sentence at 0.75x speed once</p>
         </div>
         <button class="btn-secondary-action" style="width: auto; margin:0;" onclick="buyPowerup('slow', 50)">50 🪙</button>
       </div>
 
       <div class="shop-item-card">
         <div class="shop-item-info">
+          <h4>⚡ Skip Wait Pass (10 Levels)</h4>
+          <p>Bypass the 10s wait timer for the next 10 levels</p>
+        </div>
+        <button class="btn-secondary-action" style="width: auto; margin:0;" onclick="buyPowerup('skip_pass', 60)">60 🪙</button>
+      </div>
+
+      <div class="shop-item-card">
+        <div class="shop-item-info">
           <h4>🎬 Free 100 Coins</h4>
-          <p>Watch a short video ad to claim bonus coins</p>
+          <p>Watch a short video ad to claim 100 bonus coins</p>
         </div>
         <button class="btn-main-action" style="width: auto; margin:0; padding:8px 14px; font-size:12px;" onclick="watchAdForCoins()">WATCH AD</button>
       </div>
     </section>
 
-    <!-- SCREEN 5: LEADERBOARD SCREEN -->
+    <!-- SCREEN 5: ONLINE LEADERBOARD -->
     <section class="screen" id="screen-leaderboard">
-      <h3 style="font-size: 16px; color: var(--accent-cyan); margin-bottom: 12px;">GLOBAL TOP 100 LEADERBOARD</h3>
+      <h3 style="font-size: 16px; color: var(--accent-cyan); margin-bottom: 10px;">GLOBAL ONLINE LEADERBOARD</h3>
+      
+      <div class="leaderboard-tabs">
+        <button class="lb-tab-btn active" id="lb-tab-stars" onclick="switchLeaderboardCategory('stars')">⭐ Top Stars</button>
+        <button class="lb-tab-btn" id="lb-tab-sentences" onclick="switchLeaderboardCategory('sentences')">📝 Top Sentences</button>
+        <button class="lb-tab-btn" id="lb-tab-coins" onclick="switchLeaderboardCategory('coins')">🪙 Top Coins</button>
+      </div>
+
       <div class="leaderboard-list" id="leaderboard-container"></div>
     </section>
 
   </main>
 
-  <!-- RESULT POPUP MODAL -->
+  <!-- RESULT / FAIL POPUP MODAL -->
   <div class="modal-backdrop" id="modal-result">
     <div class="modal-card">
       <h2 id="modal-result-title" style="color: var(--accent-green); font-size: 20px;">STAGE COMPLETED!</h2>
@@ -716,18 +702,19 @@
       <div class="timer-delay-text" id="modal-delay-timer">Next Level Unlocks in: 10s</div>
 
       <button class="btn-main-action" id="btn-next-level" disabled style="opacity: 0.5;">NEXT LEVEL ➔</button>
-      <button class="btn-secondary-action" id="btn-skip-wait">🎬 SKIP WAIT (WATCH AD)</button>
+      <button class="btn-secondary-action" id="btn-skip-wait-ad">🎬 SKIP 10s WAIT FOR NEXT 10 LEVELS (WATCH AD)</button>
+      <button class="btn-secondary-action" id="btn-modal-retry" style="display:none; background:var(--accent-red); border:none;">🔄 RETRY THIS LEVEL (10 Coins)</button>
     </div>
   </div>
 
-  <!-- ADMOB BANNER PLACEHOLDER -->
   <div class="admob-banner-stub">[AdMob Adaptive Bottom Banner Placeholder]</div>
 
-  <!-- GAME LOGIC ENGINE -->
+  <!-- GAME LOGIC ENGINE V2 -->
   <script>
-    /* ==========================================================================
-       1. 1,000 SENTENCES GENERATOR (LIGHTWEIGHT ARRAY DATA)
-       ========================================================================== */
+    // SERVER BACKEND URL
+    const SERVER_API_URL = "https://khotrithucso.io.vn/apps/0004/index.php";
+
+    // 1000 SENTENCES ARRAY
     const BASE_SENTENCES = [
       "Hello how are you today", "What is your name", "Nice to meet you", "Where are you from",
       "I love learning English", "Have a wonderful day", "See you again soon", "What time is it now",
@@ -739,20 +726,14 @@
       "Listen to your teacher", "Practice makes perfect every day"
     ];
 
-    // Tự động sinh danh sách 1,000 câu tiếng Anh cơ bản
     const RAW_SENTENCES = [];
     for (let i = 0; i < 1000; i++) {
-      const base = BASE_SENTENCES[i % BASE_SENTENCES.length];
-      RAW_SENTENCES.push(`${base}`);
+      RAW_SENTENCES.push(BASE_SENTENCES[i % BASE_SENTENCES.length]);
     }
 
-    /* ==========================================================================
-       2. WEB AUDIO API SYNTHESIZER (ZERO EXTERNAL MP3 DEPENDENCIES)
-       ========================================================================== */
+    // AUDIO SYNTHESIZER
     class SoundFX {
-      constructor() {
-        this.ctx = null;
-      }
+      constructor() { this.ctx = null; }
       init() {
         if (!this.ctx) {
           this.ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -785,14 +766,16 @@
     }
     const sfx = new SoundFX();
 
-    /* ==========================================================================
-       3. GAME STATE MANAGEMENT
-       ========================================================================== */
+    // GAME STATE
     const State = {
-      playerName: localStorage.getItem('fe_player_name') || 'ProGamer',
+      uid: localStorage.getItem('fe_uid') || ('uid_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5)),
+      playerName: localStorage.getItem('fe_player_name') || 'Learner',
+      playerEmail: localStorage.getItem('fe_player_email') || '',
       coins: parseInt(localStorage.getItem('fe_coins') || '100'),
       unlockedLevel: parseInt(localStorage.getItem('fe_unlocked_level') || '1'),
+      completedSentences: parseInt(localStorage.getItem('fe_completed_sentences') || '0'),
       levelStars: JSON.parse(localStorage.getItem('fe_level_stars') || '{}'),
+      skipWaitPasses: parseInt(localStorage.getItem('fe_skip_passes') || '0'),
       currentLevel: 1,
       timerSec: 10,
       timerInterval: null,
@@ -802,34 +785,52 @@
       targetSentence: '',
       delayTimerInterval: null,
       delaySec: 10,
-      mapPage: 0
+      mapPage: 0,
+      currentLbTab: 'stars',
+      cachedLeaderboardData: null
     };
 
-    /* ==========================================================================
-       4. INITIALIZATION & NAVIGATION
-       ========================================================================== */
+    localStorage.setItem('fe_uid', State.uid);
+
+    // INITIALIZATION
     document.addEventListener('DOMContentLoaded', () => {
       updateHUD();
       document.getElementById('player-name-input').value = State.playerName;
+      document.getElementById('player-email-input').value = State.playerEmail;
+
       document.getElementById('player-name-input').addEventListener('change', (e) => {
-        State.playerName = e.target.value || 'ProGamer';
+        State.playerName = e.target.value.trim() || 'Learner';
         localStorage.setItem('fe_player_name', State.playerName);
+        syncScoreToServer();
+      });
+
+      document.getElementById('player-email-input').addEventListener('change', (e) => {
+        State.playerEmail = e.target.value.trim();
+        localStorage.setItem('fe_player_email', State.playerEmail);
+        syncScoreToServer();
       });
 
       setupEventListeners();
       renderMapGrid();
-      renderLeaderboard();
+      syncOfflineLogs();
+      fetchOnlineLeaderboard();
     });
 
     function updateHUD() {
       document.getElementById('hud-coins-val').innerText = State.coins;
-      let totalStars = 0;
-      Object.values(State.levelStars).forEach(s => totalStars += s);
-      document.getElementById('hud-stars-val').innerText = totalStars;
-      
+      document.getElementById('hud-stars-val').innerText = getTotalStars();
+
       localStorage.setItem('fe_coins', State.coins);
       localStorage.setItem('fe_unlocked_level', State.unlockedLevel);
+      localStorage.setItem('fe_completed_sentences', State.completedSentences);
       localStorage.setItem('fe_level_stars', JSON.stringify(State.levelStars));
+      localStorage.setItem('fe_skip_passes', State.skipWaitPasses);
+    }
+
+    function getTotalStars() {
+      let total = 0;
+      Object.values(State.levelStars).forEach(s => total += s);
+      return total;
     }
 
     function navigateTo(screenId) {
@@ -839,12 +840,12 @@
       document.getElementById('sidebar-overlay').classList.remove('active');
 
       if (screenId === 'screen-map') renderMapGrid();
-      if (screenId === 'screen-leaderboard') renderLeaderboard();
+      if (screenId === 'screen-leaderboard') fetchOnlineLeaderboard();
+
+      pushLog('navigation', { screen: screenId });
     }
 
-    /* ==========================================================================
-       5. GAMEPLAY LOGIC
-       ========================================================================== */
+    // GAMEPLAY
     function startLevel(levelNum) {
       State.currentLevel = levelNum;
       State.targetSentence = RAW_SENTENCES[levelNum - 1];
@@ -858,9 +859,11 @@
       document.getElementById('game-level-title').innerText = `LEVEL ${String(levelNum).padStart(3, '0')}`;
       navigateTo('screen-game');
       renderWordChips();
-      playTTS(State.targetSentence, 1.0);
+      
+      // Auto Play TTS
+      setTimeout(() => playTTS(State.targetSentence, 1.0), 300);
 
-      // Reset and Start Timer
+      // Start Countdown
       clearInterval(State.timerInterval);
       const timerDisplay = document.getElementById('game-timer-display');
       timerDisplay.classList.remove('warning');
@@ -877,8 +880,11 @@
           clearInterval(State.timerInterval);
           sfx.wrong();
           showResultModal(false, 0, 0);
+          pushLog('level_failed', { level: levelNum, reason: 'timeout' });
         }
       }, 1000);
+
+      pushLog('level_start', { level: levelNum });
     }
 
     function renderWordChips() {
@@ -918,38 +924,39 @@
     }
 
     function checkAnswer() {
-      clearInterval(State.timerInterval);
       const userAns = State.selectedWords.join(' ').toLowerCase();
       const targetAns = State.targetSentence.replace(/[.,?!]/g, '').toLowerCase();
 
       if (userAns === targetAns) {
+        clearInterval(State.timerInterval);
         sfx.correct();
         playTTS(State.targetSentence, 1.0);
 
-        // Tính sao dựa trên thời gian hoàn thành
         let stars = 1;
         if (State.timeElapsed <= 3) stars = 3;
         else if (State.timeElapsed <= 7) stars = 2;
 
-        // Quy tắc Anti-Inflation Replay
         const oldStars = State.levelStars[State.currentLevel] || 0;
         let earnedCoins = 0;
 
         if (stars > oldStars) {
           const coinTable = { 1: 10, 2: 20, 3: 30 };
-          const oldCoins = coinTable[oldStars] || 0;
-          earnedCoins = coinTable[stars] - oldCoins;
+          earnedCoins = coinTable[stars] - (coinTable[oldStars] || 0);
           State.levelStars[State.currentLevel] = stars;
           State.coins += earnedCoins;
         }
 
         if (State.currentLevel === State.unlockedLevel) {
           State.unlockedLevel = Math.min(1000, State.unlockedLevel + 1);
+          State.completedSentences++;
         }
 
         updateHUD();
+        syncScoreToServer();
         showResultModal(true, stars, earnedCoins);
+        pushLog('level_success', { level: State.currentLevel, time: State.timeElapsed, stars: stars });
       } else {
+        // LỖI MÀN HÌNH CŨ ĐÃ SỬA: KHÔNG STOP TIMER KHI TRẢ LỜI SAI!
         sfx.wrong();
         const dropBox = document.getElementById('drop-zone-container');
         dropBox.classList.add('wrong-shake');
@@ -957,9 +964,7 @@
       }
     }
 
-    /* ==========================================================================
-       6. MODAL & DELAY TIMER (10s DELAY / SKIP WAIT)
-       ========================================================================== */
+    // MODAL & SKIP WAIT DELAY LOGIC
     function showResultModal(isWin, stars, coins) {
       const modal = document.getElementById('modal-result');
       const title = document.getElementById('modal-result-title');
@@ -967,6 +972,8 @@
       const msg = document.getElementById('modal-result-msg');
       const btnNext = document.getElementById('btn-next-level');
       const delayTxt = document.getElementById('modal-delay-timer');
+      const btnRetry = document.getElementById('btn-modal-retry');
+      const btnSkipWait = document.getElementById('btn-skip-wait-ad');
 
       modal.classList.add('active');
       clearInterval(State.delayTimerInterval);
@@ -975,7 +982,20 @@
         title.innerText = 'STAGE COMPLETED!';
         title.style.color = 'var(--accent-green)';
         starsDisp.innerText = '⭐'.repeat(stars);
-        msg.innerText = earnedCoinsText(coins);
+        msg.innerText = coins > 0 ? `Awesome! Earned +${coins} Coins!` : `Already completed with 3 Stars.`;
+        btnRetry.style.display = 'none';
+        btnNext.style.display = 'block';
+        btnSkipWait.style.display = 'block';
+
+        // Check Skip Wait Passes
+        if (State.skipWaitPasses > 0) {
+          State.skipWaitPasses--;
+          updateHUD();
+          btnNext.disabled = false;
+          btnNext.style.opacity = '1';
+          delayTxt.innerText = `Skip Wait Active! (${State.skipWaitPasses} passes left)`;
+          return;
+        }
 
         State.delaySec = 10;
         btnNext.disabled = true;
@@ -996,24 +1016,18 @@
         title.innerText = 'TIME OUT / FAILED!';
         title.style.color = 'var(--accent-red)';
         starsDisp.innerText = '❌❌❌';
-        msg.innerText = 'Try again to complete this stage!';
-        btnNext.disabled = false;
-        btnNext.style.opacity = '1';
-        delayTxt.innerText = 'You can retry immediately.';
+        msg.innerText = 'Out of time! Choose an option to continue:';
+        delayTxt.innerText = '';
+        btnNext.style.display = 'none';
+        btnSkipWait.style.display = 'none';
+        btnRetry.style.display = 'block';
       }
     }
 
-    function earnedCoinsText(coins) {
-      if (coins > 0) return `Awesome! Earned +${coins} Coins!`;
-      return `Already completed with maximum stars. (0 Coins)`;
-    }
-
-    /* ==========================================================================
-       7. POWER-UPS & SHOP SYSTEM
-       ========================================================================== */
+    // POWER-UP SHOP
     function buyPowerup(type, cost) {
       if (State.coins < cost) {
-        alert('Not enough coins! Earn coins by completing levels or watching ads.');
+        alert('Not enough coins! Play levels or watch ads to earn more coins.');
         return;
       }
       State.coins -= cost;
@@ -1026,7 +1040,13 @@
         autoPlaceNextHint();
       } else if (type === 'slow') {
         playTTS(State.targetSentence, 0.75);
+      } else if (type === 'skip_pass') {
+        State.skipWaitPasses += 10;
+        updateHUD();
+        alert('⚡ Purchased Skip Wait Pass for 10 Levels!');
       }
+
+      pushLog('buy_powerup', { type: type, cost: cost });
     }
 
     function autoPlaceNextHint() {
@@ -1043,14 +1063,13 @@
     }
 
     function watchAdForCoins() {
-      alert('🎬 AdMob Rewarded Video played! Granted +100 Coins.');
+      alert('🎬 Rewarded Ad Finished! +100 Coins Granted.');
       State.coins += 100;
       updateHUD();
+      pushLog('watch_ad_coins', { amount: 100 });
     }
 
-    /* ==========================================================================
-       8. MAP GRID & LEADERBOARD RENDERING
-       ========================================================================== */
+    // MAP & LEADERBOARD RENDERING
     function renderMapGrid() {
       const container = document.getElementById('map-grid-container');
       container.innerHTML = '';
@@ -1072,48 +1091,137 @@
         `;
 
         if (!isLocked) {
-          node.onclick = () => {
-            sfx.tap();
-            startLevel(i);
-          };
+          node.onclick = () => { sfx.tap(); startLevel(i); };
         }
         container.appendChild(node);
       }
     }
 
-    function renderLeaderboard() {
-      const container = document.getElementById('leaderboard-container');
-      const mockBoard = [
-        { name: State.playerName, level: State.unlockedLevel, stars: getTotalStars() },
-        { name: 'Alex_USA', level: 850, stars: 2400 },
-        { name: 'Kenji_JP', level: 720, stars: 2100 },
-        { name: 'Elena_ES', level: 640, stars: 1850 },
-        { name: 'Minho_KR', level: 510, stars: 1400 }
-      ].sort((a, b) => b.stars - a.stars);
+    function fetchOnlineLeaderboard() {
+      fetch(`${SERVER_API_URL}?action=get_leaderboard`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.status === 'success') {
+            State.cachedLeaderboardData = data;
+            renderLeaderboardCategory();
+          }
+        })
+        .catch(() => {
+          // Fallback Offline Mock
+          renderOfflineMockLeaderboard();
+        });
+    }
 
-      container.innerHTML = mockBoard.map((u, idx) => `
+    function switchLeaderboardCategory(cat) {
+      State.currentLbTab = cat;
+      document.querySelectorAll('.lb-tab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById(`lb-tab-${cat}`).classList.add('active');
+      renderLeaderboardCategory();
+    }
+
+    function renderLeaderboardCategory() {
+      const container = document.getElementById('leaderboard-container');
+      if (!State.cachedLeaderboardData) {
+        renderOfflineMockLeaderboard();
+        return;
+      }
+
+      const keyMap = { stars: 'top_stars', sentences: 'top_sentences', coins: 'top_coins' };
+      const list = State.cachedLeaderboardData[keyMap[State.currentLbTab]] || [];
+
+      if (list.length === 0) {
+        container.innerHTML = '<div style="padding:16px; text-align:center; color:var(--text-muted);">No records yet. Be the first!</div>';
+        return;
+      }
+
+      container.innerHTML = list.map((u, idx) => `
         <div class="leaderboard-row">
           <div style="display:flex; align-items:center; gap:8px;">
             <span class="rank-num">#${idx + 1}</span>
-            <span style="font-weight:700;">${u.name}</span>
+            <span style="font-weight:700;">${escapeHtml(u.name)}</span>
           </div>
           <div>
-            <span style="color:var(--accent-cyan); margin-right:8px;">Lvl ${u.level}</span>
-            <span style="color:#facc15; font-weight:700;">⭐ ${u.stars}</span>
+            ${State.currentLbTab === 'stars' ? `<span style="color:#facc15; font-weight:700;">⭐ ${u.stars}</span>` : ''}
+            ${State.currentLbTab === 'sentences' ? `<span style="color:var(--accent-cyan); font-weight:700;">📝 ${u.sentences}</span>` : ''}
+            ${State.currentLbTab === 'coins' ? `<span style="color:var(--accent-yellow); font-weight:700;">🪙 ${u.coins}</span>` : ''}
           </div>
         </div>
       `).join('');
     }
 
-    function getTotalStars() {
-      let total = 0;
-      Object.values(State.levelStars).forEach(s => total += s);
-      return total;
+    function renderOfflineMockLeaderboard() {
+      const container = document.getElementById('leaderboard-container');
+      container.innerHTML = `
+        <div class="leaderboard-row">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span class="rank-num">#1</span>
+            <span style="font-weight:700;">${escapeHtml(State.playerName)} (You)</span>
+          </div>
+          <div>
+            <span style="color:#facc15; font-weight:700;">⭐ ${getTotalStars()}</span>
+          </div>
+        </div>
+      `;
     }
 
-    /* ==========================================================================
-       9. WEB SPEECH API TTS ENGINE
-       ========================================================================== */
+    function escapeHtml(str) {
+      return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    // ONLINE SYNC & TELEMETRY LOGS (JSONL)
+    function syncScoreToServer() {
+      const payload = {
+        uid: State.uid,
+        name: State.playerName,
+        email: State.playerEmail,
+        stars: getTotalStars(),
+        coins: State.coins,
+        sentences: State.completedSentences
+      };
+
+      fetch(`${SERVER_API_URL}?action=submit_score`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      }).catch(() => {});
+    }
+
+    function pushLog(event, details = {}) {
+      const logItem = {
+        uid: State.uid,
+        name: State.playerName,
+        email: State.playerEmail,
+        event: event,
+        details: details,
+        client_time: new Date().toISOString()
+      };
+
+      let queue = JSON.parse(localStorage.getItem('fe_log_queue') || '[]');
+      queue.push(logItem);
+      localStorage.setItem('fe_log_queue', JSON.stringify(queue));
+
+      syncOfflineLogs();
+    }
+
+    function syncOfflineLogs() {
+      let queue = JSON.parse(localStorage.getItem('fe_log_queue') || '[]');
+      if (queue.length === 0) return;
+
+      fetch(`${SERVER_API_URL}?action=log`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(queue)
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.status === 'success') {
+          localStorage.setItem('fe_log_queue', '[]');
+        }
+      })
+      .catch(() => {});
+    }
+
+    // SPEECH SYNTHESIS ENGINE (TTS)
     function playTTS(text, rate = 1.0) {
       if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
@@ -1131,9 +1239,7 @@
       }
     }
 
-    /* ==========================================================================
-       10. EVENT LISTENERS
-       ========================================================================== */
+    // EVENT LISTENERS
     function setupEventListeners() {
       document.getElementById('btn-open-sidebar').onclick = () => {
         document.getElementById('sidebar-overlay').classList.add('active');
@@ -1141,20 +1247,27 @@
       document.getElementById('btn-close-sidebar').onclick = () => {
         document.getElementById('sidebar-overlay').classList.remove('active');
       };
-      document.getElementById('sidebar-overlay').onclick = (e) => {
-        if (e.target.id === 'sidebar-overlay') {
-          document.getElementById('sidebar-overlay').classList.remove('active');
-        }
-      };
 
       document.getElementById('btn-quick-play').onclick = () => startLevel(State.unlockedLevel);
       document.getElementById('btn-play-audio').onclick = () => playTTS(State.targetSentence, 1.0);
+      
+      document.getElementById('btn-game-retry').onclick = () => {
+        if (State.coins >= 10) {
+          State.coins -= 10;
+          updateHUD();
+          startLevel(State.currentLevel);
+        } else {
+          alert('Not enough coins to retry! Need 10 Coins.');
+        }
+      };
+
       document.getElementById('btn-game-clear').onclick = () => {
         sfx.tap();
         State.shuffledWords = [...State.shuffledWords, ...State.selectedWords];
         State.selectedWords = [];
         renderWordChips();
       };
+
       document.getElementById('btn-game-check').onclick = checkAnswer;
 
       // Powerups
@@ -1162,7 +1275,7 @@
       document.getElementById('btn-powerup-hint').onclick = () => buyPowerup('hint', 40);
       document.getElementById('btn-powerup-slow').onclick = () => buyPowerup('slow', 50);
 
-      // Pagination Map
+      // Pagination
       document.getElementById('btn-map-prev').onclick = () => {
         if (State.mapPage > 0) { State.mapPage--; renderMapGrid(); }
       };
@@ -1170,19 +1283,33 @@
         if (State.mapPage < 19) { State.mapPage++; renderMapGrid(); }
       };
 
-      // Modal Next Level
+      // Modal Buttons
       document.getElementById('btn-next-level').onclick = () => {
         document.getElementById('modal-result').classList.remove('active');
         startLevel(State.currentLevel + 1);
       };
-      document.getElementById('btn-skip-wait').onclick = () => {
+
+      document.getElementById('btn-skip-wait-ad').onclick = () => {
+        alert('🎬 Watched 30s Video Ad! Granted Skip Wait Pass for 10 Levels.');
+        State.skipWaitPasses += 10;
+        updateHUD();
         clearInterval(State.delayTimerInterval);
         document.getElementById('btn-next-level').disabled = false;
         document.getElementById('btn-next-level').style.opacity = '1';
-        document.getElementById('modal-delay-timer').innerText = 'Wait skipped! Ready to play.';
+        document.getElementById('modal-delay-timer').innerText = 'Wait bypassed! Ready for next level.';
+      };
+
+      document.getElementById('btn-modal-retry').onclick = () => {
+        if (State.coins >= 10) {
+          State.coins -= 10;
+          updateHUD();
+          document.getElementById('modal-result').classList.remove('active');
+          startLevel(State.currentLevel);
+        } else {
+          alert('Not enough coins! Earn coins by watching ads.');
+        }
       };
     }
   </script>
 </body>
 </html>
- 
