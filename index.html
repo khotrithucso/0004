@@ -3,8 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Fast English 1000 Sentence Puzzle Pro</title>
+  <title>Fast English 1000 Sentence Puzzle V3 Pro</title>
   <style>
+    /* ==========================================================================
+       1. CORE SYSTEM TOKENS & RESET
+       ========================================================================== */
     :root {
       --bg-dark: #090d16;
       --card-bg: #0f172a;
@@ -38,7 +41,9 @@
       flex-direction: column;
     }
 
-    /* TOP BAR HUD */
+    /* ==========================================================================
+       2. TOP BAR & HAMBURGER SIDEBAR
+       ========================================================================== */
     .app-topbar {
       background: var(--card-bg);
       border-bottom: 1px solid var(--border-color);
@@ -161,7 +166,9 @@
       gap: 12px;
     }
 
-    /* ACTIVITY SCREENS SYSTEM */
+    /* ==========================================================================
+       3. ACTIVITY SCREENS SYSTEM
+       ========================================================================== */
     .screen {
       display: none;
       flex: 1;
@@ -240,6 +247,12 @@
       width: 100%;
       margin-bottom: 10px;
       box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+      transition: transform 0.1s, background 0.2s;
+    }
+
+    .btn-main-action:active {
+      transform: scale(0.98);
+      background: var(--accent-green-hover);
     }
 
     .btn-secondary-action {
@@ -353,6 +366,11 @@
       display: inline-flex;
       align-items: center;
       gap: 6px;
+      box-shadow: 0 4px 10px rgba(2, 132, 199, 0.3);
+    }
+
+    .btn-speaker:active {
+      transform: scale(0.96);
     }
 
     .drop-zone-box {
@@ -397,6 +415,11 @@
       font-weight: 600;
       cursor: pointer;
       box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .word-chip:active {
+      transform: scale(0.95);
+      background: var(--accent-cyan);
     }
 
     .powerups-bar {
@@ -541,7 +564,7 @@
   <header class="app-topbar">
     <div class="topbar-left">
       <button class="btn-hamburger" id="btn-open-sidebar">☰</button>
-      <div class="app-logo-title">⚡ FAST ENGLISH V2</div>
+      <div class="app-logo-title">⚡ FAST ENGLISH V3 PRO</div>
     </div>
     <div class="user-hud-stats">
       <div class="hud-chip hud-coins">🪙 <span id="hud-coins-val">100</span></div>
@@ -670,10 +693,10 @@
 
       <div class="shop-item-card">
         <div class="shop-item-info">
-          <h4>🎬 Free 100 Coins</h4>
-          <p>Watch a short video ad to claim 100 bonus coins</p>
+          <h4>🎬 Free +100 Coins Bonus</h4>
+          <p>Watch a 30-second Video Ad to claim 100 free coins</p>
         </div>
-        <button class="btn-main-action" style="width: auto; margin:0; padding:8px 14px; font-size:12px;" onclick="watchAdForCoins()">WATCH AD</button>
+        <button class="btn-main-action" style="width: auto; margin:0; padding:8px 14px; font-size:12px;" onclick="watchAdForCoins()">WATCH 30s AD</button>
       </div>
     </section>
 
@@ -701,20 +724,31 @@
 
       <div class="timer-delay-text" id="modal-delay-timer">Next Level Unlocks in: 10s</div>
 
+      <!-- ACTION BUTTONS -->
       <button class="btn-main-action" id="btn-next-level" disabled style="opacity: 0.5;">NEXT LEVEL ➔</button>
-      <button class="btn-secondary-action" id="btn-skip-wait-ad">🎬 SKIP 10s WAIT FOR NEXT 10 LEVELS (WATCH AD)</button>
+      <button class="btn-secondary-action" id="btn-skip-wait-ad">🎬 SKIP 10s WAIT FOR NEXT 10 LEVELS (WATCH 30s AD)</button>
       <button class="btn-secondary-action" id="btn-modal-retry" style="display:none; background:var(--accent-red); border:none;">🔄 RETRY THIS LEVEL (10 Coins)</button>
+      
+      <!-- NEW: NÚT QUAY VỀ TRANG CHÍNH -->
+      <button class="btn-secondary-action" id="btn-modal-home" style="margin-top:8px; background:var(--surface-bg);">🏠 HOME MENU</button>
     </div>
   </div>
 
   <div class="admob-banner-stub">[AdMob Adaptive Bottom Banner Placeholder]</div>
 
-  <!-- GAME LOGIC ENGINE V2 -->
+  <!-- GAME LOGIC ENGINE V3 PRO -->
   <script>
-    // SERVER BACKEND URL
     const SERVER_API_URL = "https://khotrithucso.io.vn/apps/0004/index.php";
 
-    // 1000 SENTENCES ARRAY
+    // ADMOB TEST CONFIGURATION
+    const ADMOB_TEST = {
+      appId: "ca-app-pub-3940256099942544~3347511713",
+      banner: "ca-app-pub-3940256099942544/6300978111",
+      interstitial: "ca-app-pub-3940256099942544/1033173712",
+      rewarded: "ca-app-pub-3940256099942544/5224354917"
+    };
+
+    // 1,000 SENTENCES ARRAY
     const BASE_SENTENCES = [
       "Hello how are you today", "What is your name", "Nice to meet you", "Where are you from",
       "I love learning English", "Have a wonderful day", "See you again soon", "What time is it now",
@@ -792,6 +826,22 @@
 
     localStorage.setItem('fe_uid', State.uid);
 
+    // AUDIO CONTEXT UNLOCKER
+    let isAudioUnlocked = false;
+    function unlockAudioEngine() {
+      if (!isAudioUnlocked) {
+        isAudioUnlocked = true;
+        sfx.init();
+        if ('speechSynthesis' in window) {
+          window.speechSynthesis.getVoices();
+          const silentUtterance = new SpeechSynthesisUtterance('');
+          window.speechSynthesis.speak(silentUtterance);
+        }
+      }
+    }
+    document.addEventListener('touchstart', unlockAudioEngine, { once: true });
+    document.addEventListener('click', unlockAudioEngine, { once: true });
+
     // INITIALIZATION
     document.addEventListener('DOMContentLoaded', () => {
       updateHUD();
@@ -847,6 +897,7 @@
 
     // GAMEPLAY
     function startLevel(levelNum) {
+      unlockAudioEngine();
       State.currentLevel = levelNum;
       State.targetSentence = RAW_SENTENCES[levelNum - 1];
       State.selectedWords = [];
@@ -860,7 +911,7 @@
       navigateTo('screen-game');
       renderWordChips();
       
-      // Auto Play TTS
+      // Auto Play TTS Voice
       setTimeout(() => playTTS(State.targetSentence, 1.0), 300);
 
       // Start Countdown
@@ -956,7 +1007,6 @@
         showResultModal(true, stars, earnedCoins);
         pushLog('level_success', { level: State.currentLevel, time: State.timeElapsed, stars: stars });
       } else {
-        // LỖI MÀN HÌNH CŨ ĐÃ SỬA: KHÔNG STOP TIMER KHI TRẢ LỜI SAI!
         sfx.wrong();
         const dropBox = document.getElementById('drop-zone-container');
         dropBox.classList.add('wrong-shake');
@@ -987,7 +1037,6 @@
         btnNext.style.display = 'block';
         btnSkipWait.style.display = 'block';
 
-        // Check Skip Wait Passes
         if (State.skipWaitPasses > 0) {
           State.skipWaitPasses--;
           updateHUD();
@@ -1062,11 +1111,30 @@
       }
     }
 
+    // WATCH 30s ADMOB REWARDED VIDEO
     function watchAdForCoins() {
-      alert('🎬 Rewarded Ad Finished! +100 Coins Granted.');
-      State.coins += 100;
-      updateHUD();
-      pushLog('watch_ad_coins', { amount: 100 });
+      showRewardedAd(() => {
+        State.coins += 100;
+        updateHUD();
+        alert('🎉 Watched 30s Video Ad! +100 Free Coins Granted.');
+        pushLog('watch_ad_coins', { amount: 100 });
+      });
+    }
+
+    function showRewardedAd(onRewardSuccess) {
+      if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.AdMob) {
+        const { AdMob } = window.Capacitor.Plugins;
+        AdMob.prepareRewardVideoAd({ adId: ADMOB_TEST.rewarded })
+          .then(() => AdMob.showRewardVideoAd())
+          .then(() => { if (onRewardSuccess) onRewardSuccess(); })
+          .catch(() => {
+            alert('🎬 [AdMob 30s Rewarded Test Ad Simulated]\nReward granted!');
+            if (onRewardSuccess) onRewardSuccess();
+          });
+      } else {
+        alert('🎬 [AdMob 30s Rewarded Test Ad Simulated]\nReward granted!');
+        if (onRewardSuccess) onRewardSuccess();
+      }
     }
 
     // MAP & LEADERBOARD RENDERING
@@ -1106,10 +1174,7 @@
             renderLeaderboardCategory();
           }
         })
-        .catch(() => {
-          // Fallback Offline Mock
-          renderOfflineMockLeaderboard();
-        });
+        .catch(() => renderOfflineMockLeaderboard());
     }
 
     function switchLeaderboardCategory(cat) {
@@ -1221,14 +1286,39 @@
       .catch(() => {});
     }
 
-    // SPEECH SYNTHESIS ENGINE (TTS)
+    // MULTI-TIER TTS SPEECH ENGINE
     function playTTS(text, rate = 1.0) {
+      unlockAudioEngine();
+      if (!text) return;
+
+      // Tier 1: Web Speech API (Native Browser Engine)
       if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
-        const utter = new SpeechSynthesisUtterance(text);
-        utter.lang = 'en-US';
-        utter.rate = rate;
-        window.speechSynthesis.speak(utter);
+        try {
+          window.speechSynthesis.cancel();
+          const utter = new SpeechSynthesisUtterance(text);
+          utter.lang = 'en-US';
+          utter.rate = rate;
+          utter.volume = 1.0;
+
+          utter.onerror = () => playFallbackTTSStream(text);
+          window.speechSynthesis.speak(utter);
+          return;
+        } catch (e) {
+          console.warn("SpeechSynthesis failed, trying stream fallback...", e);
+        }
+      }
+
+      // Tier 2: Stream Elements Free TTS API Stream
+      playFallbackTTSStream(text);
+    }
+
+    function playFallbackTTSStream(text) {
+      try {
+        const streamUrl = `https://api.streamelements.com/kappa/v2/speech?voice=Brian&text=${encodeURIComponent(text)}`;
+        const audio = new Audio(streamUrl);
+        audio.play().catch(e => console.warn("Audio Stream Blocked:", e));
+      } catch (err) {
+        console.error("TTS Stream Error:", err);
       }
     }
 
@@ -1283,20 +1373,21 @@
         if (State.mapPage < 19) { State.mapPage++; renderMapGrid(); }
       };
 
-      // Modal Buttons
+      // Modal Actions
       document.getElementById('btn-next-level').onclick = () => {
         document.getElementById('modal-result').classList.remove('active');
         startLevel(State.currentLevel + 1);
       };
 
       document.getElementById('btn-skip-wait-ad').onclick = () => {
-        alert('🎬 Watched 30s Video Ad! Granted Skip Wait Pass for 10 Levels.');
-        State.skipWaitPasses += 10;
-        updateHUD();
-        clearInterval(State.delayTimerInterval);
-        document.getElementById('btn-next-level').disabled = false;
-        document.getElementById('btn-next-level').style.opacity = '1';
-        document.getElementById('modal-delay-timer').innerText = 'Wait bypassed! Ready for next level.';
+        showRewardedAd(() => {
+          State.skipWaitPasses += 10;
+          updateHUD();
+          clearInterval(State.delayTimerInterval);
+          document.getElementById('btn-next-level').disabled = false;
+          document.getElementById('btn-next-level').style.opacity = '1';
+          document.getElementById('modal-delay-timer').innerText = 'Wait bypassed! Ready for next level.';
+        });
       };
 
       document.getElementById('btn-modal-retry').onclick = () => {
@@ -1308,6 +1399,14 @@
         } else {
           alert('Not enough coins! Earn coins by watching ads.');
         }
+      };
+
+      // NÚT TRỞ VỀ TRANG CHỦ
+      document.getElementById('btn-modal-home').onclick = () => {
+        clearInterval(State.delayTimerInterval);
+        clearInterval(State.timerInterval);
+        document.getElementById('modal-result').classList.remove('active');
+        navigateTo('screen-home');
       };
     }
   </script>
