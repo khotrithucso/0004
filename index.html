@@ -564,13 +564,12 @@
   </div>
 
   <div class="admob-banner-stub">[AdMob Adaptive Bottom Banner Active]</div>
-
   <script>
     const SERVER_API_URL = "https://khotrithucso.io.vn/apps/0004/index.php";
 
     const ADMOB_TEST = {
       appId: "ca-app-pub-3940256099942544~3347511713",
-      rewarded: "ca-app-pub-3940256099942544/5224354917"
+      rewarded: "ca-app-pub-3940256099942544/5224354917" // ID Test chuẩn Rewarded Video của Google
     };
 
     const BASE_SENTENCES = [
@@ -588,7 +587,7 @@
     for (let i = 0; i < 1000; i++) RAW_SENTENCES.push(BASE_SENTENCES[i % BASE_SENTENCES.length]);
 
     /* ==========================================================================
-       2. MULTI-PLATFORM VOICE ENGINE (ANDROID WEBVIEW / CAPACITOR / WEB)
+       2. MULTI-PLATFORM VOICE ENGINE (NATIVE TTS + WEB FALLBACK)
        ========================================================================== */
     class VoiceEngine {
       constructor() {
@@ -618,10 +617,28 @@
         return this.currentGender;
       }
 
-      speak(text, isSlow = false) {
+      async speak(text, isSlow = false) {
         if (!text) return;
         text = text.trim();
 
+        // 1. Ưu tiên dùng Capacitor Native TTS (Mượt nhất trên App Android/iOS)
+        if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.TextToSpeech) {
+            try {
+                await window.Capacitor.Plugins.TextToSpeech.speak({
+                    text: text,
+                    lang: 'en-US',
+                    rate: isSlow ? 0.70 : 0.90,
+                    pitch: this.currentGender === 'male' ? 0.85 : 1.25,
+                    volume: 1.0,
+                    category: 'ambient'
+                });
+                return;
+            } catch (e) {
+                console.log("Capacitor Native TTS Error:", e);
+            }
+        }
+
+        // 2. Fallback Web Speech API (Dùng cho Web/Trình duyệt)
         if ('speechSynthesis' in window) {
           try {
             window.speechSynthesis.cancel();
@@ -662,17 +679,23 @@
         }
       }
 
-      playStreamFallback(text) {
+      async playStreamFallback(text) {
         try {
-          const isMale = (this.currentGender === 'male');
-          const voiceName = isMale ? 'Brian' : 'Salli';
-          const streamUrl = `https://api.streamelements.com/kappa/v2/speech?voice=${voiceName}&text=${encodeURIComponent(text)}`;
-          const audio = new Audio(streamUrl);
-          audio.play().catch(() => {
-            const googleUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(text)}&tl=en&client=tw-ob`;
-            new Audio(googleUrl).play().catch(() => {});
-          });
-        } catch (err) {}
+            let streamUrl = `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(text)}&type=2`;
+            let audio = new Audio(streamUrl);
+            let playPromise = audio.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(async () => {
+                    const isMale = (this.currentGender === 'male');
+                    const voiceName = isMale ? 'Brian' : 'Salli';
+                    let altUrl = `https://api.streamelements.com/kappa/v2/speech?voice=${voiceName}&text=${encodeURIComponent(text)}`;
+                    let altAudio = new Audio(altUrl);
+                    await altAudio.play().catch(() => {});
+                });
+            }
+        } catch (err) {
+            console.log("Audio Stream Error:", err);
+        }
       }
     }
     const voiceEngine = new VoiceEngine();
@@ -1351,7 +1374,7 @@
     }
 
     /* ==========================================================================
-       9. ADMOB HYBRID FAIL-SAFE HANDLER & SIMULATED AD PLAYER
+       9. ADMOB REWARDED VIDEO (CHUẨN HÓA VÀ FIX LỖI LISTENER)
        ========================================================================== */
     function watchAdForCoins() {
       showRewardedAdWithFailSafe(() => {
@@ -1369,30 +1392,50 @@
         try {
           const { AdMob, RewardAdPluginEvents } = window.Capacitor.Plugins;
 
-          try { await AdMob.initialize({}); } catch(e) {}
+          // Bắt buộc initialize với thông số Test[span_2](start_span)[span_2](end_span)
+          await AdMob.initialize({ initializeForTesting: true });
 
-          const rewardSub = AdMob.addListener(RewardAdPluginEvents.Rewarded, () => {
+          // FIX: Xóa bỏ mọi listener tồn đọng từ các lần bấm trước để tránh rác bộ nhớ/chạy đè
+          await AdMob.removeAllListeners();
+
+          AdMob.addListener(RewardAdPluginEvents.Rewarded, (rewardItem) => {
             isRewarded = true;
           });
 
-          const dismissSub = AdMob.addListener(RewardAdPluginEvents.Dismissed, () => {
-            if (isRewarded && onRewardSuccess) onRewardSuccess();
-            if (rewardSub) rewardSub.remove();
-            if (dismissSub) dismissSub.remove();
+          AdMob.addListener(RewardAdPluginEvents.Dismissed, () => {
+            if (isRewarded && onRewardSuccess) {
+                onRewardSuccess();
+            }
+            AdMob.removeAllListeners(); // Dọn dẹp sau khi xem xong
           });
 
-          const failSub = AdMob.addListener(RewardAdPluginEvents.FailedToShow, () => {
-            if (failSub) failSub.remove();
+          AdMob.addListener(RewardAdPluginEvents.FailedToLoad, (err) => {
+            console.error("Ad Failed to Load", err);
+            AdMob.removeAllListeners();
             showSimulatedAdPlayer(onRewardSuccess);
           });
 
-          AdMob.prepareRewardVideoAd({ adId: ADMOB_TEST.rewarded })
-            .then(() => AdMob.showRewardVideoAd())
-            .catch(() => showSimulatedAdPlayer(onRewardSuccess));
+          AdMob.addListener(RewardAdPluginEvents.FailedToShow, (err) => {
+            console.error("Ad Failed to Show", err);
+            AdMob.removeAllListeners();
+            showSimulatedAdPlayer(onRewardSuccess);
+          });
+
+          await AdMob.prepareRewardVideoAd({
+            adId: ADMOB_TEST.rewarded,
+            isTesting: true // Cờ test bắt buộc trên một số phiên bản cũ
+          });
+          
+          await AdMob.showRewardVideoAd();
           return;
-        } catch (err) {}
+        } catch (err) {
+          console.error("AdMob exception", err);
+          showSimulatedAdPlayer(onRewardSuccess);
+          return;
+        }
       }
 
+      // Fallback khi chạy trên Web hoặc Plugin lỗi
       showSimulatedAdPlayer(onRewardSuccess);
     }
 
@@ -1562,5 +1605,6 @@
       document.getElementById('btn-confirm-buy').onclick = confirmDirectPurchase;
     }
   </script>
+
 </body>
 </html>
