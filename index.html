@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Fast English 1000 Sentence Puzzle V4 Pro</title>
+  <title>Fast English 1000 Sentence Puzzle V5 Ultra Pro</title>
   <style>
     /* ==========================================================================
        1. DYNAMIC COLOR THEMES & CORE TOKENS
@@ -25,7 +25,6 @@
       --theme-gradient: linear-gradient(135deg, #e0f2fe 0%, #f8fafc 100%);
     }
 
-    /* THEME PRESETS */
     body.theme-sky { --theme-gradient: linear-gradient(135deg, #e0f2fe 0%, #f8fafc 100%); }
     body.theme-mint { --theme-gradient: linear-gradient(135deg, #d1fae5 0%, #f8fafc 100%); }
     body.theme-sunset { --theme-gradient: linear-gradient(135deg, #ffedd5 0%, #f8fafc 100%); }
@@ -51,11 +50,9 @@
       transition: background 0.5s ease;
     }
 
-    /* ==========================================================================
-       2. TOP BAR & SIDEBAR DYNAMIC UI
-       ========================================================================== */
+    /* TOP BAR HUD */
     .app-topbar {
-      background: rgba(255, 255, 255, 0.9);
+      background: rgba(255, 255, 255, 0.95);
       backdrop-filter: blur(8px);
       border-bottom: 1px solid var(--border-color);
       padding: 12px 16px;
@@ -68,48 +65,23 @@
       box-shadow: var(--shadow-card);
     }
 
-    .topbar-left {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
+    .topbar-left { display: flex; align-items: center; gap: 12px; }
+    .btn-hamburger { background: none; border: none; color: var(--text-light); font-size: 22px; cursor: pointer; padding: 4px; }
+    .app-logo-title { font-size: 15px; font-weight: 800; color: var(--accent-cyan); letter-spacing: 0.5px; }
 
-    .btn-hamburger {
-      background: none;
-      border: none;
-      color: var(--text-light);
-      font-size: 22px;
-      cursor: pointer;
-      padding: 4px;
-    }
-
-    .app-logo-title {
-      font-size: 15px;
-      font-weight: 800;
-      color: var(--accent-cyan);
-      letter-spacing: 0.5px;
-    }
-
-    .user-hud-stats {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 13px;
-      font-weight: 700;
-    }
-
+    .user-hud-stats { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; }
     .hud-chip {
       background: var(--surface-bg);
       border: 1px solid var(--border-color);
-      padding: 4px 10px;
+      padding: 4px 8px;
       border-radius: 20px;
       display: flex;
       align-items: center;
       gap: 4px;
     }
-
     .hud-coins { color: var(--accent-yellow); }
     .hud-stars { color: #d97706; }
+    .hud-streak { color: #ef4444; }
 
     /* SIDEBAR DRAWER */
     .sidebar-overlay {
@@ -122,11 +94,7 @@
       pointer-events: none;
       transition: opacity 0.3s ease;
     }
-
-    .sidebar-overlay.active {
-      opacity: 1;
-      pointer-events: auto;
-    }
+    .sidebar-overlay.active { opacity: 1; pointer-events: auto; }
 
     .sidebar-drawer {
       position: fixed;
@@ -142,271 +110,117 @@
       padding: 20px 16px;
       box-shadow: var(--shadow-soft);
     }
-
-    .sidebar-overlay.active .sidebar-drawer {
-      transform: translateX(0);
-    }
+    .sidebar-overlay.active .sidebar-drawer { transform: translateX(0); }
 
     .sidebar-header {
-      font-size: 18px;
-      font-weight: 800;
-      color: var(--accent-cyan);
-      margin-bottom: 20px;
-      padding-bottom: 12px;
+      font-size: 18px; font-weight: 800; color: var(--accent-cyan);
+      margin-bottom: 20px; padding-bottom: 12px;
       border-bottom: 1px solid var(--border-color);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      display: flex; justify-content: space-between; align-items: center;
     }
 
-    .sidebar-menu {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
+    .sidebar-menu { display: flex; flex-direction: column; gap: 10px; }
     .sidebar-btn {
-      background: var(--surface-bg);
-      color: var(--text-light);
+      background: var(--surface-bg); color: var(--text-light);
       border: 1px solid var(--border-color);
-      padding: 12px 16px;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 600;
-      text-align: left;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      transition: background 0.2s;
+      padding: 12px 16px; border-radius: 8px;
+      font-size: 14px; font-weight: 600; text-align: left;
+      cursor: pointer; display: flex; align-items: center; gap: 12px;
     }
 
-    .sidebar-btn:hover { background: #e2e8f0; }
-
-    /* ==========================================================================
-       3. SCREENS & GAMEPLAY ENGINE
-       ========================================================================== */
+    /* SCREENS */
     .screen {
-      display: none;
-      flex: 1;
-      padding: 16px;
-      max-width: 600px;
-      margin: 0 auto;
-      width: 100%;
+      display: none; flex: 1; padding: 16px; max-width: 600px;
+      margin: 0 auto; width: 100%;
       animation: fadeIn 0.25s ease-in-out;
     }
-
-    .screen.active {
-      display: flex;
-      flex-direction: column;
-    }
+    .screen.active { display: flex; flex-direction: column; }
 
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(6px); }
       to { opacity: 1; transform: translateY(0); }
     }
 
-    /* HOME HERO */
     .home-hero-card {
       background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
-      border-radius: 16px;
-      padding: 24px 16px;
-      text-align: center;
-      margin-bottom: 20px;
-      border: 1px solid var(--border-color);
-      box-shadow: var(--shadow-soft);
+      border-radius: 16px; padding: 24px 16px; text-align: center;
+      margin-bottom: 20px; border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-soft); color: #fff;
     }
-
-    .home-hero-card h1 {
-      font-size: 22px;
-      font-weight: 800;
-      margin-bottom: 6px;
-      color: #fff;
-    }
-
-    .home-hero-card p {
-      font-size: 13px;
-      color: #f0f9ff;
-    }
+    .home-hero-card h1 { font-size: 22px; font-weight: 800; margin-bottom: 6px; }
+    .home-hero-card p { font-size: 13px; color: #f0f9ff; }
 
     .player-input-group { margin-bottom: 14px; }
-    .player-input-group label {
-      display: block;
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--text-muted);
-      margin-bottom: 6px;
-      text-align: left;
-    }
-
+    .player-input-group label { display: block; font-size: 12px; font-weight: 700; color: var(--text-muted); margin-bottom: 6px; text-align: left; }
     .form-control {
-      width: 100%;
-      background: var(--card-bg);
-      border: 1.5px solid var(--border-color);
-      color: var(--text-light);
-      padding: 12px 14px;
-      border-radius: 8px;
-      font-size: 14px;
-      outline: none;
+      width: 100%; background: var(--card-bg); border: 1.5px solid var(--border-color);
+      color: var(--text-light); padding: 12px 14px; border-radius: 8px; font-size: 14px; outline: none;
     }
 
     .btn-main-action {
-      background: var(--accent-green);
-      color: #fff;
-      border: none;
-      padding: 14px;
-      border-radius: 10px;
-      font-size: 15px;
-      font-weight: 800;
-      cursor: pointer;
-      width: 100%;
-      margin-bottom: 10px;
+      background: var(--accent-green); color: #fff; border: none;
+      padding: 14px; border-radius: 10px; font-size: 15px; font-weight: 800;
+      cursor: pointer; width: 100%; margin-bottom: 10px;
       box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
-      transition: transform 0.1s, background 0.2s;
     }
-
     .btn-main-action:active { transform: scale(0.98); background: var(--accent-green-hover); }
 
     .btn-secondary-action {
-      background: var(--card-bg);
-      color: var(--text-light);
-      border: 1.5px solid var(--border-color);
-      padding: 12px;
-      border-radius: 10px;
-      font-size: 14px;
-      font-weight: 700;
-      cursor: pointer;
-      width: 100%;
-      margin-bottom: 10px;
-      box-shadow: var(--shadow-card);
+      background: var(--card-bg); color: var(--text-light);
+      border: 1.5px solid var(--border-color); padding: 12px;
+      border-radius: 10px; font-size: 14px; font-weight: 700;
+      cursor: pointer; width: 100%; margin-bottom: 10px; box-shadow: var(--shadow-card);
     }
 
     /* LEVEL MAP */
-    .map-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-    }
-
+    .map-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
     .map-grid-container {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 10px;
-      max-height: 65vh;
-      overflow-y: auto;
-      padding-right: 4px;
+      display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px;
+      max-height: 65vh; overflow-y: auto; padding-right: 4px;
     }
-
     .level-node {
-      background: var(--card-bg);
-      border: 1.5px solid var(--border-color);
-      border-radius: 10px;
-      aspect-ratio: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      font-weight: 700;
-      font-size: 13px;
+      background: var(--card-bg); border: 1.5px solid var(--border-color);
+      border-radius: 10px; aspect-ratio: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; cursor: pointer; font-weight: 700; font-size: 13px;
       box-shadow: var(--shadow-card);
     }
-
-    .level-node.locked {
-      opacity: 0.4;
-      cursor: not-allowed;
-      background: #e2e8f0;
-    }
-
-    .level-node.active-stage {
-      border-color: var(--accent-green);
-      box-shadow: 0 0 12px rgba(16, 185, 129, 0.4);
-      background: rgba(16, 185, 129, 0.1);
-      color: var(--accent-green-hover);
-    }
-
+    .level-node.locked { opacity: 0.4; cursor: not-allowed; background: #e2e8f0; }
+    .level-node.active-stage { border-color: var(--accent-green); box-shadow: 0 0 12px rgba(16, 185, 129, 0.4); background: rgba(16, 185, 129, 0.1); }
     .level-stars-mini { font-size: 9px; color: var(--accent-yellow); margin-top: 2px; }
 
-    /* GAMEPLAY HUDS & CARDS */
+    /* GAMEPLAY */
     .gameplay-hud {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-      background: var(--card-bg);
-      padding: 10px 14px;
-      border-radius: 10px;
-      border: 1px solid var(--border-color);
-      box-shadow: var(--shadow-card);
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 12px; background: var(--card-bg); padding: 10px 14px;
+      border-radius: 10px; border: 1px solid var(--border-color); box-shadow: var(--shadow-card);
     }
-
     .timer-badge { font-size: 16px; font-weight: 800; color: var(--accent-yellow); }
     .timer-badge.warning { color: var(--accent-red); animation: pulse 0.5s infinite alternate; }
 
     @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.1); } }
 
     .audio-card {
-      background: var(--card-bg);
-      border: 1px solid var(--border-color);
-      border-radius: 12px;
-      padding: 14px;
-      text-align: center;
-      margin-bottom: 12px;
-      box-shadow: var(--shadow-card);
+      background: var(--card-bg); border: 1px solid var(--border-color);
+      border-radius: 12px; padding: 14px; text-align: center; margin-bottom: 12px; box-shadow: var(--shadow-card);
     }
-
-    .audio-controls-row {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      margin-top: 6px;
-    }
+    .audio-controls-row { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 6px; }
 
     .btn-speaker {
-      background: var(--accent-cyan);
-      color: #fff;
-      border: none;
-      padding: 10px 18px;
-      border-radius: 20px;
-      font-size: 13px;
-      font-weight: 700;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      box-shadow: 0 4px 10px rgba(2, 132, 199, 0.25);
+      background: var(--accent-cyan); color: #fff; border: none; padding: 10px 18px;
+      border-radius: 20px; font-size: 13px; font-weight: 700; cursor: pointer;
+      display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 4px 10px rgba(2, 132, 199, 0.25);
     }
-
     .btn-voice-toggle {
-      background: var(--surface-bg);
-      border: 1px solid var(--border-color);
-      color: var(--text-light);
-      padding: 8px 12px;
-      border-radius: 16px;
-      font-size: 12px;
-      font-weight: 700;
-      cursor: pointer;
+      background: var(--surface-bg); border: 1px solid var(--border-color);
+      color: var(--text-light); padding: 8px 12px; border-radius: 16px; font-size: 12px; font-weight: 700; cursor: pointer;
     }
 
     .drop-zone-box {
-      background: #ffffff;
-      border: 2px dashed #cbd5e1;
-      border-radius: 12px;
-      min-height: 90px;
-      padding: 12px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      align-content: flex-start;
-      margin-bottom: 12px;
+      background: #ffffff; border: 2px dashed #cbd5e1; border-radius: 12px;
+      min-height: 90px; padding: 12px; display: flex; flex-wrap: wrap; gap: 8px;
+      align-content: flex-start; margin-bottom: 12px;
     }
-
-    .drop-zone-box.wrong-shake {
-      border-color: var(--accent-red);
-      animation: shake 0.4s ease-in-out;
-    }
+    .drop-zone-box.wrong-shake { border-color: var(--accent-red); animation: shake 0.4s ease-in-out; }
 
     @keyframes shake {
       0%, 100% { transform: translateX(0); }
@@ -414,134 +228,46 @@
       40%, 80% { transform: translateX(6px); }
     }
 
-    .word-pool-box {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-bottom: 14px;
-      min-height: 80px;
-    }
-
+    .word-pool-box { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; min-height: 80px; }
     .word-chip {
-      background: #ffffff;
-      border: 1.5px solid var(--border-color);
-      color: var(--text-light);
-      padding: 10px 14px;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-      transition: background 0.15s, transform 0.1s;
+      background: #ffffff; border: 1.5px solid var(--border-color); color: var(--text-light);
+      padding: 10px 14px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: background 0.15s, transform 0.1s;
     }
-
     .word-chip:active { transform: scale(0.95); background: #e0f2fe; }
 
     .powerups-bar { display: flex; gap: 8px; margin-bottom: 12px; }
-
     .btn-powerup {
-      flex: 1;
-      background: var(--card-bg);
-      border: 1.5px solid var(--border-color);
-      color: var(--text-light);
-      padding: 8px;
-      border-radius: 8px;
-      font-size: 11px;
-      font-weight: 700;
-      cursor: pointer;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 2px;
-      box-shadow: var(--shadow-card);
+      flex: 1; background: var(--card-bg); border: 1.5px solid var(--border-color);
+      color: var(--text-light); padding: 8px; border-radius: 8px; font-size: 11px; font-weight: 700;
+      cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 2px; box-shadow: var(--shadow-card);
     }
-
     .btn-powerup span { color: var(--accent-yellow); font-size: 10px; font-weight: 800; }
 
     .gameplay-actions { display: flex; gap: 8px; }
 
-    /* SHOP STYLES */
+    /* SHOP */
     .shop-item-card {
-      background: var(--card-bg);
-      border: 1px solid var(--border-color);
-      border-radius: 12px;
-      padding: 14px;
-      margin-bottom: 10px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      box-shadow: var(--shadow-card);
+      background: var(--card-bg); border: 1px solid var(--border-color);
+      border-radius: 12px; padding: 14px; margin-bottom: 10px;
+      display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow-card);
     }
-
     .shop-item-info h4 { font-size: 14px; color: var(--accent-cyan); margin-bottom: 2px; }
     .shop-item-info p { font-size: 11px; color: var(--text-muted); }
     .shop-item-stock { font-size: 11px; font-weight: 800; color: var(--accent-green); margin-top: 4px; }
 
-    /* LEADERBOARD */
-    .leaderboard-tabs { display: flex; gap: 6px; margin-bottom: 12px; }
-    .lb-tab-btn {
-      flex: 1;
-      background: var(--surface-bg);
-      border: 1px solid var(--border-color);
-      color: var(--text-muted);
-      padding: 8px;
-      border-radius: 8px;
-      font-size: 12px;
-      font-weight: 700;
-      cursor: pointer;
-      text-align: center;
-    }
-
-    .lb-tab-btn.active {
-      background: var(--accent-cyan);
-      color: #fff;
-      border-color: var(--accent-cyan);
-    }
-
-    .leaderboard-list {
-      background: var(--card-bg);
-      border: 1px solid var(--border-color);
-      border-radius: 12px;
-      overflow: hidden;
-      box-shadow: var(--shadow-card);
-    }
-
-    .leaderboard-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 12px 14px;
-      border-bottom: 1px solid var(--border-color);
-      font-size: 13px;
-    }
-
-    .rank-num { font-weight: 800; width: 26px; color: var(--accent-yellow); }
-
-    /* POPUP MODAL SYSTEM */
+    /* POPUPS & MINIGAMES */
     .modal-backdrop {
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(15, 23, 42, 0.6);
-      backdrop-filter: blur(4px);
-      z-index: 300;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 16px;
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px);
+      z-index: 300; display: none; align-items: center; justify-content: center; padding: 16px;
     }
-
     .modal-backdrop.active { display: flex; }
 
     .modal-card {
-      background: var(--card-bg);
-      border: 1px solid var(--border-color);
-      border-radius: 16px;
-      padding: 20px;
-      width: 100%;
-      max-width: 380px;
-      text-align: center;
-      box-shadow: var(--shadow-soft);
-      animation: popIn 0.2s ease-out;
+      background: var(--card-bg); border: 1px solid var(--border-color);
+      border-radius: 16px; padding: 20px; width: 100%; max-width: 380px; text-align: center;
+      box-shadow: var(--shadow-soft); animation: popIn 0.2s ease-out;
     }
 
     @keyframes popIn {
@@ -549,83 +275,33 @@
       to { transform: scale(1); opacity: 1; }
     }
 
-    .modal-stars-win { font-size: 32px; margin: 10px 0; }
-    .timer-delay-text { font-size: 12px; color: var(--accent-yellow); font-weight: 700; margin: 10px 0; }
-
-    /* ==========================================================================
-       4. MINIGAMES UI (CHESTS, WHEEL, CARDS)
-       ========================================================================== */
-    .bonus-minigame-box {
-      margin: 15px 0;
-      padding: 10px;
-      background: var(--surface-bg);
-      border-radius: 12px;
-      border: 1px solid var(--border-color);
+    .bonus-minigame-box { margin: 15px 0; padding: 10px; background: var(--surface-bg); border-radius: 12px; border: 1px solid var(--border-color); }
+    .chests-container, .cards-container { display: flex; justify-content: center; gap: 12px; margin-top: 10px; }
+    .chest-item, .card-item {
+      font-size: 32px; background: #fff; border: 2px solid var(--border-color);
+      border-radius: 12px; padding: 10px; cursor: pointer; transition: transform 0.2s;
     }
+    .card-item { width: 70px; height: 90px; background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 22px; }
+    .card-item.flipped { background: #fff; color: var(--text-light); border-color: var(--accent-green); }
 
-    /* 3 CHESTS PICK */
-    .chests-container { display: flex; justify-content: center; gap: 12px; margin-top: 10px; }
-    .chest-item {
-      font-size: 36px;
-      background: #fff;
-      border: 2px solid var(--border-color);
-      border-radius: 12px;
-      padding: 12px;
-      cursor: pointer;
-      transition: transform 0.2s;
-    }
-    .chest-item:active { transform: scale(1.1); }
-
-    /* LUCKY WHEEL CANVAS */
-    #wheel-canvas { margin: 10px auto; display: block; }
-
-    /* 3 CARDS PICK */
-    .cards-container { display: flex; justify-content: center; gap: 12px; margin-top: 10px; }
-    .card-item {
-      width: 70px;
-      height: 100px;
-      background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
-      color: #fff;
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 24px;
-      font-weight: 800;
-      cursor: pointer;
-      box-shadow: var(--shadow-card);
-      transition: transform 0.3s;
-    }
-    .card-item.flipped {
-      background: #fff;
-      color: var(--text-light);
-      border: 2px solid var(--accent-green);
-    }
-
-    .admob-banner-stub {
-      background: #f1f5f9;
-      border-top: 1px solid var(--border-color);
-      color: var(--text-muted);
-      font-size: 10px;
-      text-align: center;
-      padding: 8px;
-      position: fixed;
-      bottom: 0; left: 0; right: 0;
-      z-index: 80;
-    }
+    #canvas-confetti { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 400; }
+    .admob-banner-stub { background: #f1f5f9; border-top: 1px solid var(--border-color); color: var(--text-muted); font-size: 10px; text-align: center; padding: 8px; position: fixed; bottom: 0; left: 0; right: 0; z-index: 80; }
   </style>
 </head>
 <body class="theme-sky">
+
+  <canvas id="canvas-confetti"></canvas>
 
   <!-- TOP BAR HUD -->
   <header class="app-topbar">
     <div class="topbar-left">
       <button class="btn-hamburger" id="btn-open-sidebar">☰</button>
-      <div class="app-logo-title">⚡ FAST ENGLISH V4 PRO</div>
+      <div class="app-logo-title">⚡ FAST ENGLISH V5 ULTRA</div>
     </div>
     <div class="user-hud-stats">
       <div class="hud-chip hud-coins">🪙 <span id="hud-coins-val">100</span></div>
       <div class="hud-chip hud-stars">⭐ <span id="hud-stars-val">0</span></div>
+      <div class="hud-chip hud-streak">🔥 <span id="hud-streak-val">0</span></div>
     </div>
   </header>
 
@@ -639,6 +315,7 @@
       <div class="sidebar-menu">
         <button class="sidebar-btn" onclick="navigateTo('screen-home')">🏠 Home Screen</button>
         <button class="sidebar-btn" onclick="navigateTo('screen-map')">🗺️ 1,000 Level Map</button>
+        <button class="sidebar-btn" onclick="navigateTo('screen-review')">📝 Review Mistakes (<span id="review-count-badge">0</span>)</button>
         <button class="sidebar-btn" onclick="navigateTo('screen-shop')">🛒 Power-Up Shop</button>
         <button class="sidebar-btn" onclick="navigateTo('screen-leaderboard')">🏆 Online Leaderboard</button>
         <button class="sidebar-btn" onclick="toggleVoiceGenderDrawer()">🎙️ Voice: <span id="drawer-voice-label">Female (US)</span></button>
@@ -669,7 +346,7 @@
 
       <button class="btn-main-action" id="btn-quick-play">🚀 PLAY CURRENT LEVEL</button>
       <button class="btn-secondary-action" onclick="navigateTo('screen-map')">🗺️ SELECT LEVEL MAP</button>
-      <button class="btn-secondary-action" onclick="navigateTo('screen-leaderboard')">🏆 ONLINE LEADERBOARD</button>
+      <button class="btn-secondary-action" onclick="navigateTo('screen-review')">📝 MISTAKE REVIEW BANK</button>
       <button class="btn-secondary-action" onclick="navigateTo('screen-shop')">🛒 POWER-UP SHOP</button>
     </section>
 
@@ -717,7 +394,14 @@
       </div>
     </section>
 
-    <!-- SCREEN 4: SHOP -->
+    <!-- SCREEN 4: MISTAKE REVIEW BANK -->
+    <section class="screen" id="screen-review">
+      <h3 style="font-size: 16px; color: var(--accent-cyan); margin-bottom: 8px;">MISTAKE REVIEW BANK</h3>
+      <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">Practice failed sentences to earn bonus stars & clear your list!</p>
+      <div id="review-list-container" style="display:flex; flex-direction:column; gap:10px;"></div>
+    </section>
+
+    <!-- SCREEN 5: SHOP -->
     <section class="screen" id="screen-shop">
       <h3 style="font-size: 16px; color: var(--accent-cyan); margin-bottom: 12px;">POWER-UP SHOP</h3>
       
@@ -766,29 +450,21 @@
       </div>
     </section>
 
-    <!-- SCREEN 5: ONLINE LEADERBOARD -->
+    <!-- SCREEN 6: ONLINE LEADERBOARD -->
     <section class="screen" id="screen-leaderboard">
       <h3 style="font-size: 16px; color: var(--accent-cyan); margin-bottom: 10px;">GLOBAL ONLINE LEADERBOARD</h3>
-      
-      <div class="leaderboard-tabs">
-        <button class="lb-tab-btn active" id="lb-tab-stars" onclick="switchLeaderboardCategory('stars')">⭐ Top Stars</button>
-        <button class="lb-tab-btn" id="lb-tab-sentences" onclick="switchLeaderboardCategory('sentences')">📝 Top Sentences</button>
-        <button class="lb-tab-btn" id="lb-tab-coins" onclick="switchLeaderboardCategory('coins')">🪙 Top Coins</button>
-      </div>
-
-      <div class="leaderboard-list" id="leaderboard-container"></div>
+      <div id="leaderboard-container"></div>
     </section>
 
   </main>
 
-  <!-- RESULT / BONUS POPUP MODAL -->
+  <!-- RESULT MODAL -->
   <div class="modal-backdrop" id="modal-result">
     <div class="modal-card">
       <h2 id="modal-result-title" style="color: var(--accent-green); font-size: 20px;">STAGE COMPLETED!</h2>
       <div class="modal-stars-win" id="modal-stars-display">⭐⭐⭐</div>
       <p id="modal-result-msg" style="font-size: 13px; color: var(--text-muted); margin-bottom: 8px;">Earned +30 Coins!</p>
 
-      <!-- DYNAMIC BONUS MINIGAME SECTION -->
       <div id="bonus-minigame-wrapper" class="bonus-minigame-box" style="display:none;">
         <h4 id="bonus-title" style="font-size:13px; color:var(--accent-cyan);">🎁 3-STAR BONUS GAME!</h4>
         <div id="bonus-content"></div>
@@ -796,19 +472,18 @@
 
       <div class="timer-delay-text" id="modal-delay-timer">Next Level Unlocks in: 10s</div>
 
-      <!-- ACTION BUTTONS -->
       <button class="btn-main-action" id="btn-next-level" disabled style="opacity: 0.5;">NEXT LEVEL ➔</button>
-      <button class="btn-secondary-action" id="btn-skip-wait-ad">🎬 SKIP 10s WAIT FOR NEXT 10 LEVELS (WATCH 30s AD)</button>
+      <button class="btn-secondary-action" id="btn-skip-wait-ad">🎬 SKIP WAIT TIMER (WATCH AD)</button>
       <button class="btn-secondary-action" id="btn-modal-retry" style="display:none; background:var(--accent-red); color:#fff; border:none;">🔄 RETRY THIS LEVEL (10 Coins)</button>
       <button class="btn-secondary-action" id="btn-modal-home" style="margin-top:8px;">🏠 HOME MENU</button>
     </div>
   </div>
 
-  <!-- PURCHASE CONFIRMATION MODAL -->
+  <!-- CONFIRMATION MODAL -->
   <div class="modal-backdrop" id="modal-confirm-purchase">
     <div class="modal-card">
       <h3 id="confirm-modal-title" style="color: var(--accent-cyan); font-size: 18px; margin-bottom: 8px;">GET POWER-UP</h3>
-      <p id="confirm-modal-msg" style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">You have 0 items left. Spend 30 Coins to buy and use 1 now?</p>
+      <p id="confirm-modal-msg" style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">Spend coins to unlock and use powerup?</p>
       <div style="display: flex; gap: 10px;">
         <button class="btn-secondary-action" id="btn-confirm-cancel" style="flex: 1; margin:0;">CANCEL</button>
         <button class="btn-main-action" id="btn-confirm-buy" style="flex: 1; margin:0;">BUY & USE</button>
@@ -818,19 +493,14 @@
 
   <div class="admob-banner-stub">[AdMob Adaptive Bottom Banner Placeholder]</div>
 
-  <!-- GAME LOGIC ENGINE V4 PRO -->
   <script>
     const SERVER_API_URL = "https://khotrithucso.io.vn/apps/0004/index.php";
 
-    // ADMOB TEST CONFIGURATION
     const ADMOB_TEST = {
       appId: "ca-app-pub-3940256099942544~3347511713",
-      banner: "ca-app-pub-3940256099942544/6300978111",
-      interstitial: "ca-app-pub-3940256099942544/1033173712",
       rewarded: "ca-app-pub-3940256099942544/5224354917"
     };
 
-    // 1,000 SENTENCES ARRAY
     const BASE_SENTENCES = [
       "Hello how are you today", "What is your name", "Nice to meet you", "Where are you from",
       "I love learning English", "Have a wonderful day", "See you again soon", "What time is it now",
@@ -843,11 +513,9 @@
     ];
 
     const RAW_SENTENCES = [];
-    for (let i = 0; i < 1000; i++) {
-      RAW_SENTENCES.push(BASE_SENTENCES[i % BASE_SENTENCES.length]);
-    }
+    for (let i = 0; i < 1000; i++) RAW_SENTENCES.push(BASE_SENTENCES[i % BASE_SENTENCES.length]);
 
-    // MULTI-TIER TTS & VOICE ENGINE
+    // TTS SPEECH ENGINE
     class VoiceEngine {
       constructor() {
         this.voices = [];
@@ -876,42 +544,10 @@
         return this.currentGender;
       }
 
-      getVoiceForGender(gender) {
-        if (!this.voices.length) this.loadVoices();
-        const isMale = (gender === 'male');
-        const maleNames = ['david', 'george', 'james', 'mark', 'brian', 'alex', 'daniel', 'guy'];
-        const femaleNames = ['zira', 'samantha', 'victoria', 'karen', 'fiona', 'salli', 'aria'];
-
-        const targetList = isMale ? maleNames : femaleNames;
-        const matched = this.voices.find(v => {
-          const nameLower = v.name.toLowerCase();
-          return targetList.some(n => nameLower.includes(n));
-        });
-
-        if (matched) return matched;
-        return this.voices.find(v => v.lang === 'en-US' || v.lang === 'en-GB') || this.voices[0] || null;
-      }
-
-      async speak(text) {
+      speak(text) {
         if (!text) return;
         text = text.trim();
-
-        if ('speechSynthesis' in window) {
-          window.speechSynthesis.resume();
-        }
-
-        if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.TextToSpeech) {
-          try {
-            await window.Capacitor.Plugins.TextToSpeech.speak({
-              text: text,
-              lang: 'en-US',
-              rate: 1.0,
-              pitch: this.currentGender === 'male' ? 0.9 : 1.1,
-              volume: 1.0
-            });
-            return;
-          } catch (e) {}
-        }
+        if ('speechSynthesis' in window) window.speechSynthesis.resume();
 
         if ('speechSynthesis' in window) {
           try {
@@ -919,17 +555,18 @@
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.lang = 'en-US';
             utterance.rate = 1.0;
+            const isMale = (this.currentGender === 'male');
+            const targetList = isMale ? ['david', 'george', 'brian', 'alex'] : ['zira', 'samantha', 'victoria', 'salli'];
+            const voice = this.voices.find(v => targetList.some(n => v.name.toLowerCase().includes(n)));
 
-            const voice = this.getVoiceForGender(this.currentGender);
             if (voice) utterance.voice = voice;
-            else utterance.pitch = this.currentGender === 'male' ? 0.8 : 1.15;
+            else utterance.pitch = isMale ? 0.8 : 1.15;
 
             utterance.onerror = () => this.playStreamFallback(text);
             window.speechSynthesis.speak(utterance);
             return;
           } catch (e) {}
         }
-
         this.playStreamFallback(text);
       }
 
@@ -937,50 +574,45 @@
         try {
           const voiceName = this.currentGender === 'male' ? 'Brian' : 'Salli';
           const streamUrl = `https://api.streamelements.com/kappa/v2/speech?voice=${voiceName}&text=${encodeURIComponent(text)}`;
-          const audio = new Audio(streamUrl);
-          audio.play().catch(() => {
-            const backupUrl = `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(text)}&type=2`;
-            new Audio(backupUrl).play().catch(() => {});
-          });
+          new Audio(streamUrl).play().catch(() => {});
         } catch (err) {}
       }
     }
     const voiceEngine = new VoiceEngine();
 
-    // SOUND EFFECTS
+    // SOUND FX & HAPTICS
     class SoundFX {
       constructor() { this.ctx = null; }
-      init() {
-        if (!this.ctx) {
-          this.ctx = new (window.AudioContext || window.webkitAudioContext)();
-        }
-      }
+      init() { if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); }
       playTone(freq, type, duration) {
         this.init();
         if (!this.ctx) return;
         const osc = this.ctx.createOscillator();
         const gain = this.ctx.createGain();
-        osc.type = type;
-        osc.frequency.value = freq;
+        osc.type = type; osc.frequency.value = freq;
         gain.gain.setValueAtTime(0.15, this.ctx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + duration);
-        osc.connect(gain);
-        gain.connect(this.ctx.destination);
-        osc.start();
-        osc.stop(this.ctx.currentTime + duration);
+        osc.connect(gain); gain.connect(this.ctx.destination);
+        osc.start(); osc.stop(this.ctx.currentTime + duration);
       }
-      tap() { this.playTone(600, 'sine', 0.08); }
+      tap() { this.playTone(600, 'sine', 0.08); triggerHaptic(10); }
       correct() {
         this.playTone(523.25, 'sine', 0.1);
         setTimeout(() => this.playTone(659.25, 'sine', 0.1), 100);
         setTimeout(() => this.playTone(783.99, 'sine', 0.2), 200);
+        triggerHaptic([30, 50, 30]);
       }
       wrong() {
         this.playTone(200, 'sawtooth', 0.15);
         setTimeout(() => this.playTone(150, 'sawtooth', 0.2), 150);
+        triggerHaptic([100, 30, 100]);
       }
     }
     const sfx = new SoundFX();
+
+    function triggerHaptic(pattern) {
+      if ('vibrate' in navigator) navigator.vibrate(pattern);
+    }
 
     // GAME STATE
     const State = {
@@ -991,6 +623,8 @@
       unlockedLevel: parseInt(localStorage.getItem('fe_unlocked_level') || '1'),
       completedSentences: parseInt(localStorage.getItem('fe_completed_sentences') || '0'),
       levelStars: JSON.parse(localStorage.getItem('fe_level_stars') || '{}'),
+      mistakesBank: JSON.parse(localStorage.getItem('fe_mistakes_bank') || '[]'),
+      streak: parseInt(localStorage.getItem('fe_win_streak') || '0'),
       skipWaitPasses: parseInt(localStorage.getItem('fe_skip_passes') || '0'),
       inventory: {
         time: parseInt(localStorage.getItem('fe_inv_time') || '0'),
@@ -1008,16 +642,12 @@
       delayTimerInterval: null,
       delaySec: 10,
       mapPage: 0,
-      currentLbTab: 'stars',
-      cachedLeaderboardData: null,
       pendingPurchaseType: null
     };
 
     const THEME_PRESETS = ['theme-sky', 'theme-mint', 'theme-sunset', 'theme-purple', 'theme-rose'];
-
     localStorage.setItem('fe_uid', State.uid);
 
-    // AUDIO CONTEXT UNLOCKER
     let isAudioUnlocked = false;
     function unlockAudioEngine() {
       if (!isAudioUnlocked) {
@@ -1029,7 +659,6 @@
     document.addEventListener('touchstart', unlockAudioEngine, { once: true });
     document.addEventListener('click', unlockAudioEngine, { once: true });
 
-    // INITIALIZATION
     document.addEventListener('DOMContentLoaded', () => {
       applyCurrentTheme();
       updateHUD();
@@ -1040,25 +669,13 @@
       document.getElementById('player-name-input').addEventListener('change', (e) => {
         State.playerName = e.target.value.trim() || 'Learner';
         localStorage.setItem('fe_player_name', State.playerName);
-        syncScoreToServer();
-      });
-
-      document.getElementById('player-email-input').addEventListener('change', (e) => {
-        State.playerEmail = e.target.value.trim();
-        localStorage.setItem('fe_player_email', State.playerEmail);
-        syncScoreToServer();
       });
 
       setupEventListeners();
       renderMapGrid();
-      syncOfflineLogs();
-      fetchOnlineLeaderboard();
     });
 
-    function applyCurrentTheme() {
-      document.body.className = THEME_PRESETS[State.currentThemeIndex];
-    }
-
+    function applyCurrentTheme() { document.body.className = THEME_PRESETS[State.currentThemeIndex]; }
     function switchThemePreset() {
       State.currentThemeIndex = (State.currentThemeIndex + 1) % THEME_PRESETS.length;
       localStorage.setItem('fe_theme_idx', State.currentThemeIndex);
@@ -1069,6 +686,7 @@
     function updateHUD() {
       document.getElementById('hud-coins-val').innerText = State.coins;
       document.getElementById('hud-stars-val').innerText = getTotalStars();
+      document.getElementById('hud-streak-val').innerText = State.streak;
 
       document.getElementById('powerup-count-time').innerText = `(x${State.inventory.time})`;
       document.getElementById('powerup-count-hint').innerText = `(x${State.inventory.hint})`;
@@ -1078,12 +696,13 @@
       document.getElementById('shop-stock-hint').innerText = State.inventory.hint;
       document.getElementById('shop-stock-slow').innerText = State.inventory.slow;
       document.getElementById('shop-stock-skip').innerText = State.skipWaitPasses;
+      document.getElementById('review-count-badge').innerText = State.mistakesBank.length;
 
       localStorage.setItem('fe_coins', State.coins);
       localStorage.setItem('fe_unlocked_level', State.unlockedLevel);
-      localStorage.setItem('fe_completed_sentences', State.completedSentences);
       localStorage.setItem('fe_level_stars', JSON.stringify(State.levelStars));
-      localStorage.setItem('fe_skip_passes', State.skipWaitPasses);
+      localStorage.setItem('fe_mistakes_bank', JSON.stringify(State.mistakesBank));
+      localStorage.setItem('fe_win_streak', State.streak);
       localStorage.setItem('fe_inv_time', State.inventory.time);
       localStorage.setItem('fe_inv_hint', State.inventory.hint);
       localStorage.setItem('fe_inv_slow', State.inventory.slow);
@@ -1119,9 +738,7 @@
       document.getElementById('sidebar-overlay').classList.remove('active');
 
       if (screenId === 'screen-map') renderMapGrid();
-      if (screenId === 'screen-leaderboard') fetchOnlineLeaderboard();
-
-      pushLog('navigation', { screen: screenId });
+      if (screenId === 'screen-review') renderMistakeReviewBank();
     }
 
     // GAMEPLAY
@@ -1133,7 +750,6 @@
       State.timerSec = 30;
       State.timeElapsed = 0;
 
-      // Auto cycle dynamic themes per level
       State.currentThemeIndex = (levelNum - 1) % THEME_PRESETS.length;
       applyCurrentTheme();
 
@@ -1143,7 +759,7 @@
       document.getElementById('game-level-title').innerText = `LEVEL ${String(levelNum).padStart(3, '0')}`;
       navigateTo('screen-game');
       renderWordChips();
-      
+
       setTimeout(() => voiceEngine.speak(State.targetSentence), 300);
 
       clearInterval(State.timerInterval);
@@ -1161,28 +777,26 @@
         if (State.timerSec <= 0) {
           clearInterval(State.timerInterval);
           sfx.wrong();
+          addToMistakesBank(levelNum, State.targetSentence);
+          State.streak = 0;
+          updateHUD();
           showResultModal(false, 0, 0);
-          pushLog('level_failed', { level: levelNum, reason: 'timeout' });
         }
       }, 1000);
-
-      pushLog('level_start', { level: levelNum });
     }
 
     function renderWordChips() {
       const dropZone = document.getElementById('drop-zone-container');
       const wordPool = document.getElementById('word-pool-container');
 
-      dropZone.innerHTML = '';
-      wordPool.innerHTML = '';
+      dropZone.innerHTML = ''; wordPool.innerHTML = '';
 
       if (State.selectedWords.length === 0) {
         dropZone.innerHTML = '<span style="font-size: 12px; color: var(--text-muted);">Tap words below to assemble sentence...</span>';
       } else {
         State.selectedWords.forEach((word, idx) => {
           const chip = document.createElement('div');
-          chip.className = 'word-chip';
-          chip.innerText = word;
+          chip.className = 'word-chip'; chip.innerText = word;
           chip.onclick = () => {
             sfx.tap();
             State.shuffledWords.push(State.selectedWords.splice(idx, 1)[0]);
@@ -1194,8 +808,7 @@
 
       State.shuffledWords.forEach((word, idx) => {
         const chip = document.createElement('div');
-        chip.className = 'word-chip';
-        chip.innerText = word;
+        chip.className = 'word-chip'; chip.innerText = word;
         chip.onclick = () => {
           sfx.tap();
           State.selectedWords.push(State.shuffledWords.splice(idx, 1)[0]);
@@ -1218,6 +831,9 @@
         if (State.timeElapsed <= 10) stars = 3;
         else if (State.timeElapsed <= 20) stars = 2;
 
+        if (stars === 3) launchConfetti();
+
+        State.streak++;
         const oldStars = State.levelStars[State.currentLevel] || 0;
         let earnedCoins = 0;
 
@@ -1228,15 +844,15 @@
           State.coins += earnedCoins;
         }
 
+        removeFromMistakesBank(State.currentLevel);
+
         if (State.currentLevel === State.unlockedLevel) {
           State.unlockedLevel = Math.min(1000, State.unlockedLevel + 1);
           State.completedSentences++;
         }
 
         updateHUD();
-        syncScoreToServer();
         showResultModal(true, stars, earnedCoins);
-        pushLog('level_success', { level: State.currentLevel, time: State.timeElapsed, stars: stars });
       } else {
         sfx.wrong();
         const dropBox = document.getElementById('drop-zone-container');
@@ -1245,9 +861,39 @@
       }
     }
 
-    // POWER-UP INVENTORY
-    const POWERUP_PRICES = { time: 30, hint: 40, slow: 50, skip_pass: 60 };
-    const POWERUP_NAMES = { time: "Extra Time (+10s)", hint: "Smart Hint", slow: "Slow Audio Assist", skip_pass: "Skip Wait Pass" };
+    // MISTAKE BANK
+    function addToMistakesBank(level, sentence) {
+      if (!State.mistakesBank.some(m => m.level === level)) {
+        State.mistakesBank.push({ level, sentence });
+        updateHUD();
+      }
+    }
+
+    function removeFromMistakesBank(level) {
+      State.mistakesBank = State.mistakesBank.filter(m => m.level !== level);
+      updateHUD();
+    }
+
+    function renderMistakeReviewBank() {
+      const container = document.getElementById('review-list-container');
+      if (!State.mistakesBank.length) {
+        container.innerHTML = '<div style="padding:20px; text-align:center; color:var(--text-muted); font-weight:700;">🎉 No mistakes recorded! Great job.</div>';
+        return;
+      }
+      container.innerHTML = State.mistakesBank.map(m => `
+        <div class="shop-item-card">
+          <div>
+            <h4 style="color:var(--accent-cyan); font-size:13px;">LEVEL ${String(m.level).padStart(3, '0')}</h4>
+            <p style="font-size:12px; font-weight:700;">"${m.sentence}"</p>
+          </div>
+          <button class="btn-main-action" style="width:auto; margin:0; padding:6px 12px; font-size:12px;" onclick="startLevel(${m.level})">RETRY</button>
+        </div>
+      `).join('');
+    }
+
+    // POWER-UPS
+    const POWERUP_PRICES = { time: 30, hint: 40, slow: 50 };
+    const POWERUP_NAMES = { time: "Extra Time (+10s)", hint: "Smart Hint", slow: "Slow Audio Assist" };
 
     function usePowerup(type) {
       if (State.inventory[type] > 0) {
@@ -1256,11 +902,9 @@
         applyPowerupEffect(type);
       } else {
         const price = POWERUP_PRICES[type];
-        const name = POWERUP_NAMES[type];
         State.pendingPurchaseType = type;
-
-        document.getElementById('confirm-modal-title').innerText = `USE ${name.toUpperCase()}?`;
-        document.getElementById('confirm-modal-msg').innerText = `You have 0 ${name} items remaining. Spend ${price} Coins to buy and use 1 right now?`;
+        document.getElementById('confirm-modal-title').innerText = `USE ${POWERUP_NAMES[type].toUpperCase()}?`;
+        document.getElementById('confirm-modal-msg').innerText = `Spend ${price} Coins to buy and use 1 now?`;
         document.getElementById('modal-confirm-purchase').classList.add('active');
       }
     }
@@ -1276,7 +920,7 @@
         updateHUD();
         applyPowerupEffect(type);
       } else {
-        alert(`Not enough coins! You need ${price} Coins. Watch an ad to get 100 free coins.`);
+        alert(`Not enough coins! You need ${price} Coins.`);
       }
       State.pendingPurchaseType = null;
     }
@@ -1290,7 +934,6 @@
       } else if (type === 'slow') {
         voiceEngine.speak(State.targetSentence);
       }
-      pushLog('use_powerup', { type: type });
     }
 
     function autoPlaceNextHint() {
@@ -1307,24 +950,15 @@
     }
 
     function buyShopItem(type, cost) {
-      if (State.coins < cost) {
-        alert('Not enough coins! Play levels or watch video ads to earn more coins.');
-        return;
-      }
+      if (State.coins < cost) { alert('Not enough coins!'); return; }
       State.coins -= cost;
-
-      if (type === 'skip_pass') {
-        State.skipWaitPasses += 10;
-      } else {
-        State.inventory[type]++;
-      }
-
+      if (type === 'skip_pass') State.skipWaitPasses += 10;
+      else State.inventory[type]++;
       updateHUD();
-      alert(`🎉 Successfully purchased ${POWERUP_NAMES[type]}!`);
-      pushLog('buy_shop_item', { type: type, cost: cost });
+      alert(`🎉 Purchased ${POWERUP_NAMES[type] || 'Item'}!`);
     }
 
-    // MODAL & BONUS MINIGAME TRIGGER (WHEN 3 STARS)
+    // MODAL
     function showResultModal(isWin, stars, coins) {
       const modal = document.getElementById('modal-result');
       const title = document.getElementById('modal-result-title');
@@ -1340,15 +974,11 @@
       clearInterval(State.delayTimerInterval);
 
       if (isWin) {
-        title.innerText = 'STAGE COMPLETED!';
-        title.style.color = 'var(--accent-green)';
+        title.innerText = 'STAGE COMPLETED!'; title.style.color = 'var(--accent-green)';
         starsDisp.innerText = '⭐'.repeat(stars);
-        msg.innerText = coins > 0 ? `Awesome! Earned +${coins} Coins!` : `Already completed with 3 Stars.`;
-        btnRetry.style.display = 'none';
-        btnNext.style.display = 'block';
-        btnSkipWait.style.display = 'block';
+        msg.innerText = coins > 0 ? `Awesome! Earned +${coins} Coins!` : `Already completed!`;
+        btnRetry.style.display = 'none'; btnNext.style.display = 'block'; btnSkipWait.style.display = 'block';
 
-        // Trigger Bonus Minigame if 3 Stars
         if (stars === 3) {
           bonusBox.style.display = 'block';
           renderRandomBonusMinigame();
@@ -1357,17 +987,13 @@
         }
 
         if (State.skipWaitPasses > 0) {
-          State.skipWaitPasses--;
-          updateHUD();
-          btnNext.disabled = false;
-          btnNext.style.opacity = '1';
+          State.skipWaitPasses--; updateHUD();
+          btnNext.disabled = false; btnNext.style.opacity = '1';
           delayTxt.innerText = `Skip Wait Pass Active! (${State.skipWaitPasses} passes left)`;
           return;
         }
 
-        State.delaySec = 10;
-        btnNext.disabled = true;
-        btnNext.style.opacity = '0.5';
+        State.delaySec = 10; btnNext.disabled = true; btnNext.style.opacity = '0.5';
         delayTxt.innerText = `Next Level Unlocks in: ${State.delaySec}s`;
 
         State.delayTimerInterval = setInterval(() => {
@@ -1375,170 +1001,137 @@
           delayTxt.innerText = `Next Level Unlocks in: ${State.delaySec}s`;
           if (State.delaySec <= 0) {
             clearInterval(State.delayTimerInterval);
-            btnNext.disabled = false;
-            btnNext.style.opacity = '1';
+            btnNext.disabled = false; btnNext.style.opacity = '1';
             delayTxt.innerText = 'Ready for Next Level!';
           }
         }, 1000);
       } else {
-        title.innerText = 'TIME OUT / FAILED!';
-        title.style.color = 'var(--accent-red)';
-        starsDisp.innerText = '❌❌❌';
-        msg.innerText = 'Out of time! Choose an option to continue:';
-        delayTxt.innerText = '';
-        bonusBox.style.display = 'none';
-        btnNext.style.display = 'none';
-        btnSkipWait.style.display = 'none';
-        btnRetry.style.display = 'block';
+        title.innerText = 'TIME OUT / FAILED!'; title.style.color = 'var(--accent-red)';
+        starsDisp.innerText = '❌❌❌'; msg.innerText = 'Sentence added to Mistake Bank!';
+        delayTxt.innerText = ''; bonusBox.style.display = 'none';
+        btnNext.style.display = 'none'; btnSkipWait.style.display = 'none'; btnRetry.style.display = 'block';
       }
     }
 
-    // BONUS MINIGAMES ENGINE (3 CHESTS / LUCKY WHEEL / 3 CARDS)
+    // BONUS MINIGAMES
     function renderRandomBonusMinigame() {
       const container = document.getElementById('bonus-content');
-      const gameType = Math.floor(Math.random() * 3); // 0: Chests, 1: Wheel, 2: Cards
-
-      if (gameType === 0) {
-        // 3 CHESTS PICK
-        document.getElementById('bonus-title').innerText = "📦 PICK 1 CHEST FOR BONUS REWARD!";
-        container.innerHTML = `
-          <div class="chests-container">
-            <div class="chest-item" onclick="openChestReward(this)">🎁</div>
-            <div class="chest-item" onclick="openChestReward(this)">🎁</div>
-            <div class="chest-item" onclick="openChestReward(this)">🎁</div>
-          </div>
-        `;
-      } else if (gameType === 1) {
-        // LUCKY WHEEL
-        document.getElementById('bonus-title').innerText = "☸️ SPIN THE LUCKY WHEEL!";
-        container.innerHTML = `
-          <canvas id="wheel-canvas" width="160" height="160"></canvas>
-          <button class="btn-main-action" style="padding:6px 12px; font-size:12px; margin:6px auto 0 auto; width:auto;" onclick="spinLuckyWheel()">SPIN NOW!</button>
-        `;
-        drawWheelCanvas();
-      } else {
-        // 3 CARDS PICK
-        document.getElementById('bonus-title').innerText = "🃏 PICK 1 LUCKY CARD!";
-        container.innerHTML = `
-          <div class="cards-container">
-            <div class="card-item" onclick="pickCardReward(this)">❓</div>
-            <div class="card-item" onclick="pickCardReward(this)">❓</div>
-            <div class="card-item" onclick="pickCardReward(this)">❓</div>
-          </div>
-        `;
-      }
+      container.innerHTML = `
+        <div class="chests-container">
+          <div class="chest-item" onclick="openChestReward(this)">🎁</div>
+          <div class="chest-item" onclick="openChestReward(this)">🎁</div>
+          <div class="chest-item" onclick="openChestReward(this)">🎁</div>
+        </div>
+      `;
     }
 
     function openChestReward(elem) {
       const rewards = [
         { name: "+20 Coins!", type: "coin", val: 20 },
         { name: "+1 Hint!", type: "hint", val: 1 },
-        { name: "+1 Extra Time!", type: "time", val: 1 },
-        { name: "Better Luck Next Time!", type: "none", val: 0 }
+        { name: "+1 Extra Time!", type: "time", val: 1 }
       ];
       const win = rewards[Math.floor(Math.random() * rewards.length)];
-      elem.innerText = win.type === "none" ? "💨" : "🎉";
-      grantBonusReward(win);
-    }
-
-    function pickCardReward(elem) {
-      if (elem.classList.contains('flipped')) return;
-      const rewards = [
-        { name: "+30 Coins!", type: "coin", val: 30 },
-        { name: "+1 Slow Audio!", type: "slow", val: 1 },
-        { name: "+15 Coins!", type: "coin", val: 15 },
-        { name: "Empty Card!", type: "none", val: 0 }
-      ];
-      const win = rewards[Math.floor(Math.random() * rewards.length)];
-      elem.classList.add('flipped');
-      elem.innerText = win.type === "none" ? "❌" : "🎁";
-      grantBonusReward(win);
-    }
-
-    function drawWheelCanvas() {
-      const canvas = document.getElementById('wheel-canvas');
-      if (!canvas) return;
-      const ctx = canvas.getContext('2d');
-      const colors = ['#0284c7', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
-      const slices = 6;
-      const arc = (Math.PI * 2) / slices;
-
-      for (let i = 0; i < slices; i++) {
-        ctx.beginPath();
-        ctx.fillStyle = colors[i];
-        ctx.moveTo(80, 80);
-        ctx.arc(80, 80, 75, i * arc, (i + 1) * arc);
-        ctx.fill();
-      }
-    }
-
-    function spinLuckyWheel() {
-      const win = { name: "+25 Bonus Coins!", type: "coin", val: 25 };
-      grantBonusReward(win);
-    }
-
-    function grantBonusReward(reward) {
+      elem.innerText = "🎉";
       sfx.correct();
-      if (reward.type === 'coin') State.coins += reward.val;
-      else if (reward.type === 'time') State.inventory.time += reward.val;
-      else if (reward.type === 'hint') State.inventory.hint += reward.val;
-      else if (reward.type === 'slow') State.inventory.slow += reward.val;
-
+      if (win.type === 'coin') State.coins += win.val;
+      else State.inventory[win.type] += win.val;
       updateHUD();
-      alert(`🎉 Bonus Reward: ${reward.name}`);
+      alert(`🎉 Bonus Reward: ${win.name}`);
       document.getElementById('bonus-minigame-wrapper').style.display = 'none';
     }
 
-    // ROBUST ADMOB TIMEOUT FALLBACK AD WATCHER
+    // ROBUST ADMOB NATIVE EVENT LISTENERS & SAFETY BRIDGE (SOLVES THE 5s/6s FREEZE)
     function watchAdForCoins() {
-      showRewardedAdWithTimeout(() => {
+      showRewardedAdWithFailSafe(() => {
         State.coins += 100;
         updateHUD();
-        alert('🎉 Watched 30s Video Ad! +100 Free Coins Granted.');
-        pushLog('watch_ad_coins', { amount: 100 });
+        alert('🎉 Watched Video Ad! +100 Free Coins Granted.');
       });
     }
 
-    function showRewardedAdWithTimeout(onRewardSuccess) {
+    function showRewardedAdWithFailSafe(onRewardSuccess) {
       let isHandled = false;
-      const timer = setTimeout(() => {
+
+      // HARD TIMEOUT BRIDGE: If native AdMob hangs at 5s/6s for more than 7 seconds, force dismiss!
+      const safetyTimeout = setTimeout(() => {
         if (!isHandled) {
           isHandled = true;
-          alert('🎬 [AdMob Simulated Test Ad]\nReward Granted!');
           if (onRewardSuccess) onRewardSuccess();
         }
-      }, 8000); // 8-second safety fallback timeout
+      }, 7000);
 
       if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.AdMob) {
-        const { AdMob } = window.Capacitor.Plugins;
+        const { AdMob, RewardAdPluginEvents } = window.Capacitor.Plugins;
+
+        // Register listeners BEFORE trigger
+        const rewardSub = AdMob.addListener(RewardAdPluginEvents.Rewarded, () => {
+          clearTimeout(safetyTimeout);
+          if (!isHandled) { isHandled = true; if (onRewardSuccess) onRewardSuccess(); }
+        });
+
+        const dismissSub = AdMob.addListener(RewardAdPluginEvents.Dismissed, () => {
+          clearTimeout(safetyTimeout);
+          if (!isHandled) { isHandled = true; if (onRewardSuccess) onRewardSuccess(); }
+          if (rewardSub) rewardSub.remove();
+          if (dismissSub) dismissSub.remove();
+        });
+
+        const failSub = AdMob.addListener(RewardAdPluginEvents.FailedToShow, () => {
+          clearTimeout(safetyTimeout);
+          if (!isHandled) { isHandled = true; if (onRewardSuccess) onRewardSuccess(); }
+          if (failSub) failSub.remove();
+        });
+
         AdMob.prepareRewardVideoAd({ adId: ADMOB_TEST.rewarded })
           .then(() => AdMob.showRewardVideoAd())
-          .then(() => {
-            clearTimeout(timer);
-            if (!isHandled) {
-              isHandled = true;
-              if (onRewardSuccess) onRewardSuccess();
-            }
-          })
           .catch(() => {
-            clearTimeout(timer);
-            if (!isHandled) {
-              isHandled = true;
-              alert('🎬 [AdMob Simulated Test Ad]\nReward Granted!');
-              if (onRewardSuccess) onRewardSuccess();
-            }
+            clearTimeout(safetyTimeout);
+            if (!isHandled) { isHandled = true; if (onRewardSuccess) onRewardSuccess(); }
           });
       } else {
-        clearTimeout(timer);
+        clearTimeout(safetyTimeout);
         if (!isHandled) {
           isHandled = true;
-          alert('🎬 [AdMob Simulated Test Ad]\nReward Granted!');
           if (onRewardSuccess) onRewardSuccess();
         }
       }
     }
 
-    // MAP & LEADERBOARD RENDERING
+    // CONFETTI EFFECT
+    function launchConfetti() {
+      const canvas = document.getElementById('canvas-confetti');
+      const ctx = canvas.getContext('2d');
+      canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+      const particles = [];
+      const colors = ['#10b981', '#0284c7', '#f59e0b', '#ef4444', '#8b5cf6'];
+
+      for (let i = 0; i < 50; i++) {
+        particles.push({
+          x: canvas.width / 2, y: canvas.height / 2,
+          vx: (Math.random() - 0.5) * 12, vy: (Math.random() - 0.5) * 12 - 4,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          size: Math.random() * 6 + 4, opacity: 1
+        });
+      }
+
+      let frame = 0;
+      function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach(p => {
+          p.x += p.vx; p.y += p.vy; p.vy += 0.2; p.opacity -= 0.02;
+          ctx.globalAlpha = Math.max(0, p.opacity);
+          ctx.fillStyle = p.color;
+          ctx.fillRect(p.x, p.y, p.size, p.size);
+        });
+        frame++;
+        if (frame < 50) requestAnimationFrame(animate);
+        else ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+      animate();
+    }
+
+    // MAP
     function renderMapGrid() {
       const container = document.getElementById('map-grid-container');
       container.innerHTML = '';
@@ -1554,183 +1147,42 @@
         const stars = State.levelStars[i] || 0;
 
         node.className = `level-node ${isLocked ? 'locked' : ''} ${i === State.unlockedLevel ? 'active-stage' : ''}`;
-        node.innerHTML = `
-          <span>${isLocked ? '🔒' : i}</span>
-          ${stars > 0 ? `<div class="level-stars-mini">${'⭐'.repeat(stars)}</div>` : ''}
-        `;
+        node.innerHTML = `<span>${isLocked ? '🔒' : i}</span>${stars > 0 ? `<div class="level-stars-mini">${'⭐'.repeat(stars)}</div>` : ''}`;
 
-        if (!isLocked) {
-          node.onclick = () => { sfx.tap(); startLevel(i); };
-        }
+        if (!isLocked) node.onclick = () => { sfx.tap(); startLevel(i); };
         container.appendChild(node);
       }
     }
 
-    function fetchOnlineLeaderboard() {
-      fetch(`${SERVER_API_URL}?action=get_leaderboard`)
-        .then(res => res.json())
-        .then(data => {
-          if (data.status === 'success') {
-            State.cachedLeaderboardData = data;
-            renderLeaderboardCategory();
-          }
-        })
-        .catch(() => renderOfflineMockLeaderboard());
-    }
-
-    function switchLeaderboardCategory(cat) {
-      State.currentLbTab = cat;
-      document.querySelectorAll('.lb-tab-btn').forEach(b => b.classList.remove('active'));
-      document.getElementById(`lb-tab-${cat}`).classList.add('active');
-      renderLeaderboardCategory();
-    }
-
-    function renderLeaderboardCategory() {
-      const container = document.getElementById('leaderboard-container');
-      if (!State.cachedLeaderboardData) {
-        renderOfflineMockLeaderboard();
-        return;
-      }
-
-      const keyMap = { stars: 'top_stars', sentences: 'top_sentences', coins: 'top_coins' };
-      const list = State.cachedLeaderboardData[keyMap[State.currentLbTab]] || [];
-
-      if (list.length === 0) {
-        container.innerHTML = '<div style="padding:16px; text-align:center; color:var(--text-muted);">No records yet. Be the first!</div>';
-        return;
-      }
-
-      container.innerHTML = list.map((u, idx) => `
-        <div class="leaderboard-row">
-          <div style="display:flex; align-items:center; gap:8px;">
-            <span class="rank-num">#${idx + 1}</span>
-            <span style="font-weight:700;">${escapeHtml(u.name)}</span>
-          </div>
-          <div>
-            ${State.currentLbTab === 'stars' ? `<span style="color:#d97706; font-weight:700;">⭐ ${u.stars}</span>` : ''}
-            ${State.currentLbTab === 'sentences' ? `<span style="color:var(--accent-cyan); font-weight:700;">📝 ${u.sentences}</span>` : ''}
-            ${State.currentLbTab === 'coins' ? `<span style="color:var(--accent-yellow); font-weight:700;">🪙 ${u.coins}</span>` : ''}
-          </div>
-        </div>
-      `).join('');
-    }
-
-    function renderOfflineMockLeaderboard() {
-      const container = document.getElementById('leaderboard-container');
-      container.innerHTML = `
-        <div class="leaderboard-row">
-          <div style="display:flex; align-items:center; gap:8px;">
-            <span class="rank-num">#1</span>
-            <span style="font-weight:700;">${escapeHtml(State.playerName)} (You)</span>
-          </div>
-          <div>
-            <span style="color:#d97706; font-weight:700;">⭐ ${getTotalStars()}</span>
-          </div>
-        </div>
-      `;
-    }
-
-    function escapeHtml(str) {
-      return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-    }
-
-    // ONLINE SYNC & TELEMETRY
-    function syncScoreToServer() {
-      const payload = {
-        uid: State.uid,
-        name: State.playerName,
-        email: State.playerEmail,
-        stars: getTotalStars(),
-        coins: State.coins,
-        sentences: State.completedSentences
-      };
-
-      fetch(`${SERVER_API_URL}?action=submit_score`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      }).catch(() => {});
-    }
-
-    function pushLog(event, details = {}) {
-      const logItem = {
-        uid: State.uid,
-        name: State.playerName,
-        email: State.playerEmail,
-        event: event,
-        details: details,
-        client_time: new Date().toISOString()
-      };
-
-      let queue = JSON.parse(localStorage.getItem('fe_log_queue') || '[]');
-      queue.push(logItem);
-      localStorage.setItem('fe_log_queue', JSON.stringify(queue));
-
-      syncOfflineLogs();
-    }
-
-    function syncOfflineLogs() {
-      let queue = JSON.parse(localStorage.getItem('fe_log_queue') || '[]');
-      if (queue.length === 0) return;
-
-      fetch(`${SERVER_API_URL}?action=log`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(queue)
-      })
-      .then(res => res.json())
-      .then(data => {
-        if (data.status === 'success') {
-          localStorage.setItem('fe_log_queue', '[]');
-        }
-      })
-      .catch(() => {});
-    }
-
     function resetGameProgress() {
       if (confirm('Are you sure you want to reset all game progress?')) {
-        localStorage.clear();
-        location.reload();
+        localStorage.clear(); location.reload();
       }
     }
 
     // EVENT LISTENERS
     function setupEventListeners() {
-      document.getElementById('btn-open-sidebar').onclick = () => {
-        document.getElementById('sidebar-overlay').classList.add('active');
-      };
-      document.getElementById('btn-close-sidebar').onclick = () => {
-        document.getElementById('sidebar-overlay').classList.remove('active');
-      };
+      document.getElementById('btn-open-sidebar').onclick = () => document.getElementById('sidebar-overlay').classList.add('active');
+      document.getElementById('btn-close-sidebar').onclick = () => document.getElementById('sidebar-overlay').classList.remove('active');
 
       document.getElementById('btn-quick-play').onclick = () => startLevel(State.unlockedLevel);
       document.getElementById('btn-play-audio').onclick = () => voiceEngine.speak(State.targetSentence);
-      
+
       document.getElementById('btn-game-retry').onclick = () => {
-        if (State.coins >= 10) {
-          State.coins -= 10;
-          updateHUD();
-          startLevel(State.currentLevel);
-        } else {
-          alert('Not enough coins to retry! Need 10 Coins.');
-        }
+        if (State.coins >= 10) { State.coins -= 10; updateHUD(); startLevel(State.currentLevel); }
+        else alert('Need 10 Coins to retry!');
       };
 
       document.getElementById('btn-game-clear').onclick = () => {
         sfx.tap();
         State.shuffledWords = [...State.shuffledWords, ...State.selectedWords];
-        State.selectedWords = [];
-        renderWordChips();
+        State.selectedWords = []; renderWordChips();
       };
 
       document.getElementById('btn-game-check').onclick = checkAnswer;
 
-      document.getElementById('btn-map-prev').onclick = () => {
-        if (State.mapPage > 0) { State.mapPage--; renderMapGrid(); }
-      };
-      document.getElementById('btn-map-next').onclick = () => {
-        if (State.mapPage < 19) { State.mapPage++; renderMapGrid(); }
-      };
+      document.getElementById('btn-map-prev').onclick = () => { if (State.mapPage > 0) { State.mapPage--; renderMapGrid(); } };
+      document.getElementById('btn-map-next').onclick = () => { if (State.mapPage < 19) { State.mapPage++; renderMapGrid(); } };
 
       document.getElementById('btn-next-level').onclick = () => {
         document.getElementById('modal-result').classList.remove('active');
@@ -1738,30 +1190,21 @@
       };
 
       document.getElementById('btn-skip-wait-ad').onclick = () => {
-        showRewardedAdWithTimeout(() => {
-          State.skipWaitPasses += 10;
-          updateHUD();
-          clearInterval(State.delayTimerInterval);
-          document.getElementById('btn-next-level').disabled = false;
-          document.getElementById('btn-next-level').style.opacity = '1';
-          document.getElementById('modal-delay-timer').innerText = 'Wait bypassed! Ready for next level.';
-        });
+        watchAdForCoins();
+        State.skipWaitPasses += 10; updateHUD();
+        clearInterval(State.delayTimerInterval);
+        document.getElementById('btn-next-level').disabled = false;
+        document.getElementById('btn-next-level').style.opacity = '1';
+        document.getElementById('modal-delay-timer').innerText = 'Wait timer bypassed!';
       };
 
       document.getElementById('btn-modal-retry').onclick = () => {
-        if (State.coins >= 10) {
-          State.coins -= 10;
-          updateHUD();
-          document.getElementById('modal-result').classList.remove('active');
-          startLevel(State.currentLevel);
-        } else {
-          alert('Not enough coins! Earn coins by watching ads.');
-        }
+        if (State.coins >= 10) { State.coins -= 10; updateHUD(); document.getElementById('modal-result').classList.remove('active'); startLevel(State.currentLevel); }
+        else alert('Not enough coins!');
       };
 
       document.getElementById('btn-modal-home').onclick = () => {
-        clearInterval(State.delayTimerInterval);
-        clearInterval(State.timerInterval);
+        clearInterval(State.delayTimerInterval); clearInterval(State.timerInterval);
         document.getElementById('modal-result').classList.remove('active');
         navigateTo('screen-home');
       };
