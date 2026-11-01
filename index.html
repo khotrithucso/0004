@@ -569,7 +569,8 @@
 
     const ADMOB_TEST = {
       appId: "ca-app-pub-3940256099942544~3347511713",
-      rewarded: "ca-app-pub-3940256099942544/5224354917" // ID Test chuẩn Rewarded Video của Google
+      rewarded: "ca-app-pub-3940256099942544/5224354917", // ID Test chuẩn Rewarded Video của Google
+      banner: "ca-app-pub-3940256099942544/6300978111" // ID Test chuẩn Banner của Google
     };
 
     const BASE_SENTENCES = [
@@ -587,7 +588,7 @@
     for (let i = 0; i < 1000; i++) RAW_SENTENCES.push(BASE_SENTENCES[i % BASE_SENTENCES.length]);
 
     /* ==========================================================================
-       2. MULTI-PLATFORM VOICE ENGINE (NATIVE TTS + WEB FALLBACK)
+       2. MULTI-PLATFORM VOICE ENGINE
        ========================================================================== */
     class VoiceEngine {
       constructor() {
@@ -621,7 +622,6 @@
         if (!text) return;
         text = text.trim();
 
-        // 1. Ưu tiên dùng Capacitor Native TTS (Mượt nhất trên App Android/iOS)
         if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.TextToSpeech) {
             try {
                 await window.Capacitor.Plugins.TextToSpeech.speak({
@@ -638,7 +638,6 @@
             }
         }
 
-        // 2. Fallback Web Speech API (Dùng cho Web/Trình duyệt)
         if ('speechSynthesis' in window) {
           try {
             window.speechSynthesis.cancel();
@@ -829,6 +828,9 @@
       setupEventListeners();
       renderMapGrid();
       syncScoreWithServer();
+
+      // Khởi chạy hệ thống AdMob chung
+      initAdMobBanner();
     });
 
     function applyCurrentTheme() { document.body.className = THEME_PRESETS[State.currentThemeIndex]; }
@@ -1374,8 +1376,36 @@
     }
 
     /* ==========================================================================
-       9. ADMOB REWARDED VIDEO (CHUẨN HÓA VÀ FIX LỖI LISTENER)
+       9. ADMOB TỔNG HỢP (REWARDED + BANNER) - FIX LỖI ENUM JAVASCRIPT
        ========================================================================== */
+    let isAdMobInitialized = false;
+
+    // Khởi tạo chung và bật Banner Ad
+    async function initAdMobBanner() {
+      if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.AdMob) {
+        try {
+          const { AdMob } = window.Capacitor.Plugins;
+          if (!isAdMobInitialized) {
+             await AdMob.initialize({ initializeForTesting: true });
+             isAdMobInitialized = true;
+          }
+          
+          await AdMob.showBanner({
+              adId: ADMOB_TEST.banner,
+              adSize: 'ADAPTIVE_BANNER', // FIX: dùng chuỗi trực tiếp
+              position: 'BOTTOM_CENTER',
+              margin: 0
+          });
+          
+          const stub = document.querySelector('.admob-banner-stub');
+          if (stub) stub.style.display = 'none';
+
+        } catch (e) {
+          console.log("AdMob Banner Init Error:", e);
+        }
+      }
+    }
+
     function watchAdForCoins() {
       showRewardedAdWithFailSafe(() => {
         State.coins += 100;
@@ -1387,38 +1417,50 @@
 
     async function showRewardedAdWithFailSafe(onRewardSuccess) {
       let isRewarded = false;
+      let isFallbackTriggered = false;
+
+      function triggerFallback() {
+        if (!isFallbackTriggered) {
+          isFallbackTriggered = true;
+          showSimulatedAdPlayer(onRewardSuccess);
+        }
+      }
 
       if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.AdMob) {
         try {
-          const { AdMob, RewardAdPluginEvents } = window.Capacitor.Plugins;
+          const { AdMob } = window.Capacitor.Plugins;
 
-          // Bắt buộc initialize với thông số Test[span_2](start_span)[span_2](end_span)
-          await AdMob.initialize({ initializeForTesting: true });
+          if (!isAdMobInitialized) {
+             await AdMob.initialize({ initializeForTesting: true });
+             isAdMobInitialized = true;
+          }
 
-          // FIX: Xóa bỏ mọi listener tồn đọng từ các lần bấm trước để tránh rác bộ nhớ/chạy đè
+          // Dọn dẹp bộ nhớ event listener cũ
           await AdMob.removeAllListeners();
 
-          AdMob.addListener(RewardAdPluginEvents.Rewarded, (rewardItem) => {
+          // FIX CỐT LÕI: Thay vì dùng Enum RewardAdPluginEvents bị lỗi undefined,
+          // chúng ta phải ghi cứng tên string event của Capacitor Plugin.
+          AdMob.addListener('rewardedVideoAdReward', (rewardItem) => {
             isRewarded = true;
           });
 
-          AdMob.addListener(RewardAdPluginEvents.Dismissed, () => {
-            if (isRewarded && onRewardSuccess) {
+          AdMob.addListener('rewardedVideoAdDismissed', () => {
+            if (isRewarded && onRewardSuccess && !isFallbackTriggered) {
                 onRewardSuccess();
             }
-            AdMob.removeAllListeners(); // Dọn dẹp sau khi xem xong
+            AdMob.removeAllListeners();
           });
 
-          AdMob.addListener(RewardAdPluginEvents.FailedToLoad, (err) => {
+          AdMob.addListener('rewardedVideoAdFailedToLoad', (err) => {
             console.error("Ad Failed to Load", err);
             AdMob.removeAllListeners();
-            showSimulatedAdPlayer(onRewardSuccess);
+            triggerFallback();
           });
 
-          AdMob.addListener(RewardAdPluginEvents.FailedToShow, (err) => {
+          AdMob.addListener('rewardedVideoAdFailedToShow', (err) => {
             console.error("Ad Failed to Show", err);
             AdMob.removeAllListeners();
-            showSimulatedAdPlayer(onRewardSuccess);
+            triggerFallback();
           });
 
           await AdMob.prepareRewardVideoAd({
@@ -1428,15 +1470,19 @@
           
           await AdMob.showRewardVideoAd();
           return;
+
         } catch (err) {
           console.error("AdMob exception", err);
-          showSimulatedAdPlayer(onRewardSuccess);
+          if (window.Capacitor && window.Capacitor.Plugins.AdMob) {
+            window.Capacitor.Plugins.AdMob.removeAllListeners();
+          }
+          triggerFallback();
           return;
         }
       }
 
-      // Fallback khi chạy trên Web hoặc Plugin lỗi
-      showSimulatedAdPlayer(onRewardSuccess);
+      // Không có plugin => chạy giả lập
+      triggerFallback();
     }
 
     function showSimulatedAdPlayer(onRewardSuccess) {
