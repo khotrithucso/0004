@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Fast English 1000 Sentence Puzzle V3 Pro</title>
+  <title>Fast English 1000 Sentence Puzzle V4 Pro</title>
   <style>
     /* ==========================================================================
-       1. CORE SYSTEM TOKENS & BRIGHT LIGHT THEME
+       1. DYNAMIC COLOR THEMES & CORE TOKENS
        ========================================================================== */
     :root {
       --bg-dark: #f8fafc;
@@ -22,7 +22,15 @@
       --border-color: #e2e8f0;
       --shadow-soft: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.02);
       --shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+      --theme-gradient: linear-gradient(135deg, #e0f2fe 0%, #f8fafc 100%);
     }
+
+    /* THEME PRESETS */
+    body.theme-sky { --theme-gradient: linear-gradient(135deg, #e0f2fe 0%, #f8fafc 100%); }
+    body.theme-mint { --theme-gradient: linear-gradient(135deg, #d1fae5 0%, #f8fafc 100%); }
+    body.theme-sunset { --theme-gradient: linear-gradient(135deg, #ffedd5 0%, #f8fafc 100%); }
+    body.theme-purple { --theme-gradient: linear-gradient(135deg, #f3e8ff 0%, #f8fafc 100%); }
+    body.theme-rose { --theme-gradient: linear-gradient(135deg, #ffe4e6 0%, #f8fafc 100%); }
 
     * {
       box-sizing: border-box;
@@ -34,19 +42,21 @@
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background-color: var(--bg-dark);
+      background: var(--theme-gradient);
       color: var(--text-light);
       min-height: 100vh;
       overflow-x: hidden;
       display: flex;
       flex-direction: column;
+      transition: background 0.5s ease;
     }
 
     /* ==========================================================================
-       2. TOP BAR & HAMBURGER SIDEBAR
+       2. TOP BAR & SIDEBAR DYNAMIC UI
        ========================================================================== */
     .app-topbar {
-      background: var(--card-bg);
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(8px);
       border-bottom: 1px solid var(--border-color);
       padding: 12px 16px;
       display: flex;
@@ -141,7 +151,7 @@
       font-size: 18px;
       font-weight: 800;
       color: var(--accent-cyan);
-      margin-bottom: 24px;
+      margin-bottom: 20px;
       padding-bottom: 12px;
       border-bottom: 1px solid var(--border-color);
       display: flex;
@@ -171,12 +181,10 @@
       transition: background 0.2s;
     }
 
-    .sidebar-btn:hover {
-      background: #e2e8f0;
-    }
+    .sidebar-btn:hover { background: #e2e8f0; }
 
     /* ==========================================================================
-       3. ACTIVITY SCREENS SYSTEM
+       3. SCREENS & GAMEPLAY ENGINE
        ========================================================================== */
     .screen {
       display: none;
@@ -198,7 +206,7 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    /* SCREEN 1: HOME */
+    /* HOME HERO */
     .home-hero-card {
       background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
       border-radius: 16px;
@@ -221,10 +229,7 @@
       color: #f0f9ff;
     }
 
-    .player-input-group {
-      margin-bottom: 14px;
-    }
-
+    .player-input-group { margin-bottom: 14px; }
     .player-input-group label {
       display: block;
       font-size: 12px;
@@ -243,11 +248,6 @@
       border-radius: 8px;
       font-size: 14px;
       outline: none;
-      transition: border-color 0.2s;
-    }
-
-    .form-control:focus {
-      border-color: var(--accent-cyan);
     }
 
     .btn-main-action {
@@ -265,10 +265,7 @@
       transition: transform 0.1s, background 0.2s;
     }
 
-    .btn-main-action:active {
-      transform: scale(0.98);
-      background: var(--accent-green-hover);
-    }
+    .btn-main-action:active { transform: scale(0.98); background: var(--accent-green-hover); }
 
     .btn-secondary-action {
       background: var(--card-bg);
@@ -282,14 +279,9 @@
       width: 100%;
       margin-bottom: 10px;
       box-shadow: var(--shadow-card);
-      transition: background 0.2s;
     }
 
-    .btn-secondary-action:hover {
-      background: var(--surface-bg);
-    }
-
-    /* SCREEN 2: LEVEL MAP */
+    /* LEVEL MAP */
     .map-header {
       display: flex;
       justify-content: space-between;
@@ -334,13 +326,9 @@
       color: var(--accent-green-hover);
     }
 
-    .level-stars-mini {
-      font-size: 9px;
-      color: var(--accent-yellow);
-      margin-top: 2px;
-    }
+    .level-stars-mini { font-size: 9px; color: var(--accent-yellow); margin-top: 2px; }
 
-    /* SCREEN 3: GAMEPLAY */
+    /* GAMEPLAY HUDS & CARDS */
     .gameplay-hud {
       display: flex;
       justify-content: space-between;
@@ -353,21 +341,10 @@
       box-shadow: var(--shadow-card);
     }
 
-    .timer-badge {
-      font-size: 16px;
-      font-weight: 800;
-      color: var(--accent-yellow);
-    }
+    .timer-badge { font-size: 16px; font-weight: 800; color: var(--accent-yellow); }
+    .timer-badge.warning { color: var(--accent-red); animation: pulse 0.5s infinite alternate; }
 
-    .timer-badge.warning {
-      color: var(--accent-red);
-      animation: pulse 0.5s infinite alternate;
-    }
-
-    @keyframes pulse {
-      from { transform: scale(1); }
-      to { transform: scale(1.1); }
-    }
+    @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.1); } }
 
     .audio-card {
       background: var(--card-bg);
@@ -400,10 +377,6 @@
       align-items: center;
       gap: 6px;
       box-shadow: 0 4px 10px rgba(2, 132, 199, 0.25);
-    }
-
-    .btn-speaker:active {
-      transform: scale(0.96);
     }
 
     .btn-voice-toggle {
@@ -462,16 +435,9 @@
       transition: background 0.15s, transform 0.1s;
     }
 
-    .word-chip:active {
-      transform: scale(0.95);
-      background: #e0f2fe;
-    }
+    .word-chip:active { transform: scale(0.95); background: #e0f2fe; }
 
-    .powerups-bar {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 12px;
-    }
+    .powerups-bar { display: flex; gap: 8px; margin-bottom: 12px; }
 
     .btn-powerup {
       flex: 1;
@@ -492,12 +458,9 @@
 
     .btn-powerup span { color: var(--accent-yellow); font-size: 10px; font-weight: 800; }
 
-    .gameplay-actions {
-      display: flex;
-      gap: 8px;
-    }
+    .gameplay-actions { display: flex; gap: 8px; }
 
-    /* SCREEN 4: SHOP */
+    /* SHOP STYLES */
     .shop-item-card {
       background: var(--card-bg);
       border: 1px solid var(--border-color);
@@ -514,13 +477,8 @@
     .shop-item-info p { font-size: 11px; color: var(--text-muted); }
     .shop-item-stock { font-size: 11px; font-weight: 800; color: var(--accent-green); margin-top: 4px; }
 
-    /* SCREEN 5: LEADERBOARD SYSTEM */
-    .leaderboard-tabs {
-      display: flex;
-      gap: 6px;
-      margin-bottom: 12px;
-    }
-
+    /* LEADERBOARD */
+    .leaderboard-tabs { display: flex; gap: 6px; margin-bottom: 12px; }
     .lb-tab-btn {
       flex: 1;
       background: var(--surface-bg);
@@ -557,7 +515,6 @@
       font-size: 13px;
     }
 
-    .leaderboard-row:last-child { border-bottom: none; }
     .rank-num { font-weight: 800; width: 26px; color: var(--accent-yellow); }
 
     /* POPUP MODAL SYSTEM */
@@ -595,6 +552,56 @@
     .modal-stars-win { font-size: 32px; margin: 10px 0; }
     .timer-delay-text { font-size: 12px; color: var(--accent-yellow); font-weight: 700; margin: 10px 0; }
 
+    /* ==========================================================================
+       4. MINIGAMES UI (CHESTS, WHEEL, CARDS)
+       ========================================================================== */
+    .bonus-minigame-box {
+      margin: 15px 0;
+      padding: 10px;
+      background: var(--surface-bg);
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+    }
+
+    /* 3 CHESTS PICK */
+    .chests-container { display: flex; justify-content: center; gap: 12px; margin-top: 10px; }
+    .chest-item {
+      font-size: 36px;
+      background: #fff;
+      border: 2px solid var(--border-color);
+      border-radius: 12px;
+      padding: 12px;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .chest-item:active { transform: scale(1.1); }
+
+    /* LUCKY WHEEL CANVAS */
+    #wheel-canvas { margin: 10px auto; display: block; }
+
+    /* 3 CARDS PICK */
+    .cards-container { display: flex; justify-content: center; gap: 12px; margin-top: 10px; }
+    .card-item {
+      width: 70px;
+      height: 100px;
+      background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+      color: #fff;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: var(--shadow-card);
+      transition: transform 0.3s;
+    }
+    .card-item.flipped {
+      background: #fff;
+      color: var(--text-light);
+      border: 2px solid var(--accent-green);
+    }
+
     .admob-banner-stub {
       background: #f1f5f9;
       border-top: 1px solid var(--border-color);
@@ -608,13 +615,13 @@
     }
   </style>
 </head>
-<body>
+<body class="theme-sky">
 
   <!-- TOP BAR HUD -->
   <header class="app-topbar">
     <div class="topbar-left">
       <button class="btn-hamburger" id="btn-open-sidebar">☰</button>
-      <div class="app-logo-title">⚡ FAST ENGLISH V3 PRO</div>
+      <div class="app-logo-title">⚡ FAST ENGLISH V4 PRO</div>
     </div>
     <div class="user-hud-stats">
       <div class="hud-chip hud-coins">🪙 <span id="hud-coins-val">100</span></div>
@@ -635,6 +642,7 @@
         <button class="sidebar-btn" onclick="navigateTo('screen-shop')">🛒 Power-Up Shop</button>
         <button class="sidebar-btn" onclick="navigateTo('screen-leaderboard')">🏆 Online Leaderboard</button>
         <button class="sidebar-btn" onclick="toggleVoiceGenderDrawer()">🎙️ Voice: <span id="drawer-voice-label">Female (US)</span></button>
+        <button class="sidebar-btn" onclick="switchThemePreset()">🎨 Change Dynamic Theme</button>
         <button class="sidebar-btn" onclick="resetGameProgress()">🔄 Reset Game Progress</button>
       </div>
     </div>
@@ -655,7 +663,7 @@
       </div>
 
       <div class="player-input-group">
-        <label for="player-email-input">PLAYER EMAIL (FOR REWARDS & NOTIFICATIONS):</label>
+        <label for="player-email-input">PLAYER EMAIL (FOR REWARDS):</label>
         <input type="email" id="player-email-input" class="form-control" placeholder="example@gmail.com">
       </div>
 
@@ -773,12 +781,18 @@
 
   </main>
 
-  <!-- RESULT / FAIL POPUP MODAL -->
+  <!-- RESULT / BONUS POPUP MODAL -->
   <div class="modal-backdrop" id="modal-result">
     <div class="modal-card">
       <h2 id="modal-result-title" style="color: var(--accent-green); font-size: 20px;">STAGE COMPLETED!</h2>
       <div class="modal-stars-win" id="modal-stars-display">⭐⭐⭐</div>
-      <p id="modal-result-msg" style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">Earned +30 Coins!</p>
+      <p id="modal-result-msg" style="font-size: 13px; color: var(--text-muted); margin-bottom: 8px;">Earned +30 Coins!</p>
+
+      <!-- DYNAMIC BONUS MINIGAME SECTION -->
+      <div id="bonus-minigame-wrapper" class="bonus-minigame-box" style="display:none;">
+        <h4 id="bonus-title" style="font-size:13px; color:var(--accent-cyan);">🎁 3-STAR BONUS GAME!</h4>
+        <div id="bonus-content"></div>
+      </div>
 
       <div class="timer-delay-text" id="modal-delay-timer">Next Level Unlocks in: 10s</div>
 
@@ -794,7 +808,7 @@
   <div class="modal-backdrop" id="modal-confirm-purchase">
     <div class="modal-card">
       <h3 id="confirm-modal-title" style="color: var(--accent-cyan); font-size: 18px; margin-bottom: 8px;">GET POWER-UP</h3>
-      <p id="confirm-modal-msg" style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">You have 0 items left. Do you want to use 30 Coins to buy and use 1 now?</p>
+      <p id="confirm-modal-msg" style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">You have 0 items left. Spend 30 Coins to buy and use 1 now?</p>
       <div style="display: flex; gap: 10px;">
         <button class="btn-secondary-action" id="btn-confirm-cancel" style="flex: 1; margin:0;">CANCEL</button>
         <button class="btn-main-action" id="btn-confirm-buy" style="flex: 1; margin:0;">BUY & USE</button>
@@ -804,7 +818,7 @@
 
   <div class="admob-banner-stub">[AdMob Adaptive Bottom Banner Placeholder]</div>
 
-  <!-- GAME LOGIC ENGINE V3 PRO -->
+  <!-- GAME LOGIC ENGINE V4 PRO -->
   <script>
     const SERVER_API_URL = "https://khotrithucso.io.vn/apps/0004/index.php";
 
@@ -833,7 +847,7 @@
       RAW_SENTENCES.push(BASE_SENTENCES[i % BASE_SENTENCES.length]);
     }
 
-    // MULTI-TIER TTS & VOICE GENDER ENGINE
+    // MULTI-TIER TTS & VOICE ENGINE
     class VoiceEngine {
       constructor() {
         this.voices = [];
@@ -865,8 +879,8 @@
       getVoiceForGender(gender) {
         if (!this.voices.length) this.loadVoices();
         const isMale = (gender === 'male');
-        const maleNames = ['david', 'george', 'james', 'mark', 'brian', 'alex', 'daniel', 'richard', 'guy', 'stephen'];
-        const femaleNames = ['zira', 'samantha', 'victoria', 'karen', 'fiona', 'salli', 'jenny', 'aria', 'emma'];
+        const maleNames = ['david', 'george', 'james', 'mark', 'brian', 'alex', 'daniel', 'guy'];
+        const femaleNames = ['zira', 'samantha', 'victoria', 'karen', 'fiona', 'salli', 'aria'];
 
         const targetList = isMale ? maleNames : femaleNames;
         const matched = this.voices.find(v => {
@@ -886,7 +900,6 @@
           window.speechSynthesis.resume();
         }
 
-        // 1. Try Native Capacitor TTS Plugin
         if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.TextToSpeech) {
           try {
             await window.Capacitor.Plugins.TextToSpeech.speak({
@@ -894,16 +907,12 @@
               lang: 'en-US',
               rate: 1.0,
               pitch: this.currentGender === 'male' ? 0.9 : 1.1,
-              volume: 1.0,
-              category: 'ambient'
+              volume: 1.0
             });
             return;
-          } catch (e) {
-            console.warn('Capacitor TTS error, trying Web Speech API...', e);
-          }
+          } catch (e) {}
         }
 
-        // 2. Web Speech API
         if ('speechSynthesis' in window) {
           try {
             window.speechSynthesis.cancel();
@@ -912,21 +921,15 @@
             utterance.rate = 1.0;
 
             const voice = this.getVoiceForGender(this.currentGender);
-            if (voice) {
-              utterance.voice = voice;
-            } else {
-              utterance.pitch = this.currentGender === 'male' ? 0.8 : 1.15;
-            }
+            if (voice) utterance.voice = voice;
+            else utterance.pitch = this.currentGender === 'male' ? 0.8 : 1.15;
 
             utterance.onerror = () => this.playStreamFallback(text);
             window.speechSynthesis.speak(utterance);
             return;
-          } catch (e) {
-            console.warn('Web Speech API failed, using stream fallback...', e);
-          }
+          } catch (e) {}
         }
 
-        // 3. Audio Stream Fallback
         this.playStreamFallback(text);
       }
 
@@ -935,22 +938,16 @@
           const voiceName = this.currentGender === 'male' ? 'Brian' : 'Salli';
           const streamUrl = `https://api.streamelements.com/kappa/v2/speech?voice=${voiceName}&text=${encodeURIComponent(text)}`;
           const audio = new Audio(streamUrl);
-          const playPromise = audio.play();
-          if (playPromise !== undefined) {
-            playPromise.catch(() => {
-              const backupUrl = `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(text)}&type=2`;
-              const backupAudio = new Audio(backupUrl);
-              backupAudio.play().catch(e => console.error('Audio stream playback failed:', e));
-            });
-          }
-        } catch (err) {
-          console.error('TTS Stream Error:', err);
-        }
+          audio.play().catch(() => {
+            const backupUrl = `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(text)}&type=2`;
+            new Audio(backupUrl).play().catch(() => {});
+          });
+        } catch (err) {}
       }
     }
     const voiceEngine = new VoiceEngine();
 
-    // AUDIO TONE SYNTHESIZER FOR SOUND EFFECTS
+    // SOUND EFFECTS
     class SoundFX {
       constructor() { this.ctx = null; }
       init() {
@@ -1000,6 +997,7 @@
         hint: parseInt(localStorage.getItem('fe_inv_hint') || '0'),
         slow: parseInt(localStorage.getItem('fe_inv_slow') || '0')
       },
+      currentThemeIndex: parseInt(localStorage.getItem('fe_theme_idx') || '0'),
       currentLevel: 1,
       timerSec: 30,
       timerInterval: null,
@@ -1014,6 +1012,8 @@
       cachedLeaderboardData: null,
       pendingPurchaseType: null
     };
+
+    const THEME_PRESETS = ['theme-sky', 'theme-mint', 'theme-sunset', 'theme-purple', 'theme-rose'];
 
     localStorage.setItem('fe_uid', State.uid);
 
@@ -1031,6 +1031,7 @@
 
     // INITIALIZATION
     document.addEventListener('DOMContentLoaded', () => {
+      applyCurrentTheme();
       updateHUD();
       updateVoiceLabels();
       document.getElementById('player-name-input').value = State.playerName;
@@ -1054,16 +1055,25 @@
       fetchOnlineLeaderboard();
     });
 
+    function applyCurrentTheme() {
+      document.body.className = THEME_PRESETS[State.currentThemeIndex];
+    }
+
+    function switchThemePreset() {
+      State.currentThemeIndex = (State.currentThemeIndex + 1) % THEME_PRESETS.length;
+      localStorage.setItem('fe_theme_idx', State.currentThemeIndex);
+      applyCurrentTheme();
+      document.getElementById('sidebar-overlay').classList.remove('active');
+    }
+
     function updateHUD() {
       document.getElementById('hud-coins-val').innerText = State.coins;
       document.getElementById('hud-stars-val').innerText = getTotalStars();
 
-      // Powerup Inventory Counts
       document.getElementById('powerup-count-time').innerText = `(x${State.inventory.time})`;
       document.getElementById('powerup-count-hint').innerText = `(x${State.inventory.hint})`;
       document.getElementById('powerup-count-slow').innerText = `(x${State.inventory.slow})`;
 
-      // Shop Stock Displays
       document.getElementById('shop-stock-time').innerText = State.inventory.time;
       document.getElementById('shop-stock-hint').innerText = State.inventory.hint;
       document.getElementById('shop-stock-slow').innerText = State.inventory.slow;
@@ -1120,8 +1130,12 @@
       State.currentLevel = levelNum;
       State.targetSentence = RAW_SENTENCES[levelNum - 1];
       State.selectedWords = [];
-      State.timerSec = 30; // 30s playing time per stage
+      State.timerSec = 30;
       State.timeElapsed = 0;
+
+      // Auto cycle dynamic themes per level
+      State.currentThemeIndex = (levelNum - 1) % THEME_PRESETS.length;
+      applyCurrentTheme();
 
       const words = State.targetSentence.replace(/[.,?!]/g, '').split(' ');
       State.shuffledWords = [...words].sort(() => Math.random() - 0.5);
@@ -1130,10 +1144,8 @@
       navigateTo('screen-game');
       renderWordChips();
       
-      // Auto Play Voice Speech
       setTimeout(() => voiceEngine.speak(State.targetSentence), 300);
 
-      // Start Countdown Timer
       clearInterval(State.timerInterval);
       const timerDisplay = document.getElementById('game-timer-display');
       timerDisplay.classList.remove('warning');
@@ -1233,24 +1245,22 @@
       }
     }
 
-    // POWER-UP INVENTORY & DIRECT CONSUMPTION/PURCHASE SYSTEM
+    // POWER-UP INVENTORY
     const POWERUP_PRICES = { time: 30, hint: 40, slow: 50, skip_pass: 60 };
     const POWERUP_NAMES = { time: "Extra Time (+10s)", hint: "Smart Hint", slow: "Slow Audio Assist", skip_pass: "Skip Wait Pass" };
 
     function usePowerup(type) {
       if (State.inventory[type] > 0) {
-        // Consume from stock inventory
         State.inventory[type]--;
         updateHUD();
         applyPowerupEffect(type);
       } else {
-        // Prompt user to purchase and use immediately using coins
         const price = POWERUP_PRICES[type];
         const name = POWERUP_NAMES[type];
         State.pendingPurchaseType = type;
 
         document.getElementById('confirm-modal-title').innerText = `USE ${name.toUpperCase()}?`;
-        document.getElementById('confirm-modal-msg').innerText = `You have 0 ${name} items remaining. Would you like to spend ${price} Coins to buy and use 1 right now?`;
+        document.getElementById('confirm-modal-msg').innerText = `You have 0 ${name} items remaining. Spend ${price} Coins to buy and use 1 right now?`;
         document.getElementById('modal-confirm-purchase').classList.add('active');
       }
     }
@@ -1314,7 +1324,7 @@
       pushLog('buy_shop_item', { type: type, cost: cost });
     }
 
-    // MODAL & SKIP WAIT DELAY LOGIC
+    // MODAL & BONUS MINIGAME TRIGGER (WHEN 3 STARS)
     function showResultModal(isWin, stars, coins) {
       const modal = document.getElementById('modal-result');
       const title = document.getElementById('modal-result-title');
@@ -1324,6 +1334,7 @@
       const delayTxt = document.getElementById('modal-delay-timer');
       const btnRetry = document.getElementById('btn-modal-retry');
       const btnSkipWait = document.getElementById('btn-skip-wait-ad');
+      const bonusBox = document.getElementById('bonus-minigame-wrapper');
 
       modal.classList.add('active');
       clearInterval(State.delayTimerInterval);
@@ -1336,6 +1347,14 @@
         btnRetry.style.display = 'none';
         btnNext.style.display = 'block';
         btnSkipWait.style.display = 'block';
+
+        // Trigger Bonus Minigame if 3 Stars
+        if (stars === 3) {
+          bonusBox.style.display = 'block';
+          renderRandomBonusMinigame();
+        } else {
+          bonusBox.style.display = 'none';
+        }
 
         if (State.skipWaitPasses > 0) {
           State.skipWaitPasses--;
@@ -1367,15 +1386,112 @@
         starsDisp.innerText = '❌❌❌';
         msg.innerText = 'Out of time! Choose an option to continue:';
         delayTxt.innerText = '';
+        bonusBox.style.display = 'none';
         btnNext.style.display = 'none';
         btnSkipWait.style.display = 'none';
         btnRetry.style.display = 'block';
       }
     }
 
-    // WATCH 30s ADMOB REWARDED VIDEO
+    // BONUS MINIGAMES ENGINE (3 CHESTS / LUCKY WHEEL / 3 CARDS)
+    function renderRandomBonusMinigame() {
+      const container = document.getElementById('bonus-content');
+      const gameType = Math.floor(Math.random() * 3); // 0: Chests, 1: Wheel, 2: Cards
+
+      if (gameType === 0) {
+        // 3 CHESTS PICK
+        document.getElementById('bonus-title').innerText = "📦 PICK 1 CHEST FOR BONUS REWARD!";
+        container.innerHTML = `
+          <div class="chests-container">
+            <div class="chest-item" onclick="openChestReward(this)">🎁</div>
+            <div class="chest-item" onclick="openChestReward(this)">🎁</div>
+            <div class="chest-item" onclick="openChestReward(this)">🎁</div>
+          </div>
+        `;
+      } else if (gameType === 1) {
+        // LUCKY WHEEL
+        document.getElementById('bonus-title').innerText = "☸️ SPIN THE LUCKY WHEEL!";
+        container.innerHTML = `
+          <canvas id="wheel-canvas" width="160" height="160"></canvas>
+          <button class="btn-main-action" style="padding:6px 12px; font-size:12px; margin:6px auto 0 auto; width:auto;" onclick="spinLuckyWheel()">SPIN NOW!</button>
+        `;
+        drawWheelCanvas();
+      } else {
+        // 3 CARDS PICK
+        document.getElementById('bonus-title').innerText = "🃏 PICK 1 LUCKY CARD!";
+        container.innerHTML = `
+          <div class="cards-container">
+            <div class="card-item" onclick="pickCardReward(this)">❓</div>
+            <div class="card-item" onclick="pickCardReward(this)">❓</div>
+            <div class="card-item" onclick="pickCardReward(this)">❓</div>
+          </div>
+        `;
+      }
+    }
+
+    function openChestReward(elem) {
+      const rewards = [
+        { name: "+20 Coins!", type: "coin", val: 20 },
+        { name: "+1 Hint!", type: "hint", val: 1 },
+        { name: "+1 Extra Time!", type: "time", val: 1 },
+        { name: "Better Luck Next Time!", type: "none", val: 0 }
+      ];
+      const win = rewards[Math.floor(Math.random() * rewards.length)];
+      elem.innerText = win.type === "none" ? "💨" : "🎉";
+      grantBonusReward(win);
+    }
+
+    function pickCardReward(elem) {
+      if (elem.classList.contains('flipped')) return;
+      const rewards = [
+        { name: "+30 Coins!", type: "coin", val: 30 },
+        { name: "+1 Slow Audio!", type: "slow", val: 1 },
+        { name: "+15 Coins!", type: "coin", val: 15 },
+        { name: "Empty Card!", type: "none", val: 0 }
+      ];
+      const win = rewards[Math.floor(Math.random() * rewards.length)];
+      elem.classList.add('flipped');
+      elem.innerText = win.type === "none" ? "❌" : "🎁";
+      grantBonusReward(win);
+    }
+
+    function drawWheelCanvas() {
+      const canvas = document.getElementById('wheel-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const colors = ['#0284c7', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
+      const slices = 6;
+      const arc = (Math.PI * 2) / slices;
+
+      for (let i = 0; i < slices; i++) {
+        ctx.beginPath();
+        ctx.fillStyle = colors[i];
+        ctx.moveTo(80, 80);
+        ctx.arc(80, 80, 75, i * arc, (i + 1) * arc);
+        ctx.fill();
+      }
+    }
+
+    function spinLuckyWheel() {
+      const win = { name: "+25 Bonus Coins!", type: "coin", val: 25 };
+      grantBonusReward(win);
+    }
+
+    function grantBonusReward(reward) {
+      sfx.correct();
+      if (reward.type === 'coin') State.coins += reward.val;
+      else if (reward.type === 'time') State.inventory.time += reward.val;
+      else if (reward.type === 'hint') State.inventory.hint += reward.val;
+      else if (reward.type === 'slow') State.inventory.slow += reward.val;
+
+      updateHUD();
+      alert(`🎉 Bonus Reward: ${reward.name}`);
+      document.getElementById('bonus-minigame-wrapper').style.display = 'none';
+    }
+
+    // ROBUST ADMOB TIMEOUT FALLBACK AD WATCHER
     function watchAdForCoins() {
-      showRewardedAd(() => {
+      showRewardedAdWithTimeout(() => {
         State.coins += 100;
         updateHUD();
         alert('🎉 Watched 30s Video Ad! +100 Free Coins Granted.');
@@ -1383,19 +1499,42 @@
       });
     }
 
-    function showRewardedAd(onRewardSuccess) {
+    function showRewardedAdWithTimeout(onRewardSuccess) {
+      let isHandled = false;
+      const timer = setTimeout(() => {
+        if (!isHandled) {
+          isHandled = true;
+          alert('🎬 [AdMob Simulated Test Ad]\nReward Granted!');
+          if (onRewardSuccess) onRewardSuccess();
+        }
+      }, 8000); // 8-second safety fallback timeout
+
       if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.AdMob) {
         const { AdMob } = window.Capacitor.Plugins;
         AdMob.prepareRewardVideoAd({ adId: ADMOB_TEST.rewarded })
           .then(() => AdMob.showRewardVideoAd())
-          .then(() => { if (onRewardSuccess) onRewardSuccess(); })
+          .then(() => {
+            clearTimeout(timer);
+            if (!isHandled) {
+              isHandled = true;
+              if (onRewardSuccess) onRewardSuccess();
+            }
+          })
           .catch(() => {
-            alert('🎬 [AdMob 30s Rewarded Test Ad Simulated]\nReward granted!');
-            if (onRewardSuccess) onRewardSuccess();
+            clearTimeout(timer);
+            if (!isHandled) {
+              isHandled = true;
+              alert('🎬 [AdMob Simulated Test Ad]\nReward Granted!');
+              if (onRewardSuccess) onRewardSuccess();
+            }
           });
       } else {
-        alert('🎬 [AdMob 30s Rewarded Test Ad Simulated]\nReward granted!');
-        if (onRewardSuccess) onRewardSuccess();
+        clearTimeout(timer);
+        if (!isHandled) {
+          isHandled = true;
+          alert('🎬 [AdMob Simulated Test Ad]\nReward Granted!');
+          if (onRewardSuccess) onRewardSuccess();
+        }
       }
     }
 
@@ -1495,7 +1634,7 @@
       return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     }
 
-    // ONLINE SYNC & TELEMETRY LOGS (JSONL)
+    // ONLINE SYNC & TELEMETRY
     function syncScoreToServer() {
       const payload = {
         uid: State.uid,
@@ -1586,7 +1725,6 @@
 
       document.getElementById('btn-game-check').onclick = checkAnswer;
 
-      // Pagination
       document.getElementById('btn-map-prev').onclick = () => {
         if (State.mapPage > 0) { State.mapPage--; renderMapGrid(); }
       };
@@ -1594,14 +1732,13 @@
         if (State.mapPage < 19) { State.mapPage++; renderMapGrid(); }
       };
 
-      // Modal Actions
       document.getElementById('btn-next-level').onclick = () => {
         document.getElementById('modal-result').classList.remove('active');
         startLevel(State.currentLevel + 1);
       };
 
       document.getElementById('btn-skip-wait-ad').onclick = () => {
-        showRewardedAd(() => {
+        showRewardedAdWithTimeout(() => {
           State.skipWaitPasses += 10;
           updateHUD();
           clearInterval(State.delayTimerInterval);
@@ -1622,7 +1759,6 @@
         }
       };
 
-      // HOME MENU NAVIGATION
       document.getElementById('btn-modal-home').onclick = () => {
         clearInterval(State.delayTimerInterval);
         clearInterval(State.timerInterval);
@@ -1630,7 +1766,6 @@
         navigateTo('screen-home');
       };
 
-      // PURCHASE CONFIRMATION ACTIONS
       document.getElementById('btn-confirm-cancel').onclick = () => {
         document.getElementById('modal-confirm-purchase').classList.remove('active');
         State.pendingPurchaseType = null;
