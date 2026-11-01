@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Fast English 1000 Sentence Puzzle V5.1 Ultra Pro</title>
+  <title>Fast English 1000 Sentence Puzzle V5.2 Ultra Pro</title>
   <style>
     /* ==========================================================================
        1. CORE THEMES & DESIGN TOKENS
@@ -256,6 +256,25 @@
     .shop-item-info p { font-size: 11px; color: var(--text-muted); }
     .shop-item-stock { font-size: 11px; font-weight: 800; color: var(--accent-green); margin-top: 4px; }
 
+    /* LEADERBOARD TABS & LIST */
+    .leaderboard-tabs { display: flex; gap: 6px; margin-bottom: 12px; }
+    .lb-tab-btn {
+      flex: 1; background: var(--surface-bg); border: 1px solid var(--border-color);
+      color: var(--text-muted); padding: 8px 4px; border-radius: 8px; font-size: 12px;
+      font-weight: 700; cursor: pointer; text-align: center;
+    }
+    .lb-tab-btn.active { background: var(--accent-cyan); color: #fff; border-color: var(--accent-cyan); }
+
+    .lb-item-card {
+      background: var(--card-bg); border: 1px solid var(--border-color);
+      border-radius: 10px; padding: 10px 14px; margin-bottom: 8px;
+      display: flex; align-items: center; justify-content: space-between; box-shadow: var(--shadow-card);
+    }
+    .lb-item-card.my-rank { border: 2px solid var(--accent-green); background: rgba(16, 185, 129, 0.05); }
+    .lb-rank-badge { font-size: 14px; font-weight: 800; width: 32px; text-align: center; }
+    .lb-player-name { font-size: 13px; font-weight: 700; color: var(--text-light); }
+    .lb-player-val { font-size: 13px; font-weight: 800; color: var(--accent-yellow); }
+
     /* POPUPS & ANIMATED MINIGAMES */
     .modal-backdrop {
       position: fixed; top: 0; left: 0; right: 0; bottom: 0;
@@ -279,9 +298,7 @@
 
     /* 3D FLIP CARD ANIMATION */
     .cards-container { display: flex; justify-content: center; gap: 12px; margin-top: 10px; }
-    .card-flip-wrapper {
-      perspective: 1000px; width: 75px; height: 105px; cursor: pointer;
-    }
+    .card-flip-wrapper { perspective: 1000px; width: 75px; height: 105px; cursor: pointer; }
     .card-flip-inner {
       width: 100%; height: 100%; position: relative;
       transform-style: preserve-3d; transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
@@ -292,19 +309,12 @@
       border-radius: 10px; display: flex; flex-direction: column; align-items: center;
       justify-content: center; border: 2px solid var(--border-color); box-shadow: var(--shadow-card);
     }
-    .card-front {
-      background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); color: #fff; font-size: 26px; font-weight: 800;
-    }
-    .card-back {
-      background: #fff; transform: rotateY(180deg); border-color: var(--accent-green);
-      font-size: 12px; font-weight: 800; color: var(--accent-green); padding: 4px; text-align: center;
-    }
+    .card-front { background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); color: #fff; font-size: 26px; font-weight: 800; }
+    .card-back { background: #fff; transform: rotateY(180deg); border-color: var(--accent-green); font-size: 12px; font-weight: 800; color: var(--accent-green); padding: 4px; text-align: center; }
 
     /* CHEST ANIMATION */
     .chests-container { display: flex; justify-content: center; gap: 14px; margin-top: 10px; }
-    .chest-item {
-      font-size: 38px; cursor: pointer; transition: transform 0.2s; position: relative;
-    }
+    .chest-item { font-size: 38px; cursor: pointer; transition: transform 0.2s; position: relative; }
     .chest-item.opening { animation: chestShake 0.5s ease infinite alternate; }
     .chest-item.opened { transform: scale(1.15); filter: drop-shadow(0 0 12px #f59e0b); }
 
@@ -314,10 +324,14 @@
       100% { transform: translateY(-4px) rotate(6deg); }
     }
 
-    .reward-toast-pop {
-      margin-top: 8px; font-size: 13px; font-weight: 800; color: var(--accent-green);
-      animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    .reward-toast-pop { margin-top: 8px; font-size: 13px; font-weight: 800; color: var(--accent-green); animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+
+    /* SIMULATED AD PLAYER MODAL */
+    .ad-sim-box {
+      background: #000; color: #fff; border-radius: 12px; padding: 20px; text-align: center;
+      margin-bottom: 12px; position: relative; overflow: hidden;
     }
+    .ad-sim-progress { height: 4px; background: var(--accent-green); position: absolute; bottom: 0; left: 0; width: 0%; transition: width 1s linear; }
 
     #canvas-confetti { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 400; }
     .admob-banner-stub { background: #f1f5f9; border-top: 1px solid var(--border-color); color: var(--text-muted); font-size: 10px; text-align: center; padding: 8px; position: fixed; bottom: 0; left: 0; right: 0; z-index: 80; }
@@ -331,7 +345,7 @@
   <header class="app-topbar">
     <div class="topbar-left">
       <button class="btn-hamburger" id="btn-open-sidebar">☰</button>
-      <div class="app-logo-title">⚡ FAST ENGLISH V5.1</div>
+      <div class="app-logo-title">⚡ FAST ENGLISH V5.2</div>
     </div>
     <div class="user-hud-stats">
       <div class="hud-chip hud-coins">🪙 <span id="hud-coins-val">100</span></div>
@@ -481,14 +495,24 @@
           <h4>🎬 Free +100 Coins Bonus</h4>
           <p>Watch a 30-second Video Ad to claim 100 free coins</p>
         </div>
-        <button class="btn-main-action" style="width: auto; margin:0; padding:8px 14px; font-size:12px;" onclick="watchAdForCoins()">WATCH 30s AD</button>
+        <button class="btn-main-action" style="width: auto; margin:0; padding:8px 14px; font-size:12px;" onclick="watchAdForCoins()">WATCH AD</button>
       </div>
     </section>
 
     <!-- SCREEN 6: ONLINE LEADERBOARD -->
     <section class="screen" id="screen-leaderboard">
-      <h3 style="font-size: 16px; color: var(--accent-cyan); margin-bottom: 10px;">GLOBAL ONLINE LEADERBOARD</h3>
-      <div id="leaderboard-container"></div>
+      <h3 style="font-size: 16px; color: var(--accent-cyan); margin-bottom: 8px;">GLOBAL ONLINE LEADERBOARD</h3>
+      <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">Compete with English learners worldwide!</p>
+
+      <div class="leaderboard-tabs">
+        <button class="lb-tab-btn active" id="lb-tab-stars" onclick="switchLeaderboardTab('stars')">⭐ Top Stars</button>
+        <button class="lb-tab-btn" id="lb-tab-sentences" onclick="switchLeaderboardTab('sentences')">📝 Sentences</button>
+        <button class="lb-tab-btn" id="lb-tab-coins" onclick="switchLeaderboardTab('coins')">🪙 Coins</button>
+      </div>
+
+      <div id="leaderboard-container">
+        <div style="text-align:center; padding:30px; color:var(--text-muted);">🔄 Loading leaderboard rankings...</div>
+      </div>
     </section>
 
   </main>
@@ -526,9 +550,24 @@
     </div>
   </div>
 
+  <!-- SIMULATED REWARDED AD MODAL -->
+  <div class="modal-backdrop" id="modal-ad-sim">
+    <div class="modal-card">
+      <h3 style="color: var(--accent-cyan); font-size: 16px; margin-bottom: 10px;">🎬 REWARD VIDEO AD</h3>
+      <div class="ad-sim-box">
+        <p style="font-size:13px; font-weight:700; margin-bottom:6px;">Flood-It! Puzzle Game</p>
+        <p style="font-size:11px; color:#cbd5e1;">Reward will be granted in <span id="ad-sim-counter">5</span>s...</p>
+        <div class="ad-sim-progress" id="ad-sim-progress-bar"></div>
+      </div>
+      <button class="btn-secondary-action" id="btn-close-ad-sim" disabled style="opacity:0.5;">CLOSE AD & CLAIM REWARD</button>
+    </div>
+  </div>
+
   <div class="admob-banner-stub">[AdMob Adaptive Bottom Banner Placeholder]</div>
 
   <script>
+    const SERVER_API_URL = "https://khotrithucso.io.vn/apps/0004/index.php";
+
     const ADMOB_TEST = {
       appId: "ca-app-pub-3940256099942544~3347511713",
       rewarded: "ca-app-pub-3940256099942544/5224354917"
@@ -549,7 +588,7 @@
     for (let i = 0; i < 1000; i++) RAW_SENTENCES.push(BASE_SENTENCES[i % BASE_SENTENCES.length]);
 
     /* ==========================================================================
-       2. DUAL VOICE ENGINE WITH DISTINCT MALE/FEMALE PROFILES & TTS FALLBACK
+       2. REFACTORED MULTI-PLATFORM VOICE ENGINE (ANDROID / IOS / WEB)
        ========================================================================== */
     class VoiceEngine {
       constructor() {
@@ -579,30 +618,41 @@
         return this.currentGender;
       }
 
-      speak(text) {
+      speak(text, isSlow = false) {
         if (!text) return;
         text = text.trim();
         if ('speechSynthesis' in window) window.speechSynthesis.resume();
 
-        if ('speechSynthesis' in window && this.voices.length > 0) {
+        // Re-attempt loading voices if empty
+        if (this.voices.length === 0 && 'speechSynthesis' in window) {
+          this.loadVoices();
+        }
+
+        if ('speechSynthesis' in window) {
           try {
             window.speechSynthesis.cancel();
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.lang = 'en-US';
-            utterance.rate = 0.95;
+            utterance.rate = isSlow ? 0.75 : 0.95;
 
             const isMale = (this.currentGender === 'male');
-            const targetNames = isMale 
-              ? ['david', 'george', 'brian', 'alex', 'guy', 'male'] 
-              : ['zira', 'samantha', 'victoria', 'salli', 'jenny', 'female'];
-
-            let chosenVoice = this.voices.find(v => targetNames.some(n => v.name.toLowerCase().includes(n)));
             
+            // Broad search terms compatible with Windows, Mac, iOS, Android (Google TTS)
+            const targetKeywords = isMale 
+              ? ['male', 'david', 'george', 'brian', 'alex', 'guy', 'en-us-x-tpf-local', 'en-us-x-sfg-network'] 
+              : ['female', 'zira', 'samantha', 'victoria', 'salli', 'jenny', 'google us english', 'en-us-x-iol-local'];
+
+            let chosenVoice = this.voices.find(v => targetKeywords.some(k => v.name.toLowerCase().includes(k)));
+            if (!chosenVoice && this.voices.length > 0) {
+              chosenVoice = this.voices.find(v => v.lang.startsWith('en-US') || v.lang.startsWith('en'));
+            }
+
             if (chosenVoice) {
               utterance.voice = chosenVoice;
-            } else {
-              utterance.pitch = isMale ? 0.75 : 1.25;
             }
+            
+            // Adjust pitch to clearly distinguish gender regardless of system TTS
+            utterance.pitch = isMale ? 0.8 : 1.25;
 
             utterance.onerror = () => this.playStreamFallback(text);
             window.speechSynthesis.speak(utterance);
@@ -614,10 +664,15 @@
 
       playStreamFallback(text) {
         try {
-          const voiceName = (this.currentGender === 'male') ? 'Brian' : 'Salli';
+          const isMale = (this.currentGender === 'male');
+          const voiceName = isMale ? 'Brian' : 'Salli';
           const streamUrl = `https://api.streamelements.com/kappa/v2/speech?voice=${voiceName}&text=${encodeURIComponent(text)}`;
           const audio = new Audio(streamUrl);
-          audio.play().catch(() => {});
+          audio.play().catch(() => {
+            // Google Translate TTS Backup
+            const googleUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(text)}&tl=en&client=tw-ob`;
+            new Audio(googleUrl).play().catch(() => {});
+          });
         } catch (err) {}
       }
     }
@@ -660,7 +715,7 @@
     }
 
     /* ==========================================================================
-       4. GAME STATE
+       4. GAME STATE & BACKEND SYNC
        ========================================================================== */
     const State = {
       uid: localStorage.getItem('fe_uid') || ('uid_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5)),
@@ -689,7 +744,9 @@
       delayTimerInterval: null,
       delaySec: 10,
       mapPage: 0,
-      pendingPurchaseType: null
+      pendingPurchaseType: null,
+      activeLbTab: 'stars',
+      cachedLeaderboard: null
     };
 
     const THEME_PRESETS = ['theme-sky', 'theme-mint', 'theme-sunset', 'theme-purple', 'theme-rose'];
@@ -716,10 +773,18 @@
       document.getElementById('player-name-input').addEventListener('change', (e) => {
         State.playerName = e.target.value.trim() || 'Learner';
         localStorage.setItem('fe_player_name', State.playerName);
+        syncScoreWithServer();
+      });
+
+      document.getElementById('player-email-input').addEventListener('change', (e) => {
+        State.playerEmail = e.target.value.trim() || '';
+        localStorage.setItem('fe_player_email', State.playerEmail);
+        syncScoreWithServer();
       });
 
       setupEventListeners();
       renderMapGrid();
+      syncScoreWithServer();
     });
 
     function applyCurrentTheme() { document.body.className = THEME_PRESETS[State.currentThemeIndex]; }
@@ -749,6 +814,7 @@
       localStorage.setItem('fe_unlocked_level', State.unlockedLevel);
       localStorage.setItem('fe_level_stars', JSON.stringify(State.levelStars));
       localStorage.setItem('fe_mistakes_bank', JSON.stringify(State.mistakesBank));
+      localStorage.setItem('fe_completed_sentences', State.completedSentences);
       localStorage.setItem('fe_win_streak', State.streak);
       localStorage.setItem('fe_inv_time', State.inventory.time);
       localStorage.setItem('fe_inv_hint', State.inventory.hint);
@@ -786,10 +852,98 @@
 
       if (screenId === 'screen-map') renderMapGrid();
       if (screenId === 'screen-review') renderMistakeReviewBank();
+      if (screenId === 'screen-leaderboard') fetchLeaderboardFromServer();
     }
 
     /* ==========================================================================
-       5. GAMEPLAY LOGIC
+       5. SERVER API SYNC & LEADERBOARD IMPLEMENTATION
+       ========================================================================== */
+    function syncScoreWithServer() {
+      const payload = {
+        action: 'submit_score',
+        uid: State.uid,
+        name: State.playerName,
+        email: State.playerEmail,
+        stars: getTotalStars(),
+        coins: State.coins,
+        sentences: State.completedSentences
+      };
+
+      fetch(SERVER_API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      }).catch(err => console.log('Offline mode - score stored locally'));
+    }
+
+    function fetchLeaderboardFromServer() {
+      const container = document.getElementById('leaderboard-container');
+      container.innerHTML = '<div style="text-align:center; padding:30px; color:var(--text-muted);">🔄 Loading online rankings...</div>';
+
+      fetch(`${SERVER_API_URL}?action=get_leaderboard`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.status === 'success') {
+            State.cachedLeaderboard = data;
+            renderLeaderboardTab(State.activeLbTab);
+          } else {
+            container.innerHTML = '<div style="text-align:center; padding:20px; color:var(--accent-red);">Failed to fetch leaderboard.</div>';
+          }
+        })
+        .catch(() => {
+          // Render local user preview if server unreachable
+          container.innerHTML = `
+            <div class="lb-item-card my-rank">
+              <div class="lb-rank-badge">1</div>
+              <div class="lb-player-name">${State.playerName} (YOU - Offline)</div>
+              <div class="lb-player-val">⭐ ${getTotalStars()}</div>
+            </div>
+            <p style="text-align:center; font-size:11px; color:var(--text-muted); margin-top:10px;">Connect internet to view global rankings!</p>
+          `;
+        });
+    }
+
+    function switchLeaderboardTab(tabKey) {
+      State.activeLbTab = tabKey;
+      document.querySelectorAll('.lb-tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.getElementById(`lb-tab-${tabKey}`).classList.add('active');
+      renderLeaderboardTab(tabKey);
+    }
+
+    function renderLeaderboardTab(tabKey) {
+      const container = document.getElementById('leaderboard-container');
+      if (!State.cachedLeaderboard) return;
+
+      const keyMap = { stars: 'top_stars', sentences: 'top_sentences', coins: 'top_coins' };
+      const list = State.cachedLeaderboard[keyMap[tabKey]] || [];
+
+      if (list.length === 0) {
+        container.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-muted);">No rankings recorded yet!</div>';
+        return;
+      }
+
+      const rankIcons = ['🥇', '🥈', '🥉'];
+
+      container.innerHTML = list.map((item, idx) => {
+        const rankDisplay = idx < 3 ? rankIcons[idx] : `#${idx + 1}`;
+        const isMe = (item.uid === State.uid);
+        let valDisplay = '';
+        if (tabKey === 'stars') valDisplay = `⭐ ${item.stars}`;
+        else if (tabKey === 'sentences') valDisplay = `📝 ${item.sentences}`;
+        else valDisplay = `🪙 ${item.coins}`;
+
+        return `
+          <div class="lb-item-card ${isMe ? 'my-rank' : ''}">
+            <div class="lb-rank-badge">${rankDisplay}</div>
+            <div class="lb-player-name">${item.name || 'Learner'} ${isMe ? '<span style="font-size:10px; color:var(--accent-green);">(YOU)</span>' : ''}</div>
+            <div class="lb-player-val">${valDisplay}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    /* ==========================================================================
+       6. GAMEPLAY LOGIC
        ========================================================================== */
     function startLevel(levelNum) {
       unlockAudioEngine();
@@ -901,6 +1055,7 @@
         }
 
         updateHUD();
+        syncScoreWithServer();
         showResultModal(true, stars, earnedCoins);
       } else {
         sfx.wrong();
@@ -911,7 +1066,7 @@
     }
 
     /* ==========================================================================
-       6. MISTAKE BANK & POWERUPS
+       7. MISTAKE BANK & POWERUPS
        ========================================================================== */
     function addToMistakesBank(level, sentence) {
       if (!State.mistakesBank.some(m => m.level === level)) {
@@ -982,7 +1137,7 @@
       } else if (type === 'hint') {
         autoPlaceNextHint();
       } else if (type === 'slow') {
-        voiceEngine.speak(State.targetSentence);
+        voiceEngine.speak(State.targetSentence, true);
       }
     }
 
@@ -1005,11 +1160,12 @@
       if (type === 'skip_pass') State.skipWaitPasses += 10;
       else State.inventory[type]++;
       updateHUD();
+      syncScoreWithServer();
       alert(`🎉 Purchased ${POWERUP_NAMES[type] || 'Item'}!`);
     }
 
     /* ==========================================================================
-       7. RESULT MODAL & ANIMATED MINIGAMES (CARD FLIP & CHEST OPEN)
+       8. RESULT MODAL & ANIMATED MINIGAMES
        ========================================================================== */
     function showResultModal(isWin, stars, coins) {
       const modal = document.getElementById('modal-result');
@@ -1109,14 +1265,11 @@
 
     function playCardFlipAnimation(cardElem) {
       if (cardElem.classList.contains('flipped')) return;
-
-      // Lock other cards
       const container = cardElem.parentElement;
       container.querySelectorAll('.card-flip-wrapper').forEach(c => c.style.pointerEvents = 'none');
 
       sfx.tap();
       cardElem.classList.add('flipped');
-
       const reward = getRandomBonusReward();
       const backFace = cardElem.querySelector('.card-back');
       backFace.innerText = reward.name;
@@ -1126,6 +1279,7 @@
         if (reward.type === 'coin') State.coins += reward.val;
         else State.inventory[reward.type] += reward.val;
         updateHUD();
+        syncScoreWithServer();
 
         const toast = document.getElementById('bonus-reward-toast');
         if (toast) toast.className = 'reward-toast-pop', toast.innerText = `🎉 WON: ${reward.name}`;
@@ -1134,7 +1288,6 @@
 
     function playChestOpenAnimation(chestElem) {
       if (chestElem.classList.contains('opened')) return;
-
       const container = chestElem.parentElement;
       container.querySelectorAll('.chest-item').forEach(c => c.style.pointerEvents = 'none');
 
@@ -1151,6 +1304,7 @@
         if (reward.type === 'coin') State.coins += reward.val;
         else State.inventory[reward.type] += reward.val;
         updateHUD();
+        syncScoreWithServer();
 
         const toast = document.getElementById('bonus-reward-toast');
         if (toast) toast.className = 'reward-toast-pop', toast.innerText = `🎉 UNLOCKED: ${reward.name}`;
@@ -1158,64 +1312,83 @@
     }
 
     /* ==========================================================================
-       8. ADMOB FAIL-SAFE BRIDGE (SOLVES 5s/6s FREEZE)
+       9. ADMOB HYBRID FAIL-SAFE HANDLER & SIMULATED AD PLAYER
        ========================================================================== */
     function watchAdForCoins() {
       showRewardedAdWithFailSafe(() => {
         State.coins += 100;
         updateHUD();
+        syncScoreWithServer();
         alert('🎉 Watched Video Ad! +100 Free Coins Granted.');
       });
     }
 
     function showRewardedAdWithFailSafe(onRewardSuccess) {
-      let isHandled = false;
+      let isRewarded = false;
 
-      const safetyTimeout = setTimeout(() => {
-        if (!isHandled) {
-          isHandled = true;
-          if (onRewardSuccess) onRewardSuccess();
-        }
-      }, 7000);
-
+      // 1. Try Native Capacitor AdMob Plugin
       if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.AdMob) {
-        const { AdMob, RewardAdPluginEvents } = window.Capacitor.Plugins;
+        try {
+          const { AdMob, RewardAdPluginEvents } = window.Capacitor.Plugins;
 
-        const rewardSub = AdMob.addListener(RewardAdPluginEvents.Rewarded, () => {
-          clearTimeout(safetyTimeout);
-          if (!isHandled) { isHandled = true; if (onRewardSuccess) onRewardSuccess(); }
-        });
-
-        const dismissSub = AdMob.addListener(RewardAdPluginEvents.Dismissed, () => {
-          clearTimeout(safetyTimeout);
-          if (!isHandled) { isHandled = true; if (onRewardSuccess) onRewardSuccess(); }
-          if (rewardSub) rewardSub.remove();
-          if (dismissSub) dismissSub.remove();
-        });
-
-        const failSub = AdMob.addListener(RewardAdPluginEvents.FailedToShow, () => {
-          clearTimeout(safetyTimeout);
-          if (!isHandled) { isHandled = true; if (onRewardSuccess) onRewardSuccess(); }
-          if (failSub) failSub.remove();
-        });
-
-        AdMob.prepareRewardVideoAd({ adId: ADMOB_TEST.rewarded })
-          .then(() => AdMob.showRewardVideoAd())
-          .catch(() => {
-            clearTimeout(safetyTimeout);
-            if (!isHandled) { isHandled = true; if (onRewardSuccess) onRewardSuccess(); }
+          const rewardSub = AdMob.addListener(RewardAdPluginEvents.Rewarded, () => {
+            isRewarded = true;
           });
-      } else {
-        clearTimeout(safetyTimeout);
-        if (!isHandled) {
-          isHandled = true;
-          if (onRewardSuccess) onRewardSuccess();
-        }
+
+          const dismissSub = AdMob.addListener(RewardAdPluginEvents.Dismissed, () => {
+            if (isRewarded && onRewardSuccess) onRewardSuccess();
+            if (rewardSub) rewardSub.remove();
+            if (dismissSub) dismissSub.remove();
+          });
+
+          const failSub = AdMob.addListener(RewardAdPluginEvents.FailedToShow, () => {
+            if (failSub) failSub.remove();
+            showSimulatedAdPlayer(onRewardSuccess);
+          });
+
+          AdMob.prepareRewardVideoAd({ adId: ADMOB_TEST.rewarded })
+            .then(() => AdMob.showRewardVideoAd())
+            .catch(() => showSimulatedAdPlayer(onRewardSuccess));
+          return;
+        } catch (err) {}
       }
+
+      // 2. Fallback to Simulated Video Ad Player for Dev/Web mode
+      showSimulatedAdPlayer(onRewardSuccess);
+    }
+
+    function showSimulatedAdPlayer(onRewardSuccess) {
+      const modal = document.getElementById('modal-ad-sim');
+      const counter = document.getElementById('ad-sim-counter');
+      const progressBar = document.getElementById('ad-sim-progress-bar');
+      const btnClose = document.getElementById('btn-close-ad-sim');
+
+      modal.classList.add('active');
+      let secLeft = 5;
+      counter.innerText = secLeft;
+      progressBar.style.width = '0%';
+      btnClose.disabled = true; btnClose.style.opacity = '0.5';
+
+      let timer = setInterval(() => {
+        secLeft--;
+        counter.innerText = secLeft;
+        progressBar.style.width = `${((5 - secLeft) / 5) * 100}%`;
+
+        if (secLeft <= 0) {
+          clearInterval(timer);
+          counter.innerText = '0';
+          btnClose.disabled = false; btnClose.style.opacity = '1';
+        }
+      }, 1000);
+
+      btnClose.onclick = () => {
+        modal.classList.remove('active');
+        if (onRewardSuccess) onRewardSuccess();
+      };
     }
 
     /* ==========================================================================
-       9. UTILITIES & EVENT BINDINGS
+       10. UTILITIES & EVENT BINDINGS
        ========================================================================== */
     function launchConfetti() {
       const canvas = document.getElementById('canvas-confetti');
