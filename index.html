@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Fast English 1000 Sentence Puzzle V5.2 Ultra Pro</title>
+  <title>Fast English 1000 Sentence Puzzle V5.3 Pro</title>
   <style>
     /* ==========================================================================
        1. CORE THEMES & DESIGN TOKENS
@@ -345,7 +345,7 @@
   <header class="app-topbar">
     <div class="topbar-left">
       <button class="btn-hamburger" id="btn-open-sidebar">☰</button>
-      <div class="app-logo-title">⚡ FAST ENGLISH V5.2</div>
+      <div class="app-logo-title">⚡ FAST ENGLISH V5.3</div>
     </div>
     <div class="user-hud-stats">
       <div class="hud-chip hud-coins">🪙 <span id="hud-coins-val">100</span></div>
@@ -555,7 +555,7 @@
     <div class="modal-card">
       <h3 style="color: var(--accent-cyan); font-size: 16px; margin-bottom: 10px;">🎬 REWARD VIDEO AD</h3>
       <div class="ad-sim-box">
-        <p style="font-size:13px; font-weight:700; margin-bottom:6px;">Flood-It! Puzzle Game</p>
+        <p style="font-size:13px; font-weight:700; margin-bottom:6px;">Fast English Reward Sponsor</p>
         <p style="font-size:11px; color:#cbd5e1;">Reward will be granted in <span id="ad-sim-counter">5</span>s...</p>
         <div class="ad-sim-progress" id="ad-sim-progress-bar"></div>
       </div>
@@ -563,7 +563,7 @@
     </div>
   </div>
 
-  <div class="admob-banner-stub">[AdMob Adaptive Bottom Banner Placeholder]</div>
+  <div class="admob-banner-stub">[AdMob Adaptive Bottom Banner Active]</div>
 
   <script>
     const SERVER_API_URL = "https://khotrithucso.io.vn/apps/0004/index.php";
@@ -588,7 +588,7 @@
     for (let i = 0; i < 1000; i++) RAW_SENTENCES.push(BASE_SENTENCES[i % BASE_SENTENCES.length]);
 
     /* ==========================================================================
-       2. REFACTORED MULTI-PLATFORM VOICE ENGINE (ANDROID / IOS / WEB)
+       2. MULTI-PLATFORM VOICE ENGINE (ANDROID WEBVIEW / CAPACITOR / WEB)
        ========================================================================== */
     class VoiceEngine {
       constructor() {
@@ -621,26 +621,24 @@
       speak(text, isSlow = false) {
         if (!text) return;
         text = text.trim();
-        if ('speechSynthesis' in window) window.speechSynthesis.resume();
-
-        // Re-attempt loading voices if empty
-        if (this.voices.length === 0 && 'speechSynthesis' in window) {
-          this.loadVoices();
-        }
 
         if ('speechSynthesis' in window) {
           try {
             window.speechSynthesis.cancel();
+            window.speechSynthesis.resume();
+
+            if (this.voices.length === 0) {
+              this.loadVoices();
+            }
+
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.lang = 'en-US';
-            utterance.rate = isSlow ? 0.75 : 0.95;
+            utterance.rate = isSlow ? 0.70 : 0.90;
 
             const isMale = (this.currentGender === 'male');
-            
-            // Broad search terms compatible with Windows, Mac, iOS, Android (Google TTS)
             const targetKeywords = isMale 
-              ? ['male', 'david', 'george', 'brian', 'alex', 'guy', 'en-us-x-tpf-local', 'en-us-x-sfg-network'] 
-              : ['female', 'zira', 'samantha', 'victoria', 'salli', 'jenny', 'google us english', 'en-us-x-iol-local'];
+              ? ['male', 'david', 'george', 'brian', 'alex', 'guy', 'en-us-x-tpf-local'] 
+              : ['female', 'zira', 'samantha', 'victoria', 'salli', 'jenny', 'google us english'];
 
             let chosenVoice = this.voices.find(v => targetKeywords.some(k => v.name.toLowerCase().includes(k)));
             if (!chosenVoice && this.voices.length > 0) {
@@ -651,15 +649,17 @@
               utterance.voice = chosenVoice;
             }
             
-            // Adjust pitch to clearly distinguish gender regardless of system TTS
-            utterance.pitch = isMale ? 0.8 : 1.25;
-
+            utterance.pitch = isMale ? 0.85 : 1.25;
             utterance.onerror = () => this.playStreamFallback(text);
+            
             window.speechSynthesis.speak(utterance);
             return;
-          } catch (e) {}
+          } catch (e) {
+            this.playStreamFallback(text);
+          }
+        } else {
+          this.playStreamFallback(text);
         }
-        this.playStreamFallback(text);
       }
 
       playStreamFallback(text) {
@@ -669,7 +669,6 @@
           const streamUrl = `https://api.streamelements.com/kappa/v2/speech?voice=${voiceName}&text=${encodeURIComponent(text)}`;
           const audio = new Audio(streamUrl);
           audio.play().catch(() => {
-            // Google Translate TTS Backup
             const googleUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(text)}&tl=en&client=tw-ob`;
             new Audio(googleUrl).play().catch(() => {});
           });
@@ -683,17 +682,30 @@
        ========================================================================== */
     class SoundFX {
       constructor() { this.ctx = null; }
-      init() { if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); }
+      init() {
+        if (!this.ctx) {
+          const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+          if (AudioContextClass) this.ctx = new AudioContextClass();
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
       playTone(freq, type, duration) {
         this.init();
         if (!this.ctx) return;
-        const osc = this.ctx.createOscillator();
-        const gain = this.ctx.createGain();
-        osc.type = type; osc.frequency.value = freq;
-        gain.gain.setValueAtTime(0.15, this.ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + duration);
-        osc.connect(gain); gain.connect(this.ctx.destination);
-        osc.start(); osc.stop(this.ctx.currentTime + duration);
+        try {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = type; 
+          osc.frequency.value = freq;
+          gain.gain.setValueAtTime(0.15, this.ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + duration);
+          osc.connect(gain); 
+          gain.connect(this.ctx.destination);
+          osc.start(); 
+          osc.stop(this.ctx.currentTime + duration);
+        } catch(e) {}
       }
       tap() { this.playTone(600, 'sine', 0.08); triggerHaptic(10); }
       correct() {
@@ -711,7 +723,9 @@
     const sfx = new SoundFX();
 
     function triggerHaptic(pattern) {
-      if ('vibrate' in navigator) navigator.vibrate(pattern);
+      if ('vibrate' in navigator) {
+        try { navigator.vibrate(pattern); } catch(e) {}
+      }
     }
 
     /* ==========================================================================
@@ -767,20 +781,27 @@
       applyCurrentTheme();
       updateHUD();
       updateVoiceLabels();
-      document.getElementById('player-name-input').value = State.playerName;
-      document.getElementById('player-email-input').value = State.playerEmail;
+      
+      const nameInput = document.getElementById('player-name-input');
+      const emailInput = document.getElementById('player-email-input');
+      if (nameInput) nameInput.value = State.playerName;
+      if (emailInput) emailInput.value = State.playerEmail;
 
-      document.getElementById('player-name-input').addEventListener('change', (e) => {
-        State.playerName = e.target.value.trim() || 'Learner';
-        localStorage.setItem('fe_player_name', State.playerName);
-        syncScoreWithServer();
-      });
+      if (nameInput) {
+        nameInput.addEventListener('change', (e) => {
+          State.playerName = e.target.value.trim() || 'Learner';
+          localStorage.setItem('fe_player_name', State.playerName);
+          syncScoreWithServer();
+        });
+      }
 
-      document.getElementById('player-email-input').addEventListener('change', (e) => {
-        State.playerEmail = e.target.value.trim() || '';
-        localStorage.setItem('fe_player_email', State.playerEmail);
-        syncScoreWithServer();
-      });
+      if (emailInput) {
+        emailInput.addEventListener('change', (e) => {
+          State.playerEmail = e.target.value.trim() || '';
+          localStorage.setItem('fe_player_email', State.playerEmail);
+          syncScoreWithServer();
+        });
+      }
 
       setupEventListeners();
       renderMapGrid();
@@ -873,7 +894,7 @@
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
-      }).catch(err => console.log('Offline mode - score stored locally'));
+      }).catch(() => {});
     }
 
     function fetchLeaderboardFromServer() {
@@ -883,24 +904,26 @@
       fetch(`${SERVER_API_URL}?action=get_leaderboard`)
         .then(res => res.json())
         .then(data => {
-          if (data.status === 'success') {
+          if (data && data.status === 'success') {
             State.cachedLeaderboard = data;
             renderLeaderboardTab(State.activeLbTab);
           } else {
-            container.innerHTML = '<div style="text-align:center; padding:20px; color:var(--accent-red);">Failed to fetch leaderboard.</div>';
+            renderOfflineLeaderboard();
           }
         })
-        .catch(() => {
-          // Render local user preview if server unreachable
-          container.innerHTML = `
-            <div class="lb-item-card my-rank">
-              <div class="lb-rank-badge">1</div>
-              <div class="lb-player-name">${State.playerName} (YOU - Offline)</div>
-              <div class="lb-player-val">⭐ ${getTotalStars()}</div>
-            </div>
-            <p style="text-align:center; font-size:11px; color:var(--text-muted); margin-top:10px;">Connect internet to view global rankings!</p>
-          `;
-        });
+        .catch(() => renderOfflineLeaderboard());
+    }
+
+    function renderOfflineLeaderboard() {
+      const container = document.getElementById('leaderboard-container');
+      container.innerHTML = `
+        <div class="lb-item-card my-rank">
+          <div class="lb-rank-badge">1</div>
+          <div class="lb-player-name">${State.playerName} (YOU - Local)</div>
+          <div class="lb-player-val">⭐ ${getTotalStars()}</div>
+        </div>
+        <p style="text-align:center; font-size:11px; color:var(--text-muted); margin-top:10px;">Connect internet to sync global rankings!</p>
+      `;
     }
 
     function switchLeaderboardTab(tabKey) {
@@ -992,14 +1015,16 @@
       const dropZone = document.getElementById('drop-zone-container');
       const wordPool = document.getElementById('word-pool-container');
 
-      dropZone.innerHTML = ''; wordPool.innerHTML = '';
+      dropZone.innerHTML = ''; 
+      wordPool.innerHTML = '';
 
       if (State.selectedWords.length === 0) {
         dropZone.innerHTML = '<span style="font-size: 12px; color: var(--text-muted);">Tap words below to assemble sentence...</span>';
       } else {
         State.selectedWords.forEach((word, idx) => {
           const chip = document.createElement('div');
-          chip.className = 'word-chip'; chip.innerText = word;
+          chip.className = 'word-chip'; 
+          chip.innerText = word;
           chip.onclick = () => {
             sfx.tap();
             State.shuffledWords.push(State.selectedWords.splice(idx, 1)[0]);
@@ -1011,7 +1036,8 @@
 
       State.shuffledWords.forEach((word, idx) => {
         const chip = document.createElement('div');
-        chip.className = 'word-chip'; chip.innerText = word;
+        chip.className = 'word-chip'; 
+        chip.innerText = word;
         chip.onclick = () => {
           sfx.tap();
           State.selectedWords.push(State.shuffledWords.splice(idx, 1)[0]);
@@ -1182,10 +1208,13 @@
       clearInterval(State.delayTimerInterval);
 
       if (isWin) {
-        title.innerText = 'STAGE COMPLETED!'; title.style.color = 'var(--accent-green)';
+        title.innerText = 'STAGE COMPLETED!'; 
+        title.style.color = 'var(--accent-green)';
         starsDisp.innerText = '⭐'.repeat(stars);
         msg.innerText = coins > 0 ? `Awesome! Earned +${coins} Coins!` : `Already completed!`;
-        btnRetry.style.display = 'none'; btnNext.style.display = 'block'; btnSkipWait.style.display = 'block';
+        btnRetry.style.display = 'none'; 
+        btnNext.style.display = 'block'; 
+        btnSkipWait.style.display = 'block';
 
         if (stars === 3) {
           bonusBox.style.display = 'block';
@@ -1195,13 +1224,17 @@
         }
 
         if (State.skipWaitPasses > 0) {
-          State.skipWaitPasses--; updateHUD();
-          btnNext.disabled = false; btnNext.style.opacity = '1';
+          State.skipWaitPasses--; 
+          updateHUD();
+          btnNext.disabled = false; 
+          btnNext.style.opacity = '1';
           delayTxt.innerText = `Skip Wait Pass Active! (${State.skipWaitPasses} passes left)`;
           return;
         }
 
-        State.delaySec = 10; btnNext.disabled = true; btnNext.style.opacity = '0.5';
+        State.delaySec = 10; 
+        btnNext.disabled = true; 
+        btnNext.style.opacity = '0.5';
         delayTxt.innerText = `Next Level Unlocks in: ${State.delaySec}s`;
 
         State.delayTimerInterval = setInterval(() => {
@@ -1209,15 +1242,21 @@
           delayTxt.innerText = `Next Level Unlocks in: ${State.delaySec}s`;
           if (State.delaySec <= 0) {
             clearInterval(State.delayTimerInterval);
-            btnNext.disabled = false; btnNext.style.opacity = '1';
+            btnNext.disabled = false; 
+            btnNext.style.opacity = '1';
             delayTxt.innerText = 'Ready for Next Level!';
           }
         }, 1000);
       } else {
-        title.innerText = 'TIME OUT / FAILED!'; title.style.color = 'var(--accent-red)';
-        starsDisp.innerText = '❌❌❌'; msg.innerText = 'Sentence added to Mistake Bank!';
-        delayTxt.innerText = ''; bonusBox.style.display = 'none';
-        btnNext.style.display = 'none'; btnSkipWait.style.display = 'none'; btnRetry.style.display = 'block';
+        title.innerText = 'TIME OUT / FAILED!'; 
+        title.style.color = 'var(--accent-red)';
+        starsDisp.innerText = '❌❌❌'; 
+        msg.innerText = 'Sentence added to Mistake Bank!';
+        delayTxt.innerText = ''; 
+        bonusBox.style.display = 'none';
+        btnNext.style.display = 'none'; 
+        btnSkipWait.style.display = 'none'; 
+        btnRetry.style.display = 'block';
       }
     }
 
@@ -1323,13 +1362,14 @@
       });
     }
 
-    function showRewardedAdWithFailSafe(onRewardSuccess) {
+    async function showRewardedAdWithFailSafe(onRewardSuccess) {
       let isRewarded = false;
 
-      // 1. Try Native Capacitor AdMob Plugin
       if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.AdMob) {
         try {
           const { AdMob, RewardAdPluginEvents } = window.Capacitor.Plugins;
+
+          try { await AdMob.initialize({}); } catch(e) {}
 
           const rewardSub = AdMob.addListener(RewardAdPluginEvents.Rewarded, () => {
             isRewarded = true;
@@ -1353,7 +1393,6 @@
         } catch (err) {}
       }
 
-      // 2. Fallback to Simulated Video Ad Player for Dev/Web mode
       showSimulatedAdPlayer(onRewardSuccess);
     }
 
@@ -1367,7 +1406,8 @@
       let secLeft = 5;
       counter.innerText = secLeft;
       progressBar.style.width = '0%';
-      btnClose.disabled = true; btnClose.style.opacity = '0.5';
+      btnClose.disabled = true; 
+      btnClose.style.opacity = '0.5';
 
       let timer = setInterval(() => {
         secLeft--;
@@ -1377,7 +1417,8 @@
         if (secLeft <= 0) {
           clearInterval(timer);
           counter.innerText = '0';
-          btnClose.disabled = false; btnClose.style.opacity = '1';
+          btnClose.disabled = false; 
+          btnClose.style.opacity = '1';
         }
       }, 1000);
 
@@ -1393,7 +1434,8 @@
     function launchConfetti() {
       const canvas = document.getElementById('canvas-confetti');
       const ctx = canvas.getContext('2d');
-      canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+      canvas.width = window.innerWidth; 
+      canvas.height = window.innerHeight;
       const particles = [];
       const colors = ['#10b981', '#0284c7', '#f59e0b', '#ef4444', '#8b5cf6'];
 
@@ -1446,7 +1488,8 @@
 
     function resetGameProgress() {
       if (confirm('Are you sure you want to reset all game progress?')) {
-        localStorage.clear(); location.reload();
+        localStorage.clear(); 
+        location.reload();
       }
     }
 
@@ -1458,14 +1501,20 @@
       document.getElementById('btn-play-audio').onclick = () => voiceEngine.speak(State.targetSentence);
 
       document.getElementById('btn-game-retry').onclick = () => {
-        if (State.coins >= 10) { State.coins -= 10; updateHUD(); startLevel(State.currentLevel); }
-        else alert('Need 10 Coins to retry!');
+        if (State.coins >= 10) { 
+          State.coins -= 10; 
+          updateHUD(); 
+          startLevel(State.currentLevel); 
+        } else {
+          alert('Need 10 Coins to retry!');
+        }
       };
 
       document.getElementById('btn-game-clear').onclick = () => {
         sfx.tap();
         State.shuffledWords = [...State.shuffledWords, ...State.selectedWords];
-        State.selectedWords = []; renderWordChips();
+        State.selectedWords = []; 
+        renderWordChips();
       };
 
       document.getElementById('btn-game-check').onclick = checkAnswer;
@@ -1480,7 +1529,8 @@
 
       document.getElementById('btn-skip-wait-ad').onclick = () => {
         watchAdForCoins();
-        State.skipWaitPasses += 10; updateHUD();
+        State.skipWaitPasses += 10; 
+        updateHUD();
         clearInterval(State.delayTimerInterval);
         document.getElementById('btn-next-level').disabled = false;
         document.getElementById('btn-next-level').style.opacity = '1';
@@ -1488,12 +1538,19 @@
       };
 
       document.getElementById('btn-modal-retry').onclick = () => {
-        if (State.coins >= 10) { State.coins -= 10; updateHUD(); document.getElementById('modal-result').classList.remove('active'); startLevel(State.currentLevel); }
-        else alert('Not enough coins!');
+        if (State.coins >= 10) { 
+          State.coins -= 10; 
+          updateHUD(); 
+          document.getElementById('modal-result').classList.remove('active'); 
+          startLevel(State.currentLevel); 
+        } else {
+          alert('Not enough coins!');
+        }
       };
 
       document.getElementById('btn-modal-home').onclick = () => {
-        clearInterval(State.delayTimerInterval); clearInterval(State.timerInterval);
+        clearInterval(State.delayTimerInterval); 
+        clearInterval(State.timerInterval);
         document.getElementById('modal-result').classList.remove('active');
         navigateTo('screen-home');
       };
