@@ -6,21 +6,22 @@
   <title>Fast English 1000 Sentence Puzzle V3 Pro</title>
   <style>
     /* ==========================================================================
-       1. CORE SYSTEM TOKENS & RESET
+       1. CORE SYSTEM TOKENS & BRIGHT LIGHT THEME
        ========================================================================== */
     :root {
-      --bg-dark: #090d16;
-      --card-bg: #0f172a;
-      --surface-bg: #1e293b;
+      --bg-dark: #f8fafc;
+      --card-bg: #ffffff;
+      --surface-bg: #f1f5f9;
       --accent-green: #10b981;
       --accent-green-hover: #059669;
       --accent-cyan: #0284c7;
       --accent-yellow: #f59e0b;
       --accent-red: #ef4444;
-      --text-light: #f8fafc;
-      --text-muted: #94a3b8;
-      --border-color: #334155;
-      --shadow-neon: 0 0 15px rgba(16, 185, 129, 0.3);
+      --text-light: #0f172a;
+      --text-muted: #64748b;
+      --border-color: #e2e8f0;
+      --shadow-soft: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.02);
+      --shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
     }
 
     * {
@@ -54,6 +55,7 @@
       position: sticky;
       top: 0;
       z-index: 90;
+      box-shadow: var(--shadow-card);
     }
 
     .topbar-left {
@@ -97,13 +99,14 @@
     }
 
     .hud-coins { color: var(--accent-yellow); }
-    .hud-stars { color: #facc15; }
+    .hud-stars { color: #d97706; }
 
     /* SIDEBAR DRAWER */
     .sidebar-overlay {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0, 0, 0, 0.75);
+      background: rgba(15, 23, 42, 0.4);
+      backdrop-filter: blur(4px);
       z-index: 200;
       opacity: 0;
       pointer-events: none;
@@ -127,6 +130,7 @@
       display: flex;
       flex-direction: column;
       padding: 20px 16px;
+      box-shadow: var(--shadow-soft);
     }
 
     .sidebar-overlay.active .sidebar-drawer {
@@ -136,7 +140,7 @@
     .sidebar-header {
       font-size: 18px;
       font-weight: 800;
-      color: var(--accent-green);
+      color: var(--accent-cyan);
       margin-bottom: 24px;
       padding-bottom: 12px;
       border-bottom: 1px solid var(--border-color);
@@ -164,6 +168,11 @@
       display: flex;
       align-items: center;
       gap: 12px;
+      transition: background 0.2s;
+    }
+
+    .sidebar-btn:hover {
+      background: #e2e8f0;
     }
 
     /* ==========================================================================
@@ -191,13 +200,13 @@
 
     /* SCREEN 1: HOME */
     .home-hero-card {
-      background: linear-gradient(135deg, #0284c7 0%, #0f172a 100%);
+      background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
       border-radius: 16px;
-      padding: 20px 16px;
+      padding: 24px 16px;
       text-align: center;
       margin-bottom: 20px;
       border: 1px solid var(--border-color);
-      box-shadow: var(--shadow-neon);
+      box-shadow: var(--shadow-soft);
     }
 
     .home-hero-card h1 {
@@ -208,8 +217,8 @@
     }
 
     .home-hero-card p {
-      font-size: 12px;
-      color: #e2e8f0;
+      font-size: 13px;
+      color: #f0f9ff;
     }
 
     .player-input-group {
@@ -219,20 +228,26 @@
     .player-input-group label {
       display: block;
       font-size: 12px;
+      font-weight: 700;
       color: var(--text-muted);
-      margin-bottom: 4px;
+      margin-bottom: 6px;
       text-align: left;
     }
 
     .form-control {
       width: 100%;
-      background: var(--surface-bg);
-      border: 1px solid var(--border-color);
+      background: var(--card-bg);
+      border: 1.5px solid var(--border-color);
       color: var(--text-light);
       padding: 12px 14px;
       border-radius: 8px;
       font-size: 14px;
       outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .form-control:focus {
+      border-color: var(--accent-cyan);
     }
 
     .btn-main-action {
@@ -246,7 +261,7 @@
       cursor: pointer;
       width: 100%;
       margin-bottom: 10px;
-      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
       transition: transform 0.1s, background 0.2s;
     }
 
@@ -256,9 +271,9 @@
     }
 
     .btn-secondary-action {
-      background: var(--surface-bg);
+      background: var(--card-bg);
       color: var(--text-light);
-      border: 1px solid var(--border-color);
+      border: 1.5px solid var(--border-color);
       padding: 12px;
       border-radius: 10px;
       font-size: 14px;
@@ -266,6 +281,12 @@
       cursor: pointer;
       width: 100%;
       margin-bottom: 10px;
+      box-shadow: var(--shadow-card);
+      transition: background 0.2s;
+    }
+
+    .btn-secondary-action:hover {
+      background: var(--surface-bg);
     }
 
     /* SCREEN 2: LEVEL MAP */
@@ -286,8 +307,8 @@
     }
 
     .level-node {
-      background: var(--surface-bg);
-      border: 1px solid var(--border-color);
+      background: var(--card-bg);
+      border: 1.5px solid var(--border-color);
       border-radius: 10px;
       aspect-ratio: 1;
       display: flex;
@@ -297,23 +318,25 @@
       cursor: pointer;
       font-weight: 700;
       font-size: 13px;
+      box-shadow: var(--shadow-card);
     }
 
     .level-node.locked {
-      opacity: 0.35;
+      opacity: 0.4;
       cursor: not-allowed;
-      background: #090d16;
+      background: #e2e8f0;
     }
 
     .level-node.active-stage {
       border-color: var(--accent-green);
-      box-shadow: 0 0 10px rgba(16, 185, 129, 0.6);
-      background: rgba(16, 185, 129, 0.15);
+      box-shadow: 0 0 12px rgba(16, 185, 129, 0.4);
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--accent-green-hover);
     }
 
     .level-stars-mini {
       font-size: 9px;
-      color: #facc15;
+      color: var(--accent-yellow);
       margin-top: 2px;
     }
 
@@ -327,6 +350,7 @@
       padding: 10px 14px;
       border-radius: 10px;
       border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-card);
     }
 
     .timer-badge {
@@ -352,6 +376,15 @@
       padding: 14px;
       text-align: center;
       margin-bottom: 12px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .audio-controls-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 6px;
     }
 
     .btn-speaker {
@@ -366,16 +399,27 @@
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      box-shadow: 0 4px 10px rgba(2, 132, 199, 0.3);
+      box-shadow: 0 4px 10px rgba(2, 132, 199, 0.25);
     }
 
     .btn-speaker:active {
       transform: scale(0.96);
     }
 
+    .btn-voice-toggle {
+      background: var(--surface-bg);
+      border: 1px solid var(--border-color);
+      color: var(--text-light);
+      padding: 8px 12px;
+      border-radius: 16px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
     .drop-zone-box {
-      background: rgba(15, 23, 42, 0.8);
-      border: 2px dashed var(--border-color);
+      background: #ffffff;
+      border: 2px dashed #cbd5e1;
       border-radius: 12px;
       min-height: 90px;
       padding: 12px;
@@ -406,20 +450,21 @@
     }
 
     .word-chip {
-      background: var(--surface-bg);
-      border: 1px solid var(--border-color);
+      background: #ffffff;
+      border: 1.5px solid var(--border-color);
       color: var(--text-light);
       padding: 10px 14px;
       border-radius: 8px;
       font-size: 14px;
       font-weight: 600;
       cursor: pointer;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      transition: background 0.15s, transform 0.1s;
     }
 
     .word-chip:active {
       transform: scale(0.95);
-      background: var(--accent-cyan);
+      background: #e0f2fe;
     }
 
     .powerups-bar {
@@ -431,7 +476,7 @@
     .btn-powerup {
       flex: 1;
       background: var(--card-bg);
-      border: 1px solid var(--border-color);
+      border: 1.5px solid var(--border-color);
       color: var(--text-light);
       padding: 8px;
       border-radius: 8px;
@@ -442,9 +487,10 @@
       flex-direction: column;
       align-items: center;
       gap: 2px;
+      box-shadow: var(--shadow-card);
     }
 
-    .btn-powerup span { color: var(--accent-yellow); font-size: 10px; }
+    .btn-powerup span { color: var(--accent-yellow); font-size: 10px; font-weight: 800; }
 
     .gameplay-actions {
       display: flex;
@@ -461,10 +507,12 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      box-shadow: var(--shadow-card);
     }
 
     .shop-item-info h4 { font-size: 14px; color: var(--accent-cyan); margin-bottom: 2px; }
     .shop-item-info p { font-size: 11px; color: var(--text-muted); }
+    .shop-item-stock { font-size: 11px; font-weight: 800; color: var(--accent-green); margin-top: 4px; }
 
     /* SCREEN 5: LEADERBOARD SYSTEM */
     .leaderboard-tabs {
@@ -497,6 +545,7 @@
       border: 1px solid var(--border-color);
       border-radius: 12px;
       overflow: hidden;
+      box-shadow: var(--shadow-card);
     }
 
     .leaderboard-row {
@@ -515,7 +564,8 @@
     .modal-backdrop {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0, 0, 0, 0.85);
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(4px);
       z-index: 300;
       display: none;
       align-items: center;
@@ -533,7 +583,7 @@
       width: 100%;
       max-width: 380px;
       text-align: center;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      box-shadow: var(--shadow-soft);
       animation: popIn 0.2s ease-out;
     }
 
@@ -543,10 +593,10 @@
     }
 
     .modal-stars-win { font-size: 32px; margin: 10px 0; }
-    .timer-delay-text { font-size: 12px; color: var(--accent-yellow); margin: 10px 0; }
+    .timer-delay-text { font-size: 12px; color: var(--accent-yellow); font-weight: 700; margin: 10px 0; }
 
     .admob-banner-stub {
-      background: #020617;
+      background: #f1f5f9;
       border-top: 1px solid var(--border-color);
       color: var(--text-muted);
       font-size: 10px;
@@ -584,6 +634,7 @@
         <button class="sidebar-btn" onclick="navigateTo('screen-map')">🗺️ 1,000 Level Map</button>
         <button class="sidebar-btn" onclick="navigateTo('screen-shop')">🛒 Power-Up Shop</button>
         <button class="sidebar-btn" onclick="navigateTo('screen-leaderboard')">🏆 Online Leaderboard</button>
+        <button class="sidebar-btn" onclick="toggleVoiceGenderDrawer()">🎙️ Voice: <span id="drawer-voice-label">Female (US)</span></button>
         <button class="sidebar-btn" onclick="resetGameProgress()">🔄 Reset Game Progress</button>
       </div>
     </div>
@@ -595,7 +646,7 @@
     <section class="screen active" id="screen-home">
       <div class="home-hero-card">
         <h1>1,000 SENTENCE PUZZLES</h1>
-        <p>Reflex English sentence assembly in 10s per stage!</p>
+        <p>Reflex English sentence assembly in 30s per stage!</p>
       </div>
 
       <div class="player-input-group">
@@ -604,7 +655,7 @@
       </div>
 
       <div class="player-input-group">
-        <label for="player-email-input">STUDENT EMAIL (FOR REWARDS & COURSE NOTIFICATIONS):</label>
+        <label for="player-email-input">PLAYER EMAIL (FOR REWARDS & NOTIFICATIONS):</label>
         <input type="email" id="player-email-input" class="form-control" placeholder="example@gmail.com">
       </div>
 
@@ -631,21 +682,24 @@
     <section class="screen" id="screen-game">
       <div class="gameplay-hud">
         <span style="font-weight: 800; color: var(--accent-cyan);" id="game-level-title">LEVEL 001</span>
-        <div class="timer-badge" id="game-timer-display">⏱️ 10s</div>
+        <div class="timer-badge" id="game-timer-display">⏱️ 30s</div>
       </div>
 
       <div class="audio-card">
         <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 6px;">TAP TO LISTEN SENTENCE AUDIO</p>
-        <button class="btn-speaker" id="btn-play-audio">🔊 LISTEN SENTENCE (1.0x)</button>
+        <div class="audio-controls-row">
+          <button class="btn-speaker" id="btn-play-audio">🔊 LISTEN SENTENCE</button>
+          <button class="btn-voice-toggle" id="btn-voice-toggle" onclick="toggleVoiceGender()">🎙️ Voice: Female</button>
+        </div>
       </div>
 
       <div class="drop-zone-box" id="drop-zone-container"></div>
       <div class="word-pool-box" id="word-pool-container"></div>
 
       <div class="powerups-bar">
-        <button class="btn-powerup" id="btn-powerup-time">⌛ +10s Time <span>(30🪙)</span></button>
-        <button class="btn-powerup" id="btn-powerup-hint">🧲 Smart Hint <span>(40🪙)</span></button>
-        <button class="btn-powerup" id="btn-powerup-slow">🐢 Slow Audio <span>(50🪙)</span></button>
+        <button class="btn-powerup" id="btn-powerup-time" onclick="usePowerup('time')">⌛ +10s Time <span id="powerup-count-time">(x0)</span></button>
+        <button class="btn-powerup" id="btn-powerup-hint" onclick="usePowerup('hint')">🧲 Smart Hint <span id="powerup-count-hint">(x0)</span></button>
+        <button class="btn-powerup" id="btn-powerup-slow" onclick="usePowerup('slow')">🐢 Slow Audio <span id="powerup-count-slow">(x0)</span></button>
       </div>
 
       <div class="gameplay-actions">
@@ -663,32 +717,36 @@
         <div class="shop-item-info">
           <h4>⌛ Extra Time +10s</h4>
           <p>Add 10 seconds to current level timer</p>
+          <div class="shop-item-stock">Owned: <span id="shop-stock-time">0</span></div>
         </div>
-        <button class="btn-secondary-action" style="width: auto; margin:0;" onclick="buyPowerup('time', 30)">30 🪙</button>
+        <button class="btn-secondary-action" style="width: auto; margin:0;" onclick="buyShopItem('time', 30)">30 🪙</button>
       </div>
 
       <div class="shop-item-card">
         <div class="shop-item-info">
           <h4>🧲 Smart Hint Word</h4>
           <p>Auto-place the next correct word into slot</p>
+          <div class="shop-item-stock">Owned: <span id="shop-stock-hint">0</span></div>
         </div>
-        <button class="btn-secondary-action" style="width: auto; margin:0;" onclick="buyPowerup('hint', 40)">40 🪙</button>
+        <button class="btn-secondary-action" style="width: auto; margin:0;" onclick="buyShopItem('hint', 40)">40 🪙</button>
       </div>
 
       <div class="shop-item-card">
         <div class="shop-item-info">
           <h4>🐢 Slow Audio Assist (0.75x)</h4>
-          <p>Listen sentence at 0.75x speed once</p>
+          <p>Listen sentence at 0.75x slow speed</p>
+          <div class="shop-item-stock">Owned: <span id="shop-stock-slow">0</span></div>
         </div>
-        <button class="btn-secondary-action" style="width: auto; margin:0;" onclick="buyPowerup('slow', 50)">50 🪙</button>
+        <button class="btn-secondary-action" style="width: auto; margin:0;" onclick="buyShopItem('slow', 50)">50 🪙</button>
       </div>
 
       <div class="shop-item-card">
         <div class="shop-item-info">
           <h4>⚡ Skip Wait Pass (10 Levels)</h4>
           <p>Bypass the 10s wait timer for the next 10 levels</p>
+          <div class="shop-item-stock">Passes Left: <span id="shop-stock-skip">0</span></div>
         </div>
-        <button class="btn-secondary-action" style="width: auto; margin:0;" onclick="buyPowerup('skip_pass', 60)">60 🪙</button>
+        <button class="btn-secondary-action" style="width: auto; margin:0;" onclick="buyShopItem('skip_pass', 60)">60 🪙</button>
       </div>
 
       <div class="shop-item-card">
@@ -727,10 +785,20 @@
       <!-- ACTION BUTTONS -->
       <button class="btn-main-action" id="btn-next-level" disabled style="opacity: 0.5;">NEXT LEVEL ➔</button>
       <button class="btn-secondary-action" id="btn-skip-wait-ad">🎬 SKIP 10s WAIT FOR NEXT 10 LEVELS (WATCH 30s AD)</button>
-      <button class="btn-secondary-action" id="btn-modal-retry" style="display:none; background:var(--accent-red); border:none;">🔄 RETRY THIS LEVEL (10 Coins)</button>
-      
-      <!-- NEW: NÚT QUAY VỀ TRANG CHÍNH -->
-      <button class="btn-secondary-action" id="btn-modal-home" style="margin-top:8px; background:var(--surface-bg);">🏠 HOME MENU</button>
+      <button class="btn-secondary-action" id="btn-modal-retry" style="display:none; background:var(--accent-red); color:#fff; border:none;">🔄 RETRY THIS LEVEL (10 Coins)</button>
+      <button class="btn-secondary-action" id="btn-modal-home" style="margin-top:8px;">🏠 HOME MENU</button>
+    </div>
+  </div>
+
+  <!-- PURCHASE CONFIRMATION MODAL -->
+  <div class="modal-backdrop" id="modal-confirm-purchase">
+    <div class="modal-card">
+      <h3 id="confirm-modal-title" style="color: var(--accent-cyan); font-size: 18px; margin-bottom: 8px;">GET POWER-UP</h3>
+      <p id="confirm-modal-msg" style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">You have 0 items left. Do you want to use 30 Coins to buy and use 1 now?</p>
+      <div style="display: flex; gap: 10px;">
+        <button class="btn-secondary-action" id="btn-confirm-cancel" style="flex: 1; margin:0;">CANCEL</button>
+        <button class="btn-main-action" id="btn-confirm-buy" style="flex: 1; margin:0;">BUY & USE</button>
+      </div>
     </div>
   </div>
 
@@ -765,7 +833,124 @@
       RAW_SENTENCES.push(BASE_SENTENCES[i % BASE_SENTENCES.length]);
     }
 
-    // AUDIO SYNTHESIZER
+    // MULTI-TIER TTS & VOICE GENDER ENGINE
+    class VoiceEngine {
+      constructor() {
+        this.voices = [];
+        this.currentGender = localStorage.getItem('fe_voice_gender') || 'female';
+        this.init();
+      }
+
+      init() {
+        if ('speechSynthesis' in window) {
+          this.loadVoices();
+          if (speechSynthesis.onvoiceschanged !== undefined) {
+            speechSynthesis.onvoiceschanged = () => this.loadVoices();
+          }
+        }
+      }
+
+      loadVoices() {
+        if ('speechSynthesis' in window) {
+          this.voices = window.speechSynthesis.getVoices().filter(v => v.lang.startsWith('en'));
+        }
+      }
+
+      toggleGender() {
+        this.currentGender = (this.currentGender === 'female') ? 'male' : 'female';
+        localStorage.setItem('fe_voice_gender', this.currentGender);
+        return this.currentGender;
+      }
+
+      getVoiceForGender(gender) {
+        if (!this.voices.length) this.loadVoices();
+        const isMale = (gender === 'male');
+        const maleNames = ['david', 'george', 'james', 'mark', 'brian', 'alex', 'daniel', 'richard', 'guy', 'stephen'];
+        const femaleNames = ['zira', 'samantha', 'victoria', 'karen', 'fiona', 'salli', 'jenny', 'aria', 'emma'];
+
+        const targetList = isMale ? maleNames : femaleNames;
+        const matched = this.voices.find(v => {
+          const nameLower = v.name.toLowerCase();
+          return targetList.some(n => nameLower.includes(n));
+        });
+
+        if (matched) return matched;
+        return this.voices.find(v => v.lang === 'en-US' || v.lang === 'en-GB') || this.voices[0] || null;
+      }
+
+      async speak(text) {
+        if (!text) return;
+        text = text.trim();
+
+        if ('speechSynthesis' in window) {
+          window.speechSynthesis.resume();
+        }
+
+        // 1. Try Native Capacitor TTS Plugin
+        if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.TextToSpeech) {
+          try {
+            await window.Capacitor.Plugins.TextToSpeech.speak({
+              text: text,
+              lang: 'en-US',
+              rate: 1.0,
+              pitch: this.currentGender === 'male' ? 0.9 : 1.1,
+              volume: 1.0,
+              category: 'ambient'
+            });
+            return;
+          } catch (e) {
+            console.warn('Capacitor TTS error, trying Web Speech API...', e);
+          }
+        }
+
+        // 2. Web Speech API
+        if ('speechSynthesis' in window) {
+          try {
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'en-US';
+            utterance.rate = 1.0;
+
+            const voice = this.getVoiceForGender(this.currentGender);
+            if (voice) {
+              utterance.voice = voice;
+            } else {
+              utterance.pitch = this.currentGender === 'male' ? 0.8 : 1.15;
+            }
+
+            utterance.onerror = () => this.playStreamFallback(text);
+            window.speechSynthesis.speak(utterance);
+            return;
+          } catch (e) {
+            console.warn('Web Speech API failed, using stream fallback...', e);
+          }
+        }
+
+        // 3. Audio Stream Fallback
+        this.playStreamFallback(text);
+      }
+
+      playStreamFallback(text) {
+        try {
+          const voiceName = this.currentGender === 'male' ? 'Brian' : 'Salli';
+          const streamUrl = `https://api.streamelements.com/kappa/v2/speech?voice=${voiceName}&text=${encodeURIComponent(text)}`;
+          const audio = new Audio(streamUrl);
+          const playPromise = audio.play();
+          if (playPromise !== undefined) {
+            playPromise.catch(() => {
+              const backupUrl = `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(text)}&type=2`;
+              const backupAudio = new Audio(backupUrl);
+              backupAudio.play().catch(e => console.error('Audio stream playback failed:', e));
+            });
+          }
+        } catch (err) {
+          console.error('TTS Stream Error:', err);
+        }
+      }
+    }
+    const voiceEngine = new VoiceEngine();
+
+    // AUDIO TONE SYNTHESIZER FOR SOUND EFFECTS
     class SoundFX {
       constructor() { this.ctx = null; }
       init() {
@@ -810,8 +995,13 @@
       completedSentences: parseInt(localStorage.getItem('fe_completed_sentences') || '0'),
       levelStars: JSON.parse(localStorage.getItem('fe_level_stars') || '{}'),
       skipWaitPasses: parseInt(localStorage.getItem('fe_skip_passes') || '0'),
+      inventory: {
+        time: parseInt(localStorage.getItem('fe_inv_time') || '0'),
+        hint: parseInt(localStorage.getItem('fe_inv_hint') || '0'),
+        slow: parseInt(localStorage.getItem('fe_inv_slow') || '0')
+      },
       currentLevel: 1,
-      timerSec: 10,
+      timerSec: 30,
       timerInterval: null,
       timeElapsed: 0,
       selectedWords: [],
@@ -821,7 +1011,8 @@
       delaySec: 10,
       mapPage: 0,
       currentLbTab: 'stars',
-      cachedLeaderboardData: null
+      cachedLeaderboardData: null,
+      pendingPurchaseType: null
     };
 
     localStorage.setItem('fe_uid', State.uid);
@@ -832,11 +1023,7 @@
       if (!isAudioUnlocked) {
         isAudioUnlocked = true;
         sfx.init();
-        if ('speechSynthesis' in window) {
-          window.speechSynthesis.getVoices();
-          const silentUtterance = new SpeechSynthesisUtterance('');
-          window.speechSynthesis.speak(silentUtterance);
-        }
+        voiceEngine.init();
       }
     }
     document.addEventListener('touchstart', unlockAudioEngine, { once: true });
@@ -845,6 +1032,7 @@
     // INITIALIZATION
     document.addEventListener('DOMContentLoaded', () => {
       updateHUD();
+      updateVoiceLabels();
       document.getElementById('player-name-input').value = State.playerName;
       document.getElementById('player-email-input').value = State.playerEmail;
 
@@ -870,11 +1058,42 @@
       document.getElementById('hud-coins-val').innerText = State.coins;
       document.getElementById('hud-stars-val').innerText = getTotalStars();
 
+      // Powerup Inventory Counts
+      document.getElementById('powerup-count-time').innerText = `(x${State.inventory.time})`;
+      document.getElementById('powerup-count-hint').innerText = `(x${State.inventory.hint})`;
+      document.getElementById('powerup-count-slow').innerText = `(x${State.inventory.slow})`;
+
+      // Shop Stock Displays
+      document.getElementById('shop-stock-time').innerText = State.inventory.time;
+      document.getElementById('shop-stock-hint').innerText = State.inventory.hint;
+      document.getElementById('shop-stock-slow').innerText = State.inventory.slow;
+      document.getElementById('shop-stock-skip').innerText = State.skipWaitPasses;
+
       localStorage.setItem('fe_coins', State.coins);
       localStorage.setItem('fe_unlocked_level', State.unlockedLevel);
       localStorage.setItem('fe_completed_sentences', State.completedSentences);
       localStorage.setItem('fe_level_stars', JSON.stringify(State.levelStars));
       localStorage.setItem('fe_skip_passes', State.skipWaitPasses);
+      localStorage.setItem('fe_inv_time', State.inventory.time);
+      localStorage.setItem('fe_inv_hint', State.inventory.hint);
+      localStorage.setItem('fe_inv_slow', State.inventory.slow);
+    }
+
+    function toggleVoiceGender() {
+      const newGender = voiceEngine.toggleGender();
+      updateVoiceLabels();
+      voiceEngine.speak(State.targetSentence || "Voice changed successfully");
+    }
+
+    function toggleVoiceGenderDrawer() {
+      toggleVoiceGender();
+      document.getElementById('sidebar-overlay').classList.remove('active');
+    }
+
+    function updateVoiceLabels() {
+      const text = voiceEngine.currentGender === 'male' ? 'Male (US)' : 'Female (US)';
+      document.getElementById('btn-voice-toggle').innerText = `🎙️ Voice: ${voiceEngine.currentGender === 'male' ? 'Male' : 'Female'}`;
+      document.getElementById('drawer-voice-label').innerText = text;
     }
 
     function getTotalStars() {
@@ -901,7 +1120,7 @@
       State.currentLevel = levelNum;
       State.targetSentence = RAW_SENTENCES[levelNum - 1];
       State.selectedWords = [];
-      State.timerSec = 10;
+      State.timerSec = 30; // 30s playing time per stage
       State.timeElapsed = 0;
 
       const words = State.targetSentence.replace(/[.,?!]/g, '').split(' ');
@@ -911,10 +1130,10 @@
       navigateTo('screen-game');
       renderWordChips();
       
-      // Auto Play TTS Voice
-      setTimeout(() => playTTS(State.targetSentence, 1.0), 300);
+      // Auto Play Voice Speech
+      setTimeout(() => voiceEngine.speak(State.targetSentence), 300);
 
-      // Start Countdown
+      // Start Countdown Timer
       clearInterval(State.timerInterval);
       const timerDisplay = document.getElementById('game-timer-display');
       timerDisplay.classList.remove('warning');
@@ -925,7 +1144,7 @@
         State.timeElapsed++;
         timerDisplay.innerText = `⏱️ ${State.timerSec}s`;
 
-        if (State.timerSec <= 3) timerDisplay.classList.add('warning');
+        if (State.timerSec <= 5) timerDisplay.classList.add('warning');
 
         if (State.timerSec <= 0) {
           clearInterval(State.timerInterval);
@@ -981,11 +1200,11 @@
       if (userAns === targetAns) {
         clearInterval(State.timerInterval);
         sfx.correct();
-        playTTS(State.targetSentence, 1.0);
+        voiceEngine.speak(State.targetSentence);
 
         let stars = 1;
-        if (State.timeElapsed <= 3) stars = 3;
-        else if (State.timeElapsed <= 7) stars = 2;
+        if (State.timeElapsed <= 10) stars = 3;
+        else if (State.timeElapsed <= 20) stars = 2;
 
         const oldStars = State.levelStars[State.currentLevel] || 0;
         let earnedCoins = 0;
@@ -1012,6 +1231,87 @@
         dropBox.classList.add('wrong-shake');
         setTimeout(() => dropBox.classList.remove('wrong-shake'), 400);
       }
+    }
+
+    // POWER-UP INVENTORY & DIRECT CONSUMPTION/PURCHASE SYSTEM
+    const POWERUP_PRICES = { time: 30, hint: 40, slow: 50, skip_pass: 60 };
+    const POWERUP_NAMES = { time: "Extra Time (+10s)", hint: "Smart Hint", slow: "Slow Audio Assist", skip_pass: "Skip Wait Pass" };
+
+    function usePowerup(type) {
+      if (State.inventory[type] > 0) {
+        // Consume from stock inventory
+        State.inventory[type]--;
+        updateHUD();
+        applyPowerupEffect(type);
+      } else {
+        // Prompt user to purchase and use immediately using coins
+        const price = POWERUP_PRICES[type];
+        const name = POWERUP_NAMES[type];
+        State.pendingPurchaseType = type;
+
+        document.getElementById('confirm-modal-title').innerText = `USE ${name.toUpperCase()}?`;
+        document.getElementById('confirm-modal-msg').innerText = `You have 0 ${name} items remaining. Would you like to spend ${price} Coins to buy and use 1 right now?`;
+        document.getElementById('modal-confirm-purchase').classList.add('active');
+      }
+    }
+
+    function confirmDirectPurchase() {
+      document.getElementById('modal-confirm-purchase').classList.remove('active');
+      const type = State.pendingPurchaseType;
+      if (!type) return;
+
+      const price = POWERUP_PRICES[type];
+      if (State.coins >= price) {
+        State.coins -= price;
+        updateHUD();
+        applyPowerupEffect(type);
+      } else {
+        alert(`Not enough coins! You need ${price} Coins. Watch an ad to get 100 free coins.`);
+      }
+      State.pendingPurchaseType = null;
+    }
+
+    function applyPowerupEffect(type) {
+      if (type === 'time') {
+        State.timerSec += 10;
+        document.getElementById('game-timer-display').innerText = `⏱️ ${State.timerSec}s`;
+      } else if (type === 'hint') {
+        autoPlaceNextHint();
+      } else if (type === 'slow') {
+        voiceEngine.speak(State.targetSentence);
+      }
+      pushLog('use_powerup', { type: type });
+    }
+
+    function autoPlaceNextHint() {
+      const words = State.targetSentence.replace(/[.,?!]/g, '').split(' ');
+      const currentIdx = State.selectedWords.length;
+      if (currentIdx < words.length) {
+        const targetWord = words[currentIdx];
+        const poolIdx = State.shuffledWords.findIndex(w => w.toLowerCase() === targetWord.toLowerCase());
+        if (poolIdx !== -1) {
+          State.selectedWords.push(State.shuffledWords.splice(poolIdx, 1)[0]);
+          renderWordChips();
+        }
+      }
+    }
+
+    function buyShopItem(type, cost) {
+      if (State.coins < cost) {
+        alert('Not enough coins! Play levels or watch video ads to earn more coins.');
+        return;
+      }
+      State.coins -= cost;
+
+      if (type === 'skip_pass') {
+        State.skipWaitPasses += 10;
+      } else {
+        State.inventory[type]++;
+      }
+
+      updateHUD();
+      alert(`🎉 Successfully purchased ${POWERUP_NAMES[type]}!`);
+      pushLog('buy_shop_item', { type: type, cost: cost });
     }
 
     // MODAL & SKIP WAIT DELAY LOGIC
@@ -1042,7 +1342,7 @@
           updateHUD();
           btnNext.disabled = false;
           btnNext.style.opacity = '1';
-          delayTxt.innerText = `Skip Wait Active! (${State.skipWaitPasses} passes left)`;
+          delayTxt.innerText = `Skip Wait Pass Active! (${State.skipWaitPasses} passes left)`;
           return;
         }
 
@@ -1070,44 +1370,6 @@
         btnNext.style.display = 'none';
         btnSkipWait.style.display = 'none';
         btnRetry.style.display = 'block';
-      }
-    }
-
-    // POWER-UP SHOP
-    function buyPowerup(type, cost) {
-      if (State.coins < cost) {
-        alert('Not enough coins! Play levels or watch ads to earn more coins.');
-        return;
-      }
-      State.coins -= cost;
-      updateHUD();
-
-      if (type === 'time') {
-        State.timerSec += 10;
-        document.getElementById('game-timer-display').innerText = `⏱️ ${State.timerSec}s`;
-      } else if (type === 'hint') {
-        autoPlaceNextHint();
-      } else if (type === 'slow') {
-        playTTS(State.targetSentence, 0.75);
-      } else if (type === 'skip_pass') {
-        State.skipWaitPasses += 10;
-        updateHUD();
-        alert('⚡ Purchased Skip Wait Pass for 10 Levels!');
-      }
-
-      pushLog('buy_powerup', { type: type, cost: cost });
-    }
-
-    function autoPlaceNextHint() {
-      const words = State.targetSentence.replace(/[.,?!]/g, '').split(' ');
-      const currentIdx = State.selectedWords.length;
-      if (currentIdx < words.length) {
-        const targetWord = words[currentIdx];
-        const poolIdx = State.shuffledWords.findIndex(w => w.toLowerCase() === targetWord.toLowerCase());
-        if (poolIdx !== -1) {
-          State.selectedWords.push(State.shuffledWords.splice(poolIdx, 1)[0]);
-          renderWordChips();
-        }
       }
     }
 
@@ -1206,7 +1468,7 @@
             <span style="font-weight:700;">${escapeHtml(u.name)}</span>
           </div>
           <div>
-            ${State.currentLbTab === 'stars' ? `<span style="color:#facc15; font-weight:700;">⭐ ${u.stars}</span>` : ''}
+            ${State.currentLbTab === 'stars' ? `<span style="color:#d97706; font-weight:700;">⭐ ${u.stars}</span>` : ''}
             ${State.currentLbTab === 'sentences' ? `<span style="color:var(--accent-cyan); font-weight:700;">📝 ${u.sentences}</span>` : ''}
             ${State.currentLbTab === 'coins' ? `<span style="color:var(--accent-yellow); font-weight:700;">🪙 ${u.coins}</span>` : ''}
           </div>
@@ -1223,7 +1485,7 @@
             <span style="font-weight:700;">${escapeHtml(State.playerName)} (You)</span>
           </div>
           <div>
-            <span style="color:#facc15; font-weight:700;">⭐ ${getTotalStars()}</span>
+            <span style="color:#d97706; font-weight:700;">⭐ ${getTotalStars()}</span>
           </div>
         </div>
       `;
@@ -1286,42 +1548,6 @@
       .catch(() => {});
     }
 
-    // MULTI-TIER TTS SPEECH ENGINE
-    function playTTS(text, rate = 1.0) {
-      unlockAudioEngine();
-      if (!text) return;
-
-      // Tier 1: Web Speech API (Native Browser Engine)
-      if ('speechSynthesis' in window) {
-        try {
-          window.speechSynthesis.cancel();
-          const utter = new SpeechSynthesisUtterance(text);
-          utter.lang = 'en-US';
-          utter.rate = rate;
-          utter.volume = 1.0;
-
-          utter.onerror = () => playFallbackTTSStream(text);
-          window.speechSynthesis.speak(utter);
-          return;
-        } catch (e) {
-          console.warn("SpeechSynthesis failed, trying stream fallback...", e);
-        }
-      }
-
-      // Tier 2: Stream Elements Free TTS API Stream
-      playFallbackTTSStream(text);
-    }
-
-    function playFallbackTTSStream(text) {
-      try {
-        const streamUrl = `https://api.streamelements.com/kappa/v2/speech?voice=Brian&text=${encodeURIComponent(text)}`;
-        const audio = new Audio(streamUrl);
-        audio.play().catch(e => console.warn("Audio Stream Blocked:", e));
-      } catch (err) {
-        console.error("TTS Stream Error:", err);
-      }
-    }
-
     function resetGameProgress() {
       if (confirm('Are you sure you want to reset all game progress?')) {
         localStorage.clear();
@@ -1339,7 +1565,7 @@
       };
 
       document.getElementById('btn-quick-play').onclick = () => startLevel(State.unlockedLevel);
-      document.getElementById('btn-play-audio').onclick = () => playTTS(State.targetSentence, 1.0);
+      document.getElementById('btn-play-audio').onclick = () => voiceEngine.speak(State.targetSentence);
       
       document.getElementById('btn-game-retry').onclick = () => {
         if (State.coins >= 10) {
@@ -1359,11 +1585,6 @@
       };
 
       document.getElementById('btn-game-check').onclick = checkAnswer;
-
-      // Powerups
-      document.getElementById('btn-powerup-time').onclick = () => buyPowerup('time', 30);
-      document.getElementById('btn-powerup-hint').onclick = () => buyPowerup('hint', 40);
-      document.getElementById('btn-powerup-slow').onclick = () => buyPowerup('slow', 50);
 
       // Pagination
       document.getElementById('btn-map-prev').onclick = () => {
@@ -1401,13 +1622,20 @@
         }
       };
 
-      // NÚT TRỞ VỀ TRANG CHỦ
+      // HOME MENU NAVIGATION
       document.getElementById('btn-modal-home').onclick = () => {
         clearInterval(State.delayTimerInterval);
         clearInterval(State.timerInterval);
         document.getElementById('modal-result').classList.remove('active');
         navigateTo('screen-home');
       };
+
+      // PURCHASE CONFIRMATION ACTIONS
+      document.getElementById('btn-confirm-cancel').onclick = () => {
+        document.getElementById('modal-confirm-purchase').classList.remove('active');
+        State.pendingPurchaseType = null;
+      };
+      document.getElementById('btn-confirm-buy').onclick = confirmDirectPurchase;
     }
   </script>
 </body>
