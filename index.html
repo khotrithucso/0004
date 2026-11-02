@@ -564,7 +564,7 @@
   </div>
 
   <div class="admob-banner-stub">[AdMob Adaptive Bottom Banner Active]</div>
-  <script>
+   <script>
     const SERVER_API_URL = "https://khotrithucso.io.vn/apps/0004/index.php";
 
     const ADMOB_TEST = {
@@ -741,6 +741,10 @@
         setTimeout(() => this.playTone(150, 'sawtooth', 0.2), 150);
         triggerHaptic([100, 30, 100]);
       }
+      coin() {
+        this.playTone(880, 'sine', 0.1);
+        setTimeout(() => this.playTone(1200, 'sine', 0.2), 100);
+      }
     }
     const sfx = new SoundFX();
 
@@ -828,8 +832,13 @@
       setupEventListeners();
       renderMapGrid();
       syncScoreWithServer();
-
       initAdMobBanner();
+      
+      // Gắn sự kiện chống spam cho nút xem quảng cáo trong Shop
+      const btnShopAd = document.querySelector('button[onclick="watchAdForCoins()"]');
+      if(btnShopAd) {
+          btnShopAd.onclick = function() { watchAdForCoins(this); };
+      }
     });
 
     function applyCurrentTheme() { document.body.className = THEME_PRESETS[State.currentThemeIndex]; }
@@ -1375,7 +1384,7 @@
     }
 
     /* ==========================================================================
-       9. ADMOB TỔNG HỢP (REWARDED + BANNER) - FIX LỖI CỘNG XU & LOGIC SKIP AD
+       9. ADMOB TỔNG HỢP & LOGIC NHẬN THƯỞNG + CHỐNG SPAM CLICK
        ========================================================================== */
     let isAdMobInitialized = false;
 
@@ -1404,24 +1413,44 @@
       }
     }
 
-    function watchAdForCoins() {
-      showRewardedAdWithFailSafe(() => {
-        State.coins += 100;
-        updateHUD();
-        syncScoreWithServer();
-        alert('🎉 Watched Video Ad! +100 Free Coins Granted.');
-      });
+    // Cơ chế xử lý nút bấm có Cooldown 3 giây
+    function watchAdForCoins(btnElem) {
+      if (btnElem) {
+        const originalText = btnElem.innerText;
+        btnElem.disabled = true;
+        btnElem.style.opacity = '0.5';
+        btnElem.innerText = '⏳ ĐANG TẢI...';
+        
+        setTimeout(() => {
+          btnElem.disabled = false;
+          btnElem.style.opacity = '1';
+          btnElem.innerText = originalText;
+        }, 3000);
+      }
+
+      showRewardedAdWithFailSafe();
     }
 
-    async function showRewardedAdWithFailSafe(onRewardSuccess) {
+    async function showRewardedAdWithFailSafe(onRewardSuccessCallback) {
       let isRewarded = false;
       let isFallbackTriggered = false;
 
       function triggerFallback() {
         if (!isFallbackTriggered) {
           isFallbackTriggered = true;
-          showSimulatedAdPlayer(onRewardSuccess);
+          showSimulatedAdPlayer(() => {
+             // Logic tặng xu giả lập
+             if (onRewardSuccessCallback) onRewardSuccessCallback();
+             else grantDefaultCoins();
+          });
         }
+      }
+
+      function grantDefaultCoins() {
+         State.coins += 100;
+         updateHUD();
+         syncScoreWithServer();
+         sfx.coin();
       }
 
       if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.AdMob) {
@@ -1436,24 +1465,38 @@
           // Dọn dẹp sạch listener cũ
           await AdMob.removeAllListeners();
 
-          // FIX CỘNG XU: Bắt trúng tín hiệu trả thưởng bằng cách gọi TẤT CẢ các biến thể tên sự kiện
+          // FIX CỘNG XU: Bắt trúng tín hiệu trả thưởng và CỘNG XU NGAY LẬP TỨC
           const handleReward = () => {
-             isRewarded = true;
+             if (!isRewarded) {
+                 isRewarded = true;
+                 
+                 // Cộng phần thưởng nền ngầm ngay khi Google báo OK
+                 if (onRewardSuccessCallback) {
+                     onRewardSuccessCallback();
+                 } else {
+                     grantDefaultCoins();
+                 }
+             }
           };
 
           AdMob.addListener('rewardedVideoAdReward', handleReward);
-          AdMob.addListener('onRewardedVideoAdReward', handleReward); // Cho phiên bản Plugin cũ
+          AdMob.addListener('onRewardedVideoAdReward', handleReward);
 
+          // Xử lý khi người dùng ấn nút [X] tắt quảng cáo
           const handleDismiss = () => {
-            if (isRewarded && onRewardSuccess && !isFallbackTriggered) {
-                onRewardSuccess();
-            }
             AdMob.removeAllListeners();
+            if (isRewarded) {
+                alert('🎉 Cảm ơn bạn đã xem! Đã cộng +100 Xu vào tài khoản.');
+            } else if (!onRewardSuccessCallback) {
+                // Nếu người dùng đóng sớm mà chưa nhận thưởng
+                alert('⚠️ Bạn đã tắt video sớm nên không nhận được thưởng!');
+            }
           };
 
           AdMob.addListener('rewardedVideoAdDismissed', handleDismiss);
-          AdMob.addListener('onRewardedVideoAdClosed', handleDismiss); // Cho phiên bản Plugin cũ
+          AdMob.addListener('onRewardedVideoAdClosed', handleDismiss);
 
+          // Fallback khi lỗi mạng
           AdMob.addListener('rewardedVideoAdFailedToLoad', triggerFallback);
           AdMob.addListener('rewardedVideoAdFailedToShow', triggerFallback);
           AdMob.addListener('onRewardedVideoAdFailedToLoad', triggerFallback);
@@ -1509,6 +1552,7 @@
       btnClose.onclick = () => {
         modal.classList.remove('active');
         if (onRewardSuccess) onRewardSuccess();
+        alert('🎉 Đã xem xong Video Giả lập! +100 Xu đã được cộng.');
       };
     }
 
@@ -1611,8 +1655,19 @@
         startLevel(State.currentLevel + 1);
       };
 
-      // FIX LOGIC SKIP WAIT TIMER (Chỉ mở khóa sau khi XEM XONG video)
-      document.getElementById('btn-skip-wait-ad').onclick = () => {
+      // Tích hợp logic chống spam cho nút Skip Wait Timer luôn
+      document.getElementById('btn-skip-wait-ad').onclick = function() {
+        const btn = this;
+        btn.disabled = true;
+        btn.style.opacity = '0.5';
+        btn.innerText = '⏳ ĐANG TẢI...';
+        
+        setTimeout(() => {
+            btn.disabled = false;
+            btn.style.opacity = '1';
+            btn.innerText = '🎬 SKIP WAIT TIMER (WATCH AD)';
+        }, 3000);
+
         showRewardedAdWithFailSafe(() => {
           State.skipWaitPasses += 10; 
           updateHUD();
@@ -1649,6 +1704,7 @@
       document.getElementById('btn-confirm-buy').onclick = confirmDirectPurchase;
     }
   </script>
+
 
 
 </body>
