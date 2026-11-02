@@ -829,7 +829,6 @@
       renderMapGrid();
       syncScoreWithServer();
 
-      // Khởi chạy hệ thống AdMob chung
       initAdMobBanner();
     });
 
@@ -1376,11 +1375,10 @@
     }
 
     /* ==========================================================================
-       9. ADMOB TỔNG HỢP (REWARDED + BANNER) - FIX LỖI ENUM JAVASCRIPT
+       9. ADMOB TỔNG HỢP (REWARDED + BANNER) - FIX LỖI CỘNG XU & LOGIC SKIP AD
        ========================================================================== */
     let isAdMobInitialized = false;
 
-    // Khởi tạo chung và bật Banner Ad
     async function initAdMobBanner() {
       if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.AdMob) {
         try {
@@ -1392,7 +1390,7 @@
           
           await AdMob.showBanner({
               adId: ADMOB_TEST.banner,
-              adSize: 'ADAPTIVE_BANNER', // FIX: dùng chuỗi trực tiếp
+              adSize: 'ADAPTIVE_BANNER',
               position: 'BOTTOM_CENTER',
               margin: 0
           });
@@ -1435,37 +1433,34 @@
              isAdMobInitialized = true;
           }
 
-          // Dọn dẹp bộ nhớ event listener cũ
+          // Dọn dẹp sạch listener cũ
           await AdMob.removeAllListeners();
 
-          // FIX CỐT LÕI: Thay vì dùng Enum RewardAdPluginEvents bị lỗi undefined,
-          // chúng ta phải ghi cứng tên string event của Capacitor Plugin.
-          AdMob.addListener('rewardedVideoAdReward', (rewardItem) => {
-            isRewarded = true;
-          });
+          // FIX CỘNG XU: Bắt trúng tín hiệu trả thưởng bằng cách gọi TẤT CẢ các biến thể tên sự kiện
+          const handleReward = () => {
+             isRewarded = true;
+          };
 
-          AdMob.addListener('rewardedVideoAdDismissed', () => {
+          AdMob.addListener('rewardedVideoAdReward', handleReward);
+          AdMob.addListener('onRewardedVideoAdReward', handleReward); // Cho phiên bản Plugin cũ
+
+          const handleDismiss = () => {
             if (isRewarded && onRewardSuccess && !isFallbackTriggered) {
                 onRewardSuccess();
             }
             AdMob.removeAllListeners();
-          });
+          };
 
-          AdMob.addListener('rewardedVideoAdFailedToLoad', (err) => {
-            console.error("Ad Failed to Load", err);
-            AdMob.removeAllListeners();
-            triggerFallback();
-          });
+          AdMob.addListener('rewardedVideoAdDismissed', handleDismiss);
+          AdMob.addListener('onRewardedVideoAdClosed', handleDismiss); // Cho phiên bản Plugin cũ
 
-          AdMob.addListener('rewardedVideoAdFailedToShow', (err) => {
-            console.error("Ad Failed to Show", err);
-            AdMob.removeAllListeners();
-            triggerFallback();
-          });
+          AdMob.addListener('rewardedVideoAdFailedToLoad', triggerFallback);
+          AdMob.addListener('rewardedVideoAdFailedToShow', triggerFallback);
+          AdMob.addListener('onRewardedVideoAdFailedToLoad', triggerFallback);
 
           await AdMob.prepareRewardVideoAd({
             adId: ADMOB_TEST.rewarded,
-            isTesting: true // Cờ test bắt buộc trên một số phiên bản cũ
+            isTesting: true 
           });
           
           await AdMob.showRewardVideoAd();
@@ -1616,14 +1611,17 @@
         startLevel(State.currentLevel + 1);
       };
 
+      // FIX LOGIC SKIP WAIT TIMER (Chỉ mở khóa sau khi XEM XONG video)
       document.getElementById('btn-skip-wait-ad').onclick = () => {
-        watchAdForCoins();
-        State.skipWaitPasses += 10; 
-        updateHUD();
-        clearInterval(State.delayTimerInterval);
-        document.getElementById('btn-next-level').disabled = false;
-        document.getElementById('btn-next-level').style.opacity = '1';
-        document.getElementById('modal-delay-timer').innerText = 'Wait timer bypassed!';
+        showRewardedAdWithFailSafe(() => {
+          State.skipWaitPasses += 10; 
+          updateHUD();
+          clearInterval(State.delayTimerInterval);
+          document.getElementById('btn-next-level').disabled = false;
+          document.getElementById('btn-next-level').style.opacity = '1';
+          document.getElementById('modal-delay-timer').innerText = 'Wait timer bypassed!';
+          alert('🎉 Bỏ qua đếm ngược thành công! Nhận thêm 10 passes.');
+        });
       };
 
       document.getElementById('btn-modal-retry').onclick = () => {
@@ -1651,6 +1649,7 @@
       document.getElementById('btn-confirm-buy').onclick = confirmDirectPurchase;
     }
   </script>
+
 
 </body>
 </html>
