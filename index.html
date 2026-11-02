@@ -564,13 +564,13 @@
   </div>
 
   <div class="admob-banner-stub">[AdMob Adaptive Bottom Banner Active]</div>
-   <script>
+  <script>
     const SERVER_API_URL = "https://khotrithucso.io.vn/apps/0004/index.php";
 
     const ADMOB_TEST = {
       appId: "ca-app-pub-3940256099942544~3347511713",
-      rewarded: "ca-app-pub-3940256099942544/5224354917", // ID Test chuẩn Rewarded Video của Google
-      banner: "ca-app-pub-3940256099942544/6300978111" // ID Test chuẩn Banner của Google
+      rewarded: "ca-app-pub-3940256099942544/5224354917", 
+      banner: "ca-app-pub-3940256099942544/6300978111" 
     };
 
     const BASE_SENTENCES = [
@@ -786,7 +786,11 @@
       mapPage: 0,
       pendingPurchaseType: null,
       activeLbTab: 'stars',
-      cachedLeaderboard: null
+      cachedLeaderboard: null,
+      // Cờ bảo mật mới thêm
+      isPlaying: false,
+      isChecking: false,
+      nextUnlockTime: parseInt(localStorage.getItem('fe_next_unlock_time') || '0')
     };
 
     const THEME_PRESETS = ['theme-sky', 'theme-mint', 'theme-sunset', 'theme-purple', 'theme-rose'];
@@ -813,32 +817,25 @@
       if (nameInput) nameInput.value = State.playerName;
       if (emailInput) emailInput.value = State.playerEmail;
 
-      if (nameInput) {
-        nameInput.addEventListener('change', (e) => {
+      if (nameInput) nameInput.addEventListener('change', (e) => {
           State.playerName = e.target.value.trim() || 'Learner';
           localStorage.setItem('fe_player_name', State.playerName);
           syncScoreWithServer();
-        });
-      }
+      });
 
-      if (emailInput) {
-        emailInput.addEventListener('change', (e) => {
+      if (emailInput) emailInput.addEventListener('change', (e) => {
           State.playerEmail = e.target.value.trim() || '';
           localStorage.setItem('fe_player_email', State.playerEmail);
           syncScoreWithServer();
-        });
-      }
+      });
 
       setupEventListeners();
       renderMapGrid();
       syncScoreWithServer();
       initAdMobBanner();
       
-      // Gắn sự kiện chống spam cho nút xem quảng cáo trong Shop
       const btnShopAd = document.querySelector('button[onclick="watchAdForCoins()"]');
-      if(btnShopAd) {
-          btnShopAd.onclick = function() { watchAdForCoins(this); };
-      }
+      if(btnShopAd) btnShopAd.onclick = function() { watchAdForCoins(this); };
     });
 
     function applyCurrentTheme() { document.body.className = THEME_PRESETS[State.currentThemeIndex]; }
@@ -873,10 +870,11 @@
       localStorage.setItem('fe_inv_time', State.inventory.time);
       localStorage.setItem('fe_inv_hint', State.inventory.hint);
       localStorage.setItem('fe_inv_slow', State.inventory.slow);
+      localStorage.setItem('fe_next_unlock_time', State.nextUnlockTime);
     }
 
     function toggleVoiceGender() {
-      const newGender = voiceEngine.toggleGender();
+      voiceEngine.toggleGender();
       updateVoiceLabels();
       voiceEngine.speak(State.targetSentence || "Voice changed successfully");
     }
@@ -899,6 +897,19 @@
     }
 
     function navigateTo(screenId) {
+      // Chống Gian Lận: Xử thua nếu thoát ra lúc đồng hồ đang chạy
+      if (State.isPlaying && screenId !== 'screen-game') {
+          if (!confirm('⚠️ Bạn đang trong màn chơi! Thoát ra bây giờ sẽ bị xử thua và mất chuỗi thắng. Vẫn thoát?')) {
+              return; 
+          }
+          clearInterval(State.timerInterval);
+          State.isPlaying = false;
+          State.streak = 0;
+          addToMistakesBank(State.currentLevel, State.targetSentence);
+          sfx.wrong();
+          updateHUD();
+      }
+
       clearInterval(State.timerInterval);
       document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
       document.getElementById(screenId).classList.add('active');
@@ -914,49 +925,32 @@
        ========================================================================== */
     function syncScoreWithServer() {
       const payload = {
-        action: 'submit_score',
-        uid: State.uid,
-        name: State.playerName,
-        email: State.playerEmail,
-        stars: getTotalStars(),
-        coins: State.coins,
-        sentences: State.completedSentences
+        action: 'submit_score', uid: State.uid, name: State.playerName, email: State.playerEmail,
+        stars: getTotalStars(), coins: State.coins, sentences: State.completedSentences
       };
-
       fetch(SERVER_API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
       }).catch(() => {});
     }
 
     function fetchLeaderboardFromServer() {
       const container = document.getElementById('leaderboard-container');
       container.innerHTML = '<div style="text-align:center; padding:30px; color:var(--text-muted);">🔄 Loading online rankings...</div>';
-
       fetch(`${SERVER_API_URL}?action=get_leaderboard`)
         .then(res => res.json())
         .then(data => {
           if (data && data.status === 'success') {
             State.cachedLeaderboard = data;
             renderLeaderboardTab(State.activeLbTab);
-          } else {
-            renderOfflineLeaderboard();
-          }
+          } else renderOfflineLeaderboard();
         })
         .catch(() => renderOfflineLeaderboard());
     }
 
     function renderOfflineLeaderboard() {
-      const container = document.getElementById('leaderboard-container');
-      container.innerHTML = `
-        <div class="lb-item-card my-rank">
-          <div class="lb-rank-badge">1</div>
-          <div class="lb-player-name">${State.playerName} (YOU - Local)</div>
-          <div class="lb-player-val">⭐ ${getTotalStars()}</div>
-        </div>
-        <p style="text-align:center; font-size:11px; color:var(--text-muted); margin-top:10px;">Connect internet to sync global rankings!</p>
-      `;
+      document.getElementById('leaderboard-container').innerHTML = `
+        <div class="lb-item-card my-rank"><div class="lb-rank-badge">1</div><div class="lb-player-name">${State.playerName} (YOU - Local)</div><div class="lb-player-val">⭐ ${getTotalStars()}</div></div>
+        <p style="text-align:center; font-size:11px; color:var(--text-muted); margin-top:10px;">Connect internet to sync global rankings!</p>`;
     }
 
     function switchLeaderboardTab(tabKey) {
@@ -972,29 +966,17 @@
 
       const keyMap = { stars: 'top_stars', sentences: 'top_sentences', coins: 'top_coins' };
       const list = State.cachedLeaderboard[keyMap[tabKey]] || [];
-
       if (list.length === 0) {
         container.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-muted);">No rankings recorded yet!</div>';
         return;
       }
 
       const rankIcons = ['🥇', '🥈', '🥉'];
-
       container.innerHTML = list.map((item, idx) => {
         const rankDisplay = idx < 3 ? rankIcons[idx] : `#${idx + 1}`;
         const isMe = (item.uid === State.uid);
-        let valDisplay = '';
-        if (tabKey === 'stars') valDisplay = `⭐ ${item.stars}`;
-        else if (tabKey === 'sentences') valDisplay = `📝 ${item.sentences}`;
-        else valDisplay = `🪙 ${item.coins}`;
-
-        return `
-          <div class="lb-item-card ${isMe ? 'my-rank' : ''}">
-            <div class="lb-rank-badge">${rankDisplay}</div>
-            <div class="lb-player-name">${item.name || 'Learner'} ${isMe ? '<span style="font-size:10px; color:var(--accent-green);">(YOU)</span>' : ''}</div>
-            <div class="lb-player-val">${valDisplay}</div>
-          </div>
-        `;
+        let valDisplay = tabKey === 'stars' ? `⭐ ${item.stars}` : (tabKey === 'sentences' ? `📝 ${item.sentences}` : `🪙 ${item.coins}`);
+        return `<div class="lb-item-card ${isMe ? 'my-rank' : ''}"><div class="lb-rank-badge">${rankDisplay}</div><div class="lb-player-name">${item.name || 'Learner'} ${isMe ? '<span style="font-size:10px; color:var(--accent-green);">(YOU)</span>' : ''}</div><div class="lb-player-val">${valDisplay}</div></div>`;
       }).join('');
     }
 
@@ -1002,12 +984,21 @@
        6. GAMEPLAY LOGIC
        ========================================================================== */
     function startLevel(levelNum) {
+      // Khóa Bypass Thời Gian Toàn Cục
+      if (Date.now() < State.nextUnlockTime) {
+          const waitLeft = Math.ceil((State.nextUnlockTime - Date.now()) / 1000);
+          alert(`⏳ Vui lòng chờ thêm ${waitLeft} giây để vào màn chơi mới!`);
+          return;
+      }
+
       unlockAudioEngine();
       State.currentLevel = levelNum;
       State.targetSentence = RAW_SENTENCES[levelNum - 1];
       State.selectedWords = [];
       State.timerSec = 30;
       State.timeElapsed = 0;
+      State.isPlaying = true;
+      State.isChecking = false;
 
       State.currentThemeIndex = (levelNum - 1) % THEME_PRESETS.length;
       applyCurrentTheme();
@@ -1016,12 +1007,16 @@
       State.shuffledWords = [...words].sort(() => Math.random() - 0.5);
 
       document.getElementById('game-level-title').innerText = `LEVEL ${String(levelNum).padStart(3, '0')}`;
-      navigateTo('screen-game');
-      renderWordChips();
+      
+      // Override navigateTo direct render to avoid confirm loop
+      clearInterval(State.timerInterval);
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById('screen-game').classList.add('active');
+      document.getElementById('sidebar-overlay').classList.remove('active');
 
+      renderWordChips();
       setTimeout(() => voiceEngine.speak(State.targetSentence), 300);
 
-      clearInterval(State.timerInterval);
       const timerDisplay = document.getElementById('game-timer-display');
       timerDisplay.classList.remove('warning');
       timerDisplay.innerText = `⏱️ ${State.timerSec}s`;
@@ -1035,6 +1030,7 @@
 
         if (State.timerSec <= 0) {
           clearInterval(State.timerInterval);
+          State.isPlaying = false;
           sfx.wrong();
           addToMistakesBank(levelNum, State.targetSentence);
           State.streak = 0;
@@ -1081,11 +1077,16 @@
     }
 
     function checkAnswer() {
+      // Cooldown chống Spam Click
+      if (State.isChecking) return;
+      State.isChecking = true;
+
       const userAns = State.selectedWords.join(' ').toLowerCase();
       const targetAns = State.targetSentence.replace(/[.,?!]/g, '').toLowerCase();
 
       if (userAns === targetAns) {
         clearInterval(State.timerInterval);
+        State.isPlaying = false;
         sfx.correct();
         voiceEngine.speak(State.targetSentence);
 
@@ -1120,7 +1121,11 @@
         sfx.wrong();
         const dropBox = document.getElementById('drop-zone-container');
         dropBox.classList.add('wrong-shake');
-        setTimeout(() => dropBox.classList.remove('wrong-shake'), 400);
+        
+        setTimeout(() => {
+            dropBox.classList.remove('wrong-shake');
+            State.isChecking = false;
+        }, 1000);
       }
     }
 
@@ -1147,13 +1152,9 @@
       }
       container.innerHTML = State.mistakesBank.map(m => `
         <div class="shop-item-card">
-          <div>
-            <h4 style="color:var(--accent-cyan); font-size:13px;">LEVEL ${String(m.level).padStart(3, '0')}</h4>
-            <p style="font-size:12px; font-weight:700;">"${m.sentence}"</p>
-          </div>
+          <div><h4 style="color:var(--accent-cyan); font-size:13px;">LEVEL ${String(m.level).padStart(3, '0')}</h4><p style="font-size:12px; font-weight:700;">"${m.sentence}"</p></div>
           <button class="btn-main-action" style="width:auto; margin:0; padding:6px 12px; font-size:12px;" onclick="startLevel(${m.level})">RETRY</button>
-        </div>
-      `).join('');
+        </div>`).join('');
     }
 
     const POWERUP_PRICES = { time: 30, hint: 40, slow: 50 };
@@ -1183,9 +1184,7 @@
         State.coins -= price;
         updateHUD();
         applyPowerupEffect(type);
-      } else {
-        alert(`Not enough coins! You need ${price} Coins.`);
-      }
+      } else alert(`Not enough coins! You need ${price} Coins.`);
       State.pendingPurchaseType = null;
     }
 
@@ -1193,11 +1192,8 @@
       if (type === 'time') {
         State.timerSec += 10;
         document.getElementById('game-timer-display').innerText = `⏱️ ${State.timerSec}s`;
-      } else if (type === 'hint') {
-        autoPlaceNextHint();
-      } else if (type === 'slow') {
-        voiceEngine.speak(State.targetSentence, true);
-      }
+      } else if (type === 'hint') autoPlaceNextHint();
+      else if (type === 'slow') voiceEngine.speak(State.targetSentence, true);
     }
 
     function autoPlaceNextHint() {
@@ -1232,6 +1228,7 @@
       const starsDisp = document.getElementById('modal-stars-display');
       const msg = document.getElementById('modal-result-msg');
       const btnNext = document.getElementById('btn-next-level');
+      const btnHome = document.getElementById('btn-modal-home');
       const delayTxt = document.getElementById('modal-delay-timer');
       const btnRetry = document.getElementById('btn-modal-retry');
       const btnSkipWait = document.getElementById('btn-skip-wait-ad');
@@ -1240,9 +1237,17 @@
       modal.classList.add('active');
       clearInterval(State.delayTimerInterval);
 
+      // KHÓA 10 GIÂY BẮT BUỘC: Vô hiệu hóa Toàn bộ Nút Điều Hướng ở CẢ Win & Lose
+      btnNext.disabled = true; btnNext.style.opacity = '0.5';
+      btnHome.disabled = true; btnHome.style.opacity = '0.5';
+      btnRetry.disabled = true; btnRetry.style.opacity = '0.5';
+      
+      State.delaySec = 10; 
+      State.nextUnlockTime = Date.now() + (10 * 1000); 
+      updateHUD();
+
       if (isWin) {
-        title.innerText = 'STAGE COMPLETED!'; 
-        title.style.color = 'var(--accent-green)';
+        title.innerText = 'STAGE COMPLETED!'; title.style.color = 'var(--accent-green)';
         starsDisp.innerText = '⭐'.repeat(stars);
         msg.innerText = coins > 0 ? `Awesome! Earned +${coins} Coins!` : `Already completed!`;
         btnRetry.style.display = 'none'; 
@@ -1252,67 +1257,54 @@
         if (stars === 3) {
           bonusBox.style.display = 'block';
           renderAnimatedBonusMinigame();
-        } else {
-          bonusBox.style.display = 'none';
-        }
+        } else bonusBox.style.display = 'none';
 
         if (State.skipWaitPasses > 0) {
           State.skipWaitPasses--; 
           updateHUD();
-          btnNext.disabled = false; 
-          btnNext.style.opacity = '1';
+          State.nextUnlockTime = 0; // Mở khóa liền
+          btnNext.disabled = false; btnNext.style.opacity = '1';
+          btnHome.disabled = false; btnHome.style.opacity = '1';
           delayTxt.innerText = `Skip Wait Pass Active! (${State.skipWaitPasses} passes left)`;
           return;
         }
 
-        State.delaySec = 10; 
-        btnNext.disabled = true; 
-        btnNext.style.opacity = '0.5';
-        delayTxt.innerText = `Next Level Unlocks in: ${State.delaySec}s`;
-
-        State.delayTimerInterval = setInterval(() => {
-          State.delaySec--;
-          delayTxt.innerText = `Next Level Unlocks in: ${State.delaySec}s`;
-          if (State.delaySec <= 0) {
-            clearInterval(State.delayTimerInterval);
-            btnNext.disabled = false; 
-            btnNext.style.opacity = '1';
-            delayTxt.innerText = 'Ready for Next Level!';
-          }
-        }, 1000);
       } else {
-        title.innerText = 'TIME OUT / FAILED!'; 
-        title.style.color = 'var(--accent-red)';
+        title.innerText = 'TIME OUT / FAILED!'; title.style.color = 'var(--accent-red)';
         starsDisp.innerText = '❌❌❌'; 
         msg.innerText = 'Sentence added to Mistake Bank!';
-        delayTxt.innerText = ''; 
         bonusBox.style.display = 'none';
         btnNext.style.display = 'none'; 
         btnSkipWait.style.display = 'none'; 
         btnRetry.style.display = 'block';
       }
+
+      delayTxt.innerText = `Nút bấm sẽ mở sau: ${State.delaySec}s`;
+
+      State.delayTimerInterval = setInterval(() => {
+        State.delaySec--;
+        delayTxt.innerText = `Nút bấm sẽ mở sau: ${State.delaySec}s`;
+        if (State.delaySec <= 0) {
+          clearInterval(State.delayTimerInterval);
+          btnNext.disabled = false; btnNext.style.opacity = '1';
+          btnRetry.disabled = false; btnRetry.style.opacity = '1';
+          btnHome.disabled = false; btnHome.style.opacity = '1';
+          delayTxt.innerText = 'Ready to go!';
+        }
+      }, 1000);
     }
 
     function renderAnimatedBonusMinigame() {
       const container = document.getElementById('bonus-content');
       const isCardGame = Math.random() > 0.5;
-
       if (isCardGame) {
         container.innerHTML = `
           <p style="font-size:11px; color:var(--text-muted); margin-bottom:8px;">TAP A CARD TO FLIP & REVEAL PRIZE!</p>
           <div class="cards-container">
-            <div class="card-flip-wrapper" onclick="playCardFlipAnimation(this)">
-              <div class="card-flip-inner"><div class="card-front">❓</div><div class="card-back">...</div></div>
-            </div>
-            <div class="card-flip-wrapper" onclick="playCardFlipAnimation(this)">
-              <div class="card-flip-inner"><div class="card-front">❓</div><div class="card-back">...</div></div>
-            </div>
-            <div class="card-flip-wrapper" onclick="playCardFlipAnimation(this)">
-              <div class="card-flip-inner"><div class="card-front">❓</div><div class="card-back">...</div></div>
-            </div>
-          </div>
-          <div id="bonus-reward-toast"></div>
-        `;
+            <div class="card-flip-wrapper" onclick="playCardFlipAnimation(this)"><div class="card-flip-inner"><div class="card-front">❓</div><div class="card-back">...</div></div></div>
+            <div class="card-flip-wrapper" onclick="playCardFlipAnimation(this)"><div class="card-flip-inner"><div class="card-front">❓</div><div class="card-back">...</div></div></div>
+            <div class="card-flip-wrapper" onclick="playCardFlipAnimation(this)"><div class="card-flip-inner"><div class="card-front">❓</div><div class="card-back">...</div></div></div>
+          </div><div id="bonus-reward-toast"></div>`;
       } else {
         container.innerHTML = `
           <p style="font-size:11px; color:var(--text-muted); margin-bottom:8px;">TAP A CHEST TO OPEN YOUR REWARD!</p>
@@ -1320,18 +1312,12 @@
             <div class="chest-item" onclick="playChestOpenAnimation(this)">🎁</div>
             <div class="chest-item" onclick="playChestOpenAnimation(this)">🎁</div>
             <div class="chest-item" onclick="playChestOpenAnimation(this)">🎁</div>
-          </div>
-          <div id="bonus-reward-toast"></div>
-        `;
+          </div><div id="bonus-reward-toast"></div>`;
       }
     }
 
     function getRandomBonusReward() {
-      const rewards = [
-        { name: "+25 Coins!", type: "coin", val: 25 },
-        { name: "+1 Smart Hint!", type: "hint", val: 1 },
-        { name: "+1 Extra Time!", type: "time", val: 1 }
-      ];
+      const rewards = [ { name: "+25 Coins!", type: "coin", val: 25 }, { name: "+1 Smart Hint!", type: "hint", val: 1 }, { name: "+1 Extra Time!", type: "time", val: 1 } ];
       return rewards[Math.floor(Math.random() * rewards.length)];
     }
 
@@ -1339,22 +1325,16 @@
       if (cardElem.classList.contains('flipped')) return;
       const container = cardElem.parentElement;
       container.querySelectorAll('.card-flip-wrapper').forEach(c => c.style.pointerEvents = 'none');
-
       sfx.tap();
       cardElem.classList.add('flipped');
       const reward = getRandomBonusReward();
-      const backFace = cardElem.querySelector('.card-back');
-      backFace.innerText = reward.name;
-
+      cardElem.querySelector('.card-back').innerText = reward.name;
       setTimeout(() => {
         sfx.correct();
-        if (reward.type === 'coin') State.coins += reward.val;
-        else State.inventory[reward.type] += reward.val;
-        updateHUD();
-        syncScoreWithServer();
-
+        if (reward.type === 'coin') State.coins += reward.val; else State.inventory[reward.type] += reward.val;
+        updateHUD(); syncScoreWithServer();
         const toast = document.getElementById('bonus-reward-toast');
-        if (toast) toast.className = 'reward-toast-pop', toast.innerText = `🎉 WON: ${reward.name}`;
+        if (toast) { toast.className = 'reward-toast-pop'; toast.innerText = `🎉 WON: ${reward.name}`; }
       }, 400);
     }
 
@@ -1362,24 +1342,15 @@
       if (chestElem.classList.contains('opened')) return;
       const container = chestElem.parentElement;
       container.querySelectorAll('.chest-item').forEach(c => c.style.pointerEvents = 'none');
-
-      sfx.tap();
-      chestElem.classList.add('opening');
-
+      sfx.tap(); chestElem.classList.add('opening');
       setTimeout(() => {
-        chestElem.classList.remove('opening');
-        chestElem.classList.add('opened');
-        chestElem.innerText = '📦';
-
+        chestElem.classList.remove('opening'); chestElem.classList.add('opened'); chestElem.innerText = '📦';
         sfx.correct();
         const reward = getRandomBonusReward();
-        if (reward.type === 'coin') State.coins += reward.val;
-        else State.inventory[reward.type] += reward.val;
-        updateHUD();
-        syncScoreWithServer();
-
+        if (reward.type === 'coin') State.coins += reward.val; else State.inventory[reward.type] += reward.val;
+        updateHUD(); syncScoreWithServer();
         const toast = document.getElementById('bonus-reward-toast');
-        if (toast) toast.className = 'reward-toast-pop', toast.innerText = `🎉 UNLOCKED: ${reward.name}`;
+        if (toast) { toast.className = 'reward-toast-pop'; toast.innerText = `🎉 UNLOCKED: ${reward.name}`; }
       }, 600);
     }
 
@@ -1392,42 +1363,20 @@
       if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.AdMob) {
         try {
           const { AdMob } = window.Capacitor.Plugins;
-          if (!isAdMobInitialized) {
-             await AdMob.initialize({ initializeForTesting: true });
-             isAdMobInitialized = true;
-          }
-          
-          await AdMob.showBanner({
-              adId: ADMOB_TEST.banner,
-              adSize: 'ADAPTIVE_BANNER',
-              position: 'BOTTOM_CENTER',
-              margin: 0
-          });
-          
+          if (!isAdMobInitialized) { await AdMob.initialize({ initializeForTesting: true }); isAdMobInitialized = true; }
+          await AdMob.showBanner({ adId: ADMOB_TEST.banner, adSize: 'ADAPTIVE_BANNER', position: 'BOTTOM_CENTER', margin: 0 });
           const stub = document.querySelector('.admob-banner-stub');
           if (stub) stub.style.display = 'none';
-
-        } catch (e) {
-          console.log("AdMob Banner Init Error:", e);
-        }
+        } catch (e) { console.log("AdMob Banner Init Error:", e); }
       }
     }
 
-    // Cơ chế xử lý nút bấm có Cooldown 3 giây
     function watchAdForCoins(btnElem) {
       if (btnElem) {
         const originalText = btnElem.innerText;
-        btnElem.disabled = true;
-        btnElem.style.opacity = '0.5';
-        btnElem.innerText = '⏳ ĐANG TẢI...';
-        
-        setTimeout(() => {
-          btnElem.disabled = false;
-          btnElem.style.opacity = '1';
-          btnElem.innerText = originalText;
-        }, 3000);
+        btnElem.disabled = true; btnElem.style.opacity = '0.5'; btnElem.innerText = '⏳ ĐANG TẢI...';
+        setTimeout(() => { btnElem.disabled = false; btnElem.style.opacity = '1'; btnElem.innerText = originalText; }, 3000);
       }
-
       showRewardedAdWithFailSafe();
     }
 
@@ -1438,188 +1387,88 @@
       function triggerFallback() {
         if (!isFallbackTriggered) {
           isFallbackTriggered = true;
-          showSimulatedAdPlayer(() => {
-             // Logic tặng xu giả lập
-             if (onRewardSuccessCallback) onRewardSuccessCallback();
-             else grantDefaultCoins();
-          });
+          showSimulatedAdPlayer(() => { if (onRewardSuccessCallback) onRewardSuccessCallback(); else grantDefaultCoins(); });
         }
       }
 
-      function grantDefaultCoins() {
-         State.coins += 100;
-         updateHUD();
-         syncScoreWithServer();
-         sfx.coin();
-      }
+      function grantDefaultCoins() { State.coins += 100; updateHUD(); syncScoreWithServer(); sfx.coin(); }
 
       if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.AdMob) {
         try {
           const { AdMob } = window.Capacitor.Plugins;
-
-          if (!isAdMobInitialized) {
-             await AdMob.initialize({ initializeForTesting: true });
-             isAdMobInitialized = true;
-          }
-
-          // Dọn dẹp sạch listener cũ
+          if (!isAdMobInitialized) { await AdMob.initialize({ initializeForTesting: true }); isAdMobInitialized = true; }
           await AdMob.removeAllListeners();
 
-          // FIX CỘNG XU: Bắt trúng tín hiệu trả thưởng và CỘNG XU NGAY LẬP TỨC
-          const handleReward = () => {
-             if (!isRewarded) {
-                 isRewarded = true;
-                 
-                 // Cộng phần thưởng nền ngầm ngay khi Google báo OK
-                 if (onRewardSuccessCallback) {
-                     onRewardSuccessCallback();
-                 } else {
-                     grantDefaultCoins();
-                 }
-             }
-          };
+          const handleReward = () => { if (!isRewarded) { isRewarded = true; if (onRewardSuccessCallback) onRewardSuccessCallback(); else grantDefaultCoins(); } };
+          AdMob.addListener('rewardedVideoAdReward', handleReward); AdMob.addListener('onRewardedVideoAdReward', handleReward);
 
-          AdMob.addListener('rewardedVideoAdReward', handleReward);
-          AdMob.addListener('onRewardedVideoAdReward', handleReward);
-
-          // Xử lý khi người dùng ấn nút [X] tắt quảng cáo
           const handleDismiss = () => {
             AdMob.removeAllListeners();
-            if (isRewarded) {
-                alert('🎉 Cảm ơn bạn đã xem! Đã cộng +100 Xu vào tài khoản.');
-            } else if (!onRewardSuccessCallback) {
-                // Nếu người dùng đóng sớm mà chưa nhận thưởng
-                alert('⚠️ Bạn đã tắt video sớm nên không nhận được thưởng!');
-            }
+            if (isRewarded) alert('🎉 Cảm ơn bạn đã xem! Đã cộng +100 Xu vào tài khoản.');
+            else if (!onRewardSuccessCallback) alert('⚠️ Bạn đã tắt video sớm nên không nhận được thưởng!');
           };
+          AdMob.addListener('rewardedVideoAdDismissed', handleDismiss); AdMob.addListener('onRewardedVideoAdClosed', handleDismiss);
+          AdMob.addListener('rewardedVideoAdFailedToLoad', triggerFallback); AdMob.addListener('rewardedVideoAdFailedToShow', triggerFallback); AdMob.addListener('onRewardedVideoAdFailedToLoad', triggerFallback);
 
-          AdMob.addListener('rewardedVideoAdDismissed', handleDismiss);
-          AdMob.addListener('onRewardedVideoAdClosed', handleDismiss);
-
-          // Fallback khi lỗi mạng
-          AdMob.addListener('rewardedVideoAdFailedToLoad', triggerFallback);
-          AdMob.addListener('rewardedVideoAdFailedToShow', triggerFallback);
-          AdMob.addListener('onRewardedVideoAdFailedToLoad', triggerFallback);
-
-          await AdMob.prepareRewardVideoAd({
-            adId: ADMOB_TEST.rewarded,
-            isTesting: true 
-          });
-          
+          await AdMob.prepareRewardVideoAd({ adId: ADMOB_TEST.rewarded, isTesting: true });
           await AdMob.showRewardVideoAd();
           return;
-
         } catch (err) {
-          console.error("AdMob exception", err);
-          if (window.Capacitor && window.Capacitor.Plugins.AdMob) {
-            window.Capacitor.Plugins.AdMob.removeAllListeners();
-          }
+          if (window.Capacitor && window.Capacitor.Plugins.AdMob) window.Capacitor.Plugins.AdMob.removeAllListeners();
           triggerFallback();
           return;
         }
       }
-
-      // Không có plugin => chạy giả lập
       triggerFallback();
     }
 
     function showSimulatedAdPlayer(onRewardSuccess) {
-      const modal = document.getElementById('modal-ad-sim');
-      const counter = document.getElementById('ad-sim-counter');
-      const progressBar = document.getElementById('ad-sim-progress-bar');
-      const btnClose = document.getElementById('btn-close-ad-sim');
-
+      const modal = document.getElementById('modal-ad-sim'), counter = document.getElementById('ad-sim-counter'), progressBar = document.getElementById('ad-sim-progress-bar'), btnClose = document.getElementById('btn-close-ad-sim');
       modal.classList.add('active');
-      let secLeft = 5;
-      counter.innerText = secLeft;
-      progressBar.style.width = '0%';
-      btnClose.disabled = true; 
-      btnClose.style.opacity = '0.5';
+      let secLeft = 5; counter.innerText = secLeft; progressBar.style.width = '0%';
+      btnClose.disabled = true; btnClose.style.opacity = '0.5';
 
       let timer = setInterval(() => {
-        secLeft--;
-        counter.innerText = secLeft;
-        progressBar.style.width = `${((5 - secLeft) / 5) * 100}%`;
-
-        if (secLeft <= 0) {
-          clearInterval(timer);
-          counter.innerText = '0';
-          btnClose.disabled = false; 
-          btnClose.style.opacity = '1';
-        }
+        secLeft--; counter.innerText = secLeft; progressBar.style.width = `${((5 - secLeft) / 5) * 100}%`;
+        if (secLeft <= 0) { clearInterval(timer); counter.innerText = '0'; btnClose.disabled = false; btnClose.style.opacity = '1'; }
       }, 1000);
 
-      btnClose.onclick = () => {
-        modal.classList.remove('active');
-        if (onRewardSuccess) onRewardSuccess();
-        alert('🎉 Đã xem xong Video Giả lập! +100 Xu đã được cộng.');
-      };
+      btnClose.onclick = () => { modal.classList.remove('active'); if (onRewardSuccess) onRewardSuccess(); alert('🎉 Đã xem xong Video Giả lập! +100 Xu đã được cộng.'); };
     }
 
     /* ==========================================================================
        10. UTILITIES & EVENT BINDINGS
        ========================================================================== */
     function launchConfetti() {
-      const canvas = document.getElementById('canvas-confetti');
-      const ctx = canvas.getContext('2d');
-      canvas.width = window.innerWidth; 
-      canvas.height = window.innerHeight;
-      const particles = [];
-      const colors = ['#10b981', '#0284c7', '#f59e0b', '#ef4444', '#8b5cf6'];
-
-      for (let i = 0; i < 50; i++) {
-        particles.push({
-          x: canvas.width / 2, y: canvas.height / 2,
-          vx: (Math.random() - 0.5) * 12, vy: (Math.random() - 0.5) * 12 - 4,
-          color: colors[Math.floor(Math.random() * colors.length)],
-          size: Math.random() * 6 + 4, opacity: 1
-        });
-      }
-
+      const canvas = document.getElementById('canvas-confetti'); const ctx = canvas.getContext('2d');
+      canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+      const particles = [], colors = ['#10b981', '#0284c7', '#f59e0b', '#ef4444', '#8b5cf6'];
+      for (let i = 0; i < 50; i++) particles.push({ x: canvas.width / 2, y: canvas.height / 2, vx: (Math.random() - 0.5) * 12, vy: (Math.random() - 0.5) * 12 - 4, color: colors[Math.floor(Math.random() * colors.length)], size: Math.random() * 6 + 4, opacity: 1 });
       let frame = 0;
       function animate() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        particles.forEach(p => {
-          p.x += p.vx; p.y += p.vy; p.vy += 0.2; p.opacity -= 0.02;
-          ctx.globalAlpha = Math.max(0, p.opacity);
-          ctx.fillStyle = p.color;
-          ctx.fillRect(p.x, p.y, p.size, p.size);
-        });
+        particles.forEach(p => { p.x += p.vx; p.y += p.vy; p.vy += 0.2; p.opacity -= 0.02; ctx.globalAlpha = Math.max(0, p.opacity); ctx.fillStyle = p.color; ctx.fillRect(p.x, p.y, p.size, p.size); });
         frame++;
-        if (frame < 50) requestAnimationFrame(animate);
-        else ctx.clearRect(0, 0, canvas.width, canvas.height);
+        if (frame < 50) requestAnimationFrame(animate); else ctx.clearRect(0, 0, canvas.width, canvas.height);
       }
       animate();
     }
 
     function renderMapGrid() {
-      const container = document.getElementById('map-grid-container');
-      container.innerHTML = '';
-      const pageSize = 50;
-      const startIdx = State.mapPage * pageSize;
-      const endIdx = Math.min(1000, startIdx + pageSize);
-
+      const container = document.getElementById('map-grid-container'); container.innerHTML = '';
+      const pageSize = 50, startIdx = State.mapPage * pageSize, endIdx = Math.min(1000, startIdx + pageSize);
       document.getElementById('map-page-num').innerText = `Page ${State.mapPage + 1}/20`;
-
       for (let i = startIdx + 1; i <= endIdx; i++) {
         const node = document.createElement('div');
-        const isLocked = i > State.unlockedLevel;
-        const stars = State.levelStars[i] || 0;
-
+        const isLocked = i > State.unlockedLevel, stars = State.levelStars[i] || 0;
         node.className = `level-node ${isLocked ? 'locked' : ''} ${i === State.unlockedLevel ? 'active-stage' : ''}`;
         node.innerHTML = `<span>${isLocked ? '🔒' : i}</span>${stars > 0 ? `<div class="level-stars-mini">${'⭐'.repeat(stars)}</div>` : ''}`;
-
         if (!isLocked) node.onclick = () => { sfx.tap(); startLevel(i); };
         container.appendChild(node);
       }
     }
 
-    function resetGameProgress() {
-      if (confirm('Are you sure you want to reset all game progress?')) {
-        localStorage.clear(); 
-        location.reload();
-      }
-    }
+    function resetGameProgress() { if (confirm('Are you sure you want to reset all game progress?')) { localStorage.clear(); location.reload(); } }
 
     function setupEventListeners() {
       document.getElementById('btn-open-sidebar').onclick = () => document.getElementById('sidebar-overlay').classList.add('active');
@@ -1628,21 +1477,26 @@
       document.getElementById('btn-quick-play').onclick = () => startLevel(State.unlockedLevel);
       document.getElementById('btn-play-audio').onclick = () => voiceEngine.speak(State.targetSentence);
 
+      // Chống Lạm Dụng Retry Giữa Chừng
       document.getElementById('btn-game-retry').onclick = () => {
-        if (State.coins >= 10) { 
-          State.coins -= 10; 
-          updateHUD(); 
-          startLevel(State.currentLevel); 
-        } else {
-          alert('Need 10 Coins to retry!');
+        if (State.timerSec <= 5) {
+            alert('⏳ Thời gian sắp hết, không thể bấm chơi lại lúc này! Hãy thử ghép xong câu!');
+            return;
+        }
+        if(confirm("⚠️ Chơi lại màn này sẽ tốn 10 Xu và làm MẤT chuỗi thắng hiện tại. Bạn đồng ý chứ?")) {
+            if (State.coins >= 10) { 
+              State.coins -= 10; 
+              State.streak = 0; 
+              State.isPlaying = false; // Mở khóa để ko trigger Forfeit
+              updateHUD(); 
+              startLevel(State.currentLevel); 
+            } else alert('Không đủ 10 Xu để thử lại!');
         }
       };
 
       document.getElementById('btn-game-clear').onclick = () => {
-        sfx.tap();
-        State.shuffledWords = [...State.shuffledWords, ...State.selectedWords];
-        State.selectedWords = []; 
-        renderWordChips();
+        sfx.tap(); State.shuffledWords = [...State.shuffledWords, ...State.selectedWords];
+        State.selectedWords = []; renderWordChips();
       };
 
       document.getElementById('btn-game-check').onclick = checkAnswer;
@@ -1650,30 +1504,18 @@
       document.getElementById('btn-map-prev').onclick = () => { if (State.mapPage > 0) { State.mapPage--; renderMapGrid(); } };
       document.getElementById('btn-map-next').onclick = () => { if (State.mapPage < 19) { State.mapPage++; renderMapGrid(); } };
 
-      document.getElementById('btn-next-level').onclick = () => {
-        document.getElementById('modal-result').classList.remove('active');
-        startLevel(State.currentLevel + 1);
-      };
+      document.getElementById('btn-next-level').onclick = () => { document.getElementById('modal-result').classList.remove('active'); startLevel(State.currentLevel + 1); };
 
-      // Tích hợp logic chống spam cho nút Skip Wait Timer luôn
       document.getElementById('btn-skip-wait-ad').onclick = function() {
-        const btn = this;
-        btn.disabled = true;
-        btn.style.opacity = '0.5';
-        btn.innerText = '⏳ ĐANG TẢI...';
-        
-        setTimeout(() => {
-            btn.disabled = false;
-            btn.style.opacity = '1';
-            btn.innerText = '🎬 SKIP WAIT TIMER (WATCH AD)';
-        }, 3000);
-
+        const btn = this; btn.disabled = true; btn.style.opacity = '0.5'; btn.innerText = '⏳ ĐANG TẢI...';
+        setTimeout(() => { btn.disabled = false; btn.style.opacity = '1'; btn.innerText = '🎬 SKIP WAIT TIMER (WATCH AD)'; }, 3000);
         showRewardedAdWithFailSafe(() => {
           State.skipWaitPasses += 10; 
-          updateHUD();
-          clearInterval(State.delayTimerInterval);
-          document.getElementById('btn-next-level').disabled = false;
-          document.getElementById('btn-next-level').style.opacity = '1';
+          State.nextUnlockTime = 0; // Mở khóa Bypass toàn cục
+          updateHUD(); clearInterval(State.delayTimerInterval);
+          document.getElementById('btn-next-level').disabled = false; document.getElementById('btn-next-level').style.opacity = '1';
+          document.getElementById('btn-modal-home').disabled = false; document.getElementById('btn-modal-home').style.opacity = '1';
+          document.getElementById('btn-modal-retry').disabled = false; document.getElementById('btn-modal-retry').style.opacity = '1';
           document.getElementById('modal-delay-timer').innerText = 'Wait timer bypassed!';
           alert('🎉 Bỏ qua đếm ngược thành công! Nhận thêm 10 passes.');
         });
@@ -1681,30 +1523,19 @@
 
       document.getElementById('btn-modal-retry').onclick = () => {
         if (State.coins >= 10) { 
-          State.coins -= 10; 
-          updateHUD(); 
-          document.getElementById('modal-result').classList.remove('active'); 
-          startLevel(State.currentLevel); 
-        } else {
-          alert('Not enough coins!');
-        }
+          State.coins -= 10; updateHUD(); document.getElementById('modal-result').classList.remove('active'); startLevel(State.currentLevel); 
+        } else alert('Not enough coins!');
       };
 
       document.getElementById('btn-modal-home').onclick = () => {
-        clearInterval(State.delayTimerInterval); 
-        clearInterval(State.timerInterval);
-        document.getElementById('modal-result').classList.remove('active');
-        navigateTo('screen-home');
+        clearInterval(State.delayTimerInterval); clearInterval(State.timerInterval);
+        document.getElementById('modal-result').classList.remove('active'); navigateTo('screen-home');
       };
 
-      document.getElementById('btn-confirm-cancel').onclick = () => {
-        document.getElementById('modal-confirm-purchase').classList.remove('active');
-        State.pendingPurchaseType = null;
-      };
+      document.getElementById('btn-confirm-cancel').onclick = () => { document.getElementById('modal-confirm-purchase').classList.remove('active'); State.pendingPurchaseType = null; };
       document.getElementById('btn-confirm-buy').onclick = confirmDirectPurchase;
     }
   </script>
-
 
 
 </body>
