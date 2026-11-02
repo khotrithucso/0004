@@ -519,6 +519,18 @@
         </div>
         <button class="btn-secondary-action" style="width: auto; margin:0;" onclick="buyShopItem('skip_pass', 100)">100 🪙</button>
       </div>
+      
+      
+      
+            <div class="shop-item-card">
+        <div class="shop-item-info">
+          <h4>🎬 Free +100 Coins Bonus</h4>
+          <p>Watch a 30-second Video Ad to claim 100 free coins</p>
+        </div>
+        <button class="btn-main-action" style="width: auto; margin:0; padding:8px 14px; font-size:12px;" onclick="watchAdForCoins(this)">WATCH AD</button>
+      </div>
+
+      
     </section>
 
     <!-- SCREEN 6: ONLINE LEADERBOARD -->
@@ -571,6 +583,23 @@
       </div>
     </div>
   </div>
+
+
+
+
+  <!-- SIMULATED REWARDED AD MODAL -->
+  <div class="modal-backdrop" id="modal-ad-sim">
+    <div class="modal-card">
+      <h3 style="color: var(--accent-cyan); font-size: 16px; margin-bottom: 10px;">🎬 REWARD VIDEO AD</h3>
+      <div class="ad-sim-box">
+        <p style="font-size:13px; font-weight:700; margin-bottom:6px;">Fast English Reward Sponsor</p>
+        <p style="font-size:11px; color:#cbd5e1;">Reward will be granted in <span id="ad-sim-counter">5</span>s...</p>
+        <div class="ad-sim-progress" id="ad-sim-progress-bar"></div>
+      </div>
+      <button class="btn-secondary-action" id="btn-close-ad-sim" disabled style="opacity:0.5;">CLOSE AD & CLAIM REWARD</button>
+    </div>
+  </div>
+ 
 
   <script>
     const SERVER_API_URL = "https://khotrithucso.io.vn/apps/0004/index.php";
@@ -1502,6 +1531,131 @@
       document.getElementById('btn-confirm-cancel').onclick = () => { document.getElementById('modal-confirm-purchase').classList.remove('active'); State.pendingPurchaseType = null; };
       document.getElementById('btn-confirm-buy').onclick = confirmDirectPurchase;
     }
+    
+    
+    
+    
+    
+        /* ==========================================================================
+       9. ADMOB TỔNG HỢP & LOGIC NHẬN THƯỞNG + CHỐNG SPAM CLICK
+       ========================================================================== */
+    let isAdMobInitialized = false;
+
+    function watchAdForCoins(btnElem) {
+      if (btnElem) {
+        const originalText = btnElem.innerText;
+        btnElem.disabled = true; 
+        btnElem.style.opacity = '0.5'; 
+        btnElem.innerText = '⏳ ĐANG TẢI...';
+        // Hồi phục nút bấm sau 3 giây để chống spam click
+        setTimeout(() => { 
+            btnElem.disabled = false; 
+            btnElem.style.opacity = '1'; 
+            btnElem.innerText = originalText; 
+        }, 3000);
+      }
+      showRewardedAdWithFailSafe();
+    }
+
+    async function showRewardedAdWithFailSafe(onRewardSuccessCallback) {
+      let isRewarded = false;
+      let isFallbackTriggered = false;
+
+      function triggerFallback() {
+        if (!isFallbackTriggered) {
+          isFallbackTriggered = true;
+          showSimulatedAdPlayer(() => { 
+              if (onRewardSuccessCallback) onRewardSuccessCallback(); 
+              else grantDefaultCoins(); 
+          });
+        }
+      }
+
+      function grantDefaultCoins() { 
+          State.coins += 100; 
+          updateHUD(); 
+          syncScoreWithServer(); 
+          sfx.coin(); 
+      }
+
+      // Gọi AdMob Native (nếu chạy trên App qua Capacitor)
+      if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.AdMob) {
+        try {
+          const { AdMob } = window.Capacitor.Plugins;
+          if (!isAdMobInitialized) { 
+              await AdMob.initialize({ initializeForTesting: true }); 
+              isAdMobInitialized = true; 
+          }
+          await AdMob.removeAllListeners();
+
+          const handleReward = () => { 
+              if (!isRewarded) { 
+                  isRewarded = true; 
+                  if (onRewardSuccessCallback) onRewardSuccessCallback(); 
+                  else grantDefaultCoins(); 
+              } 
+          };
+          AdMob.addListener('rewardedVideoAdReward', handleReward); 
+          AdMob.addListener('onRewardedVideoAdReward', handleReward);
+
+          const handleDismiss = () => {
+            AdMob.removeAllListeners();
+            if (isRewarded) alert('🎉 Cảm ơn bạn đã xem! Đã cộng +100 Xu vào tài khoản.');
+            else if (!onRewardSuccessCallback) alert('⚠️ Bạn đã tắt video sớm nên không nhận được thưởng!');
+          };
+          AdMob.addListener('rewardedVideoAdDismissed', handleDismiss); 
+          AdMob.addListener('onRewardedVideoAdClosed', handleDismiss);
+          AdMob.addListener('rewardedVideoAdFailedToLoad', triggerFallback); 
+          AdMob.addListener('rewardedVideoAdFailedToShow', triggerFallback); 
+
+          await AdMob.prepareRewardVideoAd({ adId: ADMOB_TEST.rewarded, isTesting: true });
+          await AdMob.showRewardVideoAd();
+          return;
+        } catch (err) {
+          if (window.Capacitor && window.Capacitor.Plugins.AdMob) window.Capacitor.Plugins.AdMob.removeAllListeners();
+          triggerFallback();
+          return;
+        }
+      }
+      
+      // Chạy trên Web hoặc mất kết nối -> Gọi giả lập
+      triggerFallback();
+    }
+
+    function showSimulatedAdPlayer(onRewardSuccess) {
+      const modal = document.getElementById('modal-ad-sim');
+      const counter = document.getElementById('ad-sim-counter');
+      const progressBar = document.getElementById('ad-sim-progress-bar');
+      const btnClose = document.getElementById('btn-close-ad-sim');
+      
+      modal.classList.add('active');
+      let secLeft = 5; 
+      counter.innerText = secLeft; 
+      progressBar.style.width = '0%';
+      btnClose.disabled = true; 
+      btnClose.style.opacity = '0.5';
+
+      let timer = setInterval(() => {
+        secLeft--; 
+        counter.innerText = secLeft; 
+        progressBar.style.width = `${((5 - secLeft) / 5) * 100}%`;
+        if (secLeft <= 0) { 
+            clearInterval(timer); 
+            counter.innerText = '0'; 
+            btnClose.disabled = false; 
+            btnClose.style.opacity = '1'; 
+        }
+      }, 1000);
+
+      btnClose.onclick = () => { 
+          modal.classList.remove('active'); 
+          if (onRewardSuccess) onRewardSuccess(); 
+          alert('🎉 Đã xem xong Video Giả lập! +100 Xu đã được cộng.'); 
+      };
+    }
+
+    
+    
   </script>
 
 </body>
