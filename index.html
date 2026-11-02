@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Fast English 1000 Sentence Puzzle V5.3 Pro</title>
+  <title>Fast English 1000 Sentence Puzzle V6.0 Pro</title>
   <style>
     /* ==========================================================================
        1. CORE THEMES & DESIGN TOKENS
@@ -81,7 +81,11 @@
     }
     .hud-coins { color: var(--accent-yellow); }
     .hud-stars { color: #d97706; }
-    .hud-streak { color: #ef4444; }
+    .hud-streak { color: #ef4444; position: relative; }
+    
+    /* Hiệu ứng chớp cho Combo */
+    .combo-active { animation: comboGlow 1s infinite alternate; border-color: var(--accent-red); background: #fef2f2; }
+    @keyframes comboGlow { from { box-shadow: 0 0 2px #ef4444; } to { box-shadow: 0 0 10px #ef4444; } }
 
     /* SIDEBAR DRAWER */
     .sidebar-overlay {
@@ -162,15 +166,20 @@
       padding: 14px; border-radius: 10px; font-size: 15px; font-weight: 800;
       cursor: pointer; width: 100%; margin-bottom: 10px;
       box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+      transition: transform 0.1s, background 0.1s;
     }
     .btn-main-action:active { transform: scale(0.98); background: var(--accent-green-hover); }
+    .btn-main-action:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
     .btn-secondary-action {
       background: var(--card-bg); color: var(--text-light);
       border: 1.5px solid var(--border-color); padding: 12px;
       border-radius: 10px; font-size: 14px; font-weight: 700;
       cursor: pointer; width: 100%; margin-bottom: 10px; box-shadow: var(--shadow-card);
+      transition: transform 0.1s;
     }
+    .btn-secondary-action:active { transform: scale(0.98); }
+    .btn-secondary-action:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
     /* LEVEL MAP */
     .map-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
@@ -188,14 +197,23 @@
     .level-node.active-stage { border-color: var(--accent-green); box-shadow: 0 0 12px rgba(16, 185, 129, 0.4); background: rgba(16, 185, 129, 0.1); }
     .level-stars-mini { font-size: 9px; color: var(--accent-yellow); margin-top: 2px; }
 
-    /* GAMEPLAY */
+    /* GAMEPLAY & TIMER BAR */
     .gameplay-hud {
-      display: flex; justify-content: space-between; align-items: center;
-      margin-bottom: 12px; background: var(--card-bg); padding: 10px 14px;
+      display: flex; flex-direction: column; margin-bottom: 12px; 
+      background: var(--card-bg); padding: 10px 14px;
       border-radius: 10px; border: 1px solid var(--border-color); box-shadow: var(--shadow-card);
     }
-    .timer-badge { font-size: 16px; font-weight: 800; color: var(--accent-yellow); }
+    .gameplay-hud-top { display: flex; justify-content: space-between; align-items: center; width: 100%; }
+    .timer-badge { font-size: 16px; font-weight: 800; color: var(--accent-yellow); transition: color 0.3s; }
     .timer-badge.warning { color: var(--accent-red); animation: pulse 0.5s infinite alternate; }
+
+    .timer-bar-container {
+      width: 100%; height: 6px; background: #e2e8f0; border-radius: 4px; margin-top: 8px; overflow: hidden;
+    }
+    .timer-bar-fill {
+      height: 100%; width: 100%; background: var(--accent-green); 
+      transition: width 1s linear, background-color 0.3s;
+    }
 
     @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.1); } }
 
@@ -218,9 +236,10 @@
     .drop-zone-box {
       background: #ffffff; border: 2px dashed #cbd5e1; border-radius: 12px;
       min-height: 90px; padding: 12px; display: flex; flex-wrap: wrap; gap: 8px;
-      align-content: flex-start; margin-bottom: 12px;
+      align-content: flex-start; margin-bottom: 12px; transition: border-color 0.3s;
     }
-    .drop-zone-box.wrong-shake { border-color: var(--accent-red); animation: shake 0.4s ease-in-out; }
+    .drop-zone-box.wrong-shake { border-color: var(--accent-red); animation: shake 0.4s ease-in-out; background: #fef2f2; }
+    .drop-zone-box.correct-pulse { border-color: var(--accent-green); background: #ecfdf5; }
 
     @keyframes shake {
       0%, 100% { transform: translateX(0); }
@@ -233,6 +252,7 @@
       background: #ffffff; border: 1.5px solid var(--border-color); color: var(--text-light);
       padding: 10px 14px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer;
       box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: background 0.15s, transform 0.1s;
+      animation: popIn 0.2s ease-out;
     }
     .word-chip:active { transform: scale(0.95); background: #e0f2fe; }
 
@@ -326,15 +346,20 @@
 
     .reward-toast-pop { margin-top: 8px; font-size: 13px; font-weight: 800; color: var(--accent-green); animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
 
-    /* SIMULATED AD PLAYER MODAL */
-    .ad-sim-box {
-      background: #000; color: #fff; border-radius: 12px; padding: 20px; text-align: center;
-      margin-bottom: 12px; position: relative; overflow: hidden;
-    }
-    .ad-sim-progress { height: 4px; background: var(--accent-green); position: absolute; bottom: 0; left: 0; width: 0%; transition: width 1s linear; }
-
     #canvas-confetti { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 400; }
-    .admob-banner-stub { background: #f1f5f9; border-top: 1px solid var(--border-color); color: var(--text-muted); font-size: 10px; text-align: center; padding: 8px; position: fixed; bottom: 0; left: 0; right: 0; z-index: 80; }
+
+    /* FLOATING COIN TEXT ANIMATION */
+    .floating-text {
+      position: fixed; top: 40%; left: 50%; transform: translate(-50%, -50%);
+      font-size: 24px; font-weight: 900; color: var(--accent-yellow);
+      text-shadow: 0 2px 10px rgba(0,0,0,0.2); z-index: 500;
+      animation: floatUpFade 1.2s forwards ease-out; pointer-events: none;
+    }
+    @keyframes floatUpFade {
+      0% { opacity: 0; transform: translate(-50%, 0) scale(0.5); }
+      20% { opacity: 1; transform: translate(-50%, -20px) scale(1.2); }
+      100% { opacity: 0; transform: translate(-50%, -60px) scale(1); }
+    }
   </style>
 </head>
 <body class="theme-sky">
@@ -345,12 +370,12 @@
   <header class="app-topbar">
     <div class="topbar-left">
       <button class="btn-hamburger" id="btn-open-sidebar">☰</button>
-      <div class="app-logo-title">⚡ FAST ENGLISH V5.3</div>
+      <div class="app-logo-title">⚡ FAST ENGLISH V6.0</div>
     </div>
     <div class="user-hud-stats">
-      <div class="hud-chip hud-coins">🪙 <span id="hud-coins-val">100</span></div>
+      <div class="hud-chip hud-coins" id="hud-chip-coins">🪙 <span id="hud-coins-val">100</span></div>
       <div class="hud-chip hud-stars">⭐ <span id="hud-stars-val">0</span></div>
-      <div class="hud-chip hud-streak">🔥 <span id="hud-streak-val">0</span></div>
+      <div class="hud-chip hud-streak" id="hud-streak-box">🔥 <span id="hud-streak-val">0</span></div>
     </div>
   </header>
 
@@ -415,8 +440,13 @@
     <!-- SCREEN 3: GAMEPLAY -->
     <section class="screen" id="screen-game">
       <div class="gameplay-hud">
-        <span style="font-weight: 800; color: var(--accent-cyan);" id="game-level-title">LEVEL 001</span>
-        <div class="timer-badge" id="game-timer-display">⏱️ 30s</div>
+        <div class="gameplay-hud-top">
+            <span style="font-weight: 800; color: var(--accent-cyan);" id="game-level-title">LEVEL 001</span>
+            <div class="timer-badge" id="game-timer-display">⏱️ 30s</div>
+        </div>
+        <div class="timer-bar-container">
+            <div class="timer-bar-fill" id="game-timer-bar"></div>
+        </div>
       </div>
 
       <div class="audio-card">
@@ -483,19 +513,11 @@
 
       <div class="shop-item-card">
         <div class="shop-item-info">
-          <h4>⚡ Skip Wait Pass (10 Levels)</h4>
-          <p>Bypass the 10s wait timer for the next 10 levels</p>
+          <h4>⚡ Skip Wait Pass (10 Passes)</h4>
+          <p>Bypass the wait timer manually for the next 10 levels</p>
           <div class="shop-item-stock">Passes Left: <span id="shop-stock-skip">0</span></div>
         </div>
-        <button class="btn-secondary-action" style="width: auto; margin:0;" onclick="buyShopItem('skip_pass', 60)">60 🪙</button>
-      </div>
-
-      <div class="shop-item-card">
-        <div class="shop-item-info">
-          <h4>🎬 Free +100 Coins Bonus</h4>
-          <p>Watch a 30-second Video Ad to claim 100 free coins</p>
-        </div>
-        <button class="btn-main-action" style="width: auto; margin:0; padding:8px 14px; font-size:12px;" onclick="watchAdForCoins()">WATCH AD</button>
+        <button class="btn-secondary-action" style="width: auto; margin:0;" onclick="buyShopItem('skip_pass', 100)">100 🪙</button>
       </div>
     </section>
 
@@ -522,19 +544,19 @@
     <div class="modal-card">
       <h2 id="modal-result-title" style="color: var(--accent-green); font-size: 20px;">STAGE COMPLETED!</h2>
       <div class="modal-stars-win" id="modal-stars-display">⭐⭐⭐</div>
-      <p id="modal-result-msg" style="font-size: 13px; color: var(--text-muted); margin-bottom: 8px;">Earned +30 Coins!</p>
+      <p id="modal-result-msg" style="font-size: 13px; font-weight:700; color: var(--text-muted); margin-bottom: 8px;">Earned +30 Coins!</p>
 
       <div id="bonus-minigame-wrapper" class="bonus-minigame-box" style="display:none;">
         <h4 id="bonus-title" style="font-size:13px; color:var(--accent-cyan);">🎁 3-STAR BONUS GAME!</h4>
         <div id="bonus-content"></div>
       </div>
 
-      <div class="timer-delay-text" id="modal-delay-timer">Next Level Unlocks in: 10s</div>
+      <div class="timer-delay-text" id="modal-delay-timer" style="font-weight:700; margin-bottom:10px;">Nút bấm sẽ mở sau: 5s</div>
 
       <button class="btn-main-action" id="btn-next-level" disabled style="opacity: 0.5;">NEXT LEVEL ➔</button>
-      <button class="btn-secondary-action" id="btn-skip-wait-ad">🎬 SKIP WAIT TIMER (WATCH AD)</button>
-      <button class="btn-secondary-action" id="btn-modal-retry" style="display:none; background:var(--accent-red); color:#fff; border:none;">🔄 RETRY THIS LEVEL (10 Coins)</button>
-      <button class="btn-secondary-action" id="btn-modal-home" style="margin-top:8px;">🏠 HOME MENU</button>
+      <button class="btn-secondary-action" id="btn-use-skip-pass" style="display:none; background:var(--accent-cyan); color:#fff; border:none; margin-bottom:10px;">🎫 USE 1 SKIP PASS (Have: <span id="modal-skip-count">0</span>)</button>
+      <button class="btn-secondary-action" id="btn-modal-retry" style="display:none; background:var(--accent-red); color:#fff; border:none; margin-bottom:10px;">🔄 RETRY THIS LEVEL (10 Coins)</button>
+      <button class="btn-secondary-action" id="btn-modal-home" disabled style="opacity:0.5;">🏠 HOME MENU</button>
     </div>
   </div>
 
@@ -550,28 +572,8 @@
     </div>
   </div>
 
-  <!-- SIMULATED REWARDED AD MODAL -->
-  <div class="modal-backdrop" id="modal-ad-sim">
-    <div class="modal-card">
-      <h3 style="color: var(--accent-cyan); font-size: 16px; margin-bottom: 10px;">🎬 REWARD VIDEO AD</h3>
-      <div class="ad-sim-box">
-        <p style="font-size:13px; font-weight:700; margin-bottom:6px;">Fast English Reward Sponsor</p>
-        <p style="font-size:11px; color:#cbd5e1;">Reward will be granted in <span id="ad-sim-counter">5</span>s...</p>
-        <div class="ad-sim-progress" id="ad-sim-progress-bar"></div>
-      </div>
-      <button class="btn-secondary-action" id="btn-close-ad-sim" disabled style="opacity:0.5;">CLOSE AD & CLAIM REWARD</button>
-    </div>
-  </div>
-
-  <div class="admob-banner-stub">[AdMob Adaptive Bottom Banner Active]</div>
   <script>
     const SERVER_API_URL = "https://khotrithucso.io.vn/apps/0004/index.php";
-
-    const ADMOB_TEST = {
-      appId: "ca-app-pub-3940256099942544~3347511713",
-      rewarded: "ca-app-pub-3940256099942544/5224354917", 
-      banner: "ca-app-pub-3940256099942544/6300978111" 
-    };
 
     const BASE_SENTENCES = [
       "Hello how are you today", "What is your name", "Nice to meet you", "Where are you from",
@@ -782,12 +784,11 @@
       shuffledWords: [],
       targetSentence: '',
       delayTimerInterval: null,
-      delaySec: 10,
+      delaySec: 5,
       mapPage: 0,
       pendingPurchaseType: null,
       activeLbTab: 'stars',
       cachedLeaderboard: null,
-      // Cờ bảo mật mới thêm
       isPlaying: false,
       isChecking: false,
       nextUnlockTime: parseInt(localStorage.getItem('fe_next_unlock_time') || '0')
@@ -832,10 +833,6 @@
       setupEventListeners();
       renderMapGrid();
       syncScoreWithServer();
-      initAdMobBanner();
-      
-      const btnShopAd = document.querySelector('button[onclick="watchAdForCoins()"]');
-      if(btnShopAd) btnShopAd.onclick = function() { watchAdForCoins(this); };
     });
 
     function applyCurrentTheme() { document.body.className = THEME_PRESETS[State.currentThemeIndex]; }
@@ -849,7 +846,17 @@
     function updateHUD() {
       document.getElementById('hud-coins-val').innerText = State.coins;
       document.getElementById('hud-stars-val').innerText = getTotalStars();
-      document.getElementById('hud-streak-val').innerText = State.streak;
+      
+      const streakEl = document.getElementById('hud-streak-val');
+      const streakBox = document.getElementById('hud-streak-box');
+      streakEl.innerText = State.streak;
+      
+      // Sáng tạo: Hiệu ứng nhấp nháy khi combo >= 3
+      if(State.streak >= 3) {
+          streakBox.classList.add('combo-active');
+      } else {
+          streakBox.classList.remove('combo-active');
+      }
 
       document.getElementById('powerup-count-time').innerText = `(x${State.inventory.time})`;
       document.getElementById('powerup-count-hint').innerText = `(x${State.inventory.hint})`;
@@ -870,6 +877,7 @@
       localStorage.setItem('fe_inv_time', State.inventory.time);
       localStorage.setItem('fe_inv_hint', State.inventory.hint);
       localStorage.setItem('fe_inv_slow', State.inventory.slow);
+      localStorage.setItem('fe_skip_passes', State.skipWaitPasses);
       localStorage.setItem('fe_next_unlock_time', State.nextUnlockTime);
     }
 
@@ -897,7 +905,6 @@
     }
 
     function navigateTo(screenId) {
-      // Chống Gian Lận: Xử thua nếu thoát ra lúc đồng hồ đang chạy
       if (State.isPlaying && screenId !== 'screen-game') {
           if (!confirm('⚠️ Bạn đang trong màn chơi! Thoát ra bây giờ sẽ bị xử thua và mất chuỗi thắng. Vẫn thoát?')) {
               return; 
@@ -984,10 +991,10 @@
        6. GAMEPLAY LOGIC
        ========================================================================== */
     function startLevel(levelNum) {
-      // Khóa Bypass Thời Gian Toàn Cục
+      // Thời gian chờ 5s
       if (Date.now() < State.nextUnlockTime) {
           const waitLeft = Math.ceil((State.nextUnlockTime - Date.now()) / 1000);
-          alert(`⏳ Vui lòng chờ thêm ${waitLeft} giây để vào màn chơi mới!`);
+          alert(`⏳ Vui lòng chờ thêm ${waitLeft} giây để vào màn chơi mới! (Hoặc dùng vé bỏ qua chờ)`);
           return;
       }
 
@@ -1008,25 +1015,39 @@
 
       document.getElementById('game-level-title').innerText = `LEVEL ${String(levelNum).padStart(3, '0')}`;
       
-      // Override navigateTo direct render to avoid confirm loop
       clearInterval(State.timerInterval);
       document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
       document.getElementById('screen-game').classList.add('active');
       document.getElementById('sidebar-overlay').classList.remove('active');
 
+      document.getElementById('drop-zone-container').className = 'drop-zone-box'; // Reset effects
+
       renderWordChips();
       setTimeout(() => voiceEngine.speak(State.targetSentence), 300);
 
       const timerDisplay = document.getElementById('game-timer-display');
+      const timerBar = document.getElementById('game-timer-bar');
+      
       timerDisplay.classList.remove('warning');
       timerDisplay.innerText = `⏱️ ${State.timerSec}s`;
+      timerBar.style.width = '100%';
+      timerBar.style.background = 'var(--accent-green)';
 
       State.timerInterval = setInterval(() => {
         State.timerSec--;
         State.timeElapsed++;
         timerDisplay.innerText = `⏱️ ${State.timerSec}s`;
+        
+        let pct = (State.timerSec / 30) * 100;
+        timerBar.style.width = pct + '%';
 
-        if (State.timerSec <= 5) timerDisplay.classList.add('warning');
+        if (State.timerSec <= 10) {
+            timerDisplay.classList.add('warning');
+            timerBar.style.background = 'var(--accent-yellow)';
+        }
+        if (State.timerSec <= 5) {
+            timerBar.style.background = 'var(--accent-red)';
+        }
 
         if (State.timerSec <= 0) {
           clearInterval(State.timerInterval);
@@ -1048,7 +1069,7 @@
       wordPool.innerHTML = '';
 
       if (State.selectedWords.length === 0) {
-        dropZone.innerHTML = '<span style="font-size: 12px; color: var(--text-muted);">Tap words below to assemble sentence...</span>';
+        dropZone.innerHTML = '<span style="font-size: 12px; color: var(--text-muted); align-self: center;">Tap words below to assemble sentence...</span>';
       } else {
         State.selectedWords.forEach((word, idx) => {
           const chip = document.createElement('div');
@@ -1076,19 +1097,29 @@
       });
     }
 
+    function spawnFloatingText(text) {
+        const el = document.createElement('div');
+        el.className = 'floating-text';
+        el.innerText = text;
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 1200);
+    }
+
     function checkAnswer() {
-      // Cooldown chống Spam Click
       if (State.isChecking) return;
       State.isChecking = true;
 
       const userAns = State.selectedWords.join(' ').toLowerCase();
       const targetAns = State.targetSentence.replace(/[.,?!]/g, '').toLowerCase();
+      const dropBox = document.getElementById('drop-zone-container');
 
       if (userAns === targetAns) {
         clearInterval(State.timerInterval);
         State.isPlaying = false;
         sfx.correct();
         voiceEngine.speak(State.targetSentence);
+        
+        dropBox.classList.add('correct-pulse');
 
         let stars = 1;
         if (State.timeElapsed <= 10) stars = 3;
@@ -1102,7 +1133,18 @@
 
         if (stars > oldStars) {
           const coinTable = { 1: 10, 2: 20, 3: 30 };
-          earnedCoins = coinTable[stars] - (coinTable[oldStars] || 0);
+          let baseCoins = coinTable[stars] - (coinTable[oldStars] || 0);
+          
+          // Hệ thống Nhân phẩm / Combo Bonus
+          let multiplier = 1;
+          let comboMsg = "";
+          if (State.streak >= 5) { multiplier = 2; comboMsg = "\n🔥 STREAK x2"; }
+          else if (State.streak >= 3) { multiplier = 1.5; comboMsg = "\n🔥 STREAK x1.5"; }
+          
+          earnedCoins = Math.floor(baseCoins * multiplier);
+          
+          if(earnedCoins > 0) spawnFloatingText(`+${earnedCoins} 🪙${comboMsg}`);
+
           State.levelStars[State.currentLevel] = stars;
           State.coins += earnedCoins;
         }
@@ -1116,16 +1158,15 @@
 
         updateHUD();
         syncScoreWithServer();
-        showResultModal(true, stars, earnedCoins);
+        setTimeout(() => showResultModal(true, stars, earnedCoins), 1000);
       } else {
         sfx.wrong();
-        const dropBox = document.getElementById('drop-zone-container');
         dropBox.classList.add('wrong-shake');
         
         setTimeout(() => {
             dropBox.classList.remove('wrong-shake');
             State.isChecking = false;
-        }, 1000);
+        }, 800);
       }
     }
 
@@ -1192,6 +1233,9 @@
       if (type === 'time') {
         State.timerSec += 10;
         document.getElementById('game-timer-display').innerText = `⏱️ ${State.timerSec}s`;
+        const bar = document.getElementById('game-timer-bar');
+        bar.style.width = Math.min(100, (State.timerSec / 30) * 100) + '%';
+        if (State.timerSec > 10) bar.style.background = 'var(--accent-green)';
       } else if (type === 'hint') autoPlaceNextHint();
       else if (type === 'slow') voiceEngine.speak(State.targetSentence, true);
     }
@@ -1216,7 +1260,7 @@
       else State.inventory[type]++;
       updateHUD();
       syncScoreWithServer();
-      alert(`🎉 Purchased ${POWERUP_NAMES[type] || 'Item'}!`);
+      alert(`🎉 Purchased Successfully!`);
     }
 
     /* ==========================================================================
@@ -1231,43 +1275,43 @@
       const btnHome = document.getElementById('btn-modal-home');
       const delayTxt = document.getElementById('modal-delay-timer');
       const btnRetry = document.getElementById('btn-modal-retry');
-      const btnSkipWait = document.getElementById('btn-skip-wait-ad');
+      const btnUseSkip = document.getElementById('btn-use-skip-pass');
       const bonusBox = document.getElementById('bonus-minigame-wrapper');
 
       modal.classList.add('active');
       clearInterval(State.delayTimerInterval);
 
-      // KHÓA 10 GIÂY BẮT BUỘC: Vô hiệu hóa Toàn bộ Nút Điều Hướng ở CẢ Win & Lose
+      // Mờ nút Next và Home trong 5 giây
       btnNext.disabled = true; btnNext.style.opacity = '0.5';
       btnHome.disabled = true; btnHome.style.opacity = '0.5';
       btnRetry.disabled = true; btnRetry.style.opacity = '0.5';
       
-      State.delaySec = 10; 
-      State.nextUnlockTime = Date.now() + (10 * 1000); 
+      State.delaySec = 5; // Thời gian chờ mới là 5s
+      State.nextUnlockTime = Date.now() + (5 * 1000); 
       updateHUD();
+
+      // Hiển thị nút dùng Vé Bỏ Qua nếu người chơi có
+      if (State.skipWaitPasses > 0) {
+          btnUseSkip.style.display = 'block';
+          document.getElementById('modal-skip-count').innerText = State.skipWaitPasses;
+      } else {
+          btnUseSkip.style.display = 'none';
+      }
 
       if (isWin) {
         title.innerText = 'STAGE COMPLETED!'; title.style.color = 'var(--accent-green)';
         starsDisp.innerText = '⭐'.repeat(stars);
-        msg.innerText = coins > 0 ? `Awesome! Earned +${coins} Coins!` : `Already completed!`;
+        
+        let comboMsg = (State.streak >= 3) ? " (Combo Bonus Applied!)" : "";
+        msg.innerText = coins > 0 ? `Awesome! Earned +${coins} Coins!${comboMsg}` : `Already completed!`;
+        
         btnRetry.style.display = 'none'; 
         btnNext.style.display = 'block'; 
-        btnSkipWait.style.display = 'block';
 
         if (stars === 3) {
           bonusBox.style.display = 'block';
           renderAnimatedBonusMinigame();
         } else bonusBox.style.display = 'none';
-
-        if (State.skipWaitPasses > 0) {
-          State.skipWaitPasses--; 
-          updateHUD();
-          State.nextUnlockTime = 0; // Mở khóa liền
-          btnNext.disabled = false; btnNext.style.opacity = '1';
-          btnHome.disabled = false; btnHome.style.opacity = '1';
-          delayTxt.innerText = `Skip Wait Pass Active! (${State.skipWaitPasses} passes left)`;
-          return;
-        }
 
       } else {
         title.innerText = 'TIME OUT / FAILED!'; title.style.color = 'var(--accent-red)';
@@ -1275,7 +1319,6 @@
         msg.innerText = 'Sentence added to Mistake Bank!';
         bonusBox.style.display = 'none';
         btnNext.style.display = 'none'; 
-        btnSkipWait.style.display = 'none'; 
         btnRetry.style.display = 'block';
       }
 
@@ -1289,6 +1332,7 @@
           btnNext.disabled = false; btnNext.style.opacity = '1';
           btnRetry.disabled = false; btnRetry.style.opacity = '1';
           btnHome.disabled = false; btnHome.style.opacity = '1';
+          btnUseSkip.style.display = 'none'; // Tắt nút skip khi đã xong
           delayTxt.innerText = 'Ready to go!';
         }
       }, 1000);
@@ -1355,88 +1399,6 @@
     }
 
     /* ==========================================================================
-       9. ADMOB TỔNG HỢP & LOGIC NHẬN THƯỞNG + CHỐNG SPAM CLICK
-       ========================================================================== */
-    let isAdMobInitialized = false;
-
-    async function initAdMobBanner() {
-      if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.AdMob) {
-        try {
-          const { AdMob } = window.Capacitor.Plugins;
-          if (!isAdMobInitialized) { await AdMob.initialize({ initializeForTesting: true }); isAdMobInitialized = true; }
-          await AdMob.showBanner({ adId: ADMOB_TEST.banner, adSize: 'ADAPTIVE_BANNER', position: 'BOTTOM_CENTER', margin: 0 });
-          const stub = document.querySelector('.admob-banner-stub');
-          if (stub) stub.style.display = 'none';
-        } catch (e) { console.log("AdMob Banner Init Error:", e); }
-      }
-    }
-
-    function watchAdForCoins(btnElem) {
-      if (btnElem) {
-        const originalText = btnElem.innerText;
-        btnElem.disabled = true; btnElem.style.opacity = '0.5'; btnElem.innerText = '⏳ ĐANG TẢI...';
-        setTimeout(() => { btnElem.disabled = false; btnElem.style.opacity = '1'; btnElem.innerText = originalText; }, 3000);
-      }
-      showRewardedAdWithFailSafe();
-    }
-
-    async function showRewardedAdWithFailSafe(onRewardSuccessCallback) {
-      let isRewarded = false;
-      let isFallbackTriggered = false;
-
-      function triggerFallback() {
-        if (!isFallbackTriggered) {
-          isFallbackTriggered = true;
-          showSimulatedAdPlayer(() => { if (onRewardSuccessCallback) onRewardSuccessCallback(); else grantDefaultCoins(); });
-        }
-      }
-
-      function grantDefaultCoins() { State.coins += 100; updateHUD(); syncScoreWithServer(); sfx.coin(); }
-
-      if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.AdMob) {
-        try {
-          const { AdMob } = window.Capacitor.Plugins;
-          if (!isAdMobInitialized) { await AdMob.initialize({ initializeForTesting: true }); isAdMobInitialized = true; }
-          await AdMob.removeAllListeners();
-
-          const handleReward = () => { if (!isRewarded) { isRewarded = true; if (onRewardSuccessCallback) onRewardSuccessCallback(); else grantDefaultCoins(); } };
-          AdMob.addListener('rewardedVideoAdReward', handleReward); AdMob.addListener('onRewardedVideoAdReward', handleReward);
-
-          const handleDismiss = () => {
-            AdMob.removeAllListeners();
-            if (isRewarded) alert('🎉 Cảm ơn bạn đã xem! Đã cộng +100 Xu vào tài khoản.');
-            else if (!onRewardSuccessCallback) alert('⚠️ Bạn đã tắt video sớm nên không nhận được thưởng!');
-          };
-          AdMob.addListener('rewardedVideoAdDismissed', handleDismiss); AdMob.addListener('onRewardedVideoAdClosed', handleDismiss);
-          AdMob.addListener('rewardedVideoAdFailedToLoad', triggerFallback); AdMob.addListener('rewardedVideoAdFailedToShow', triggerFallback); AdMob.addListener('onRewardedVideoAdFailedToLoad', triggerFallback);
-
-          await AdMob.prepareRewardVideoAd({ adId: ADMOB_TEST.rewarded, isTesting: true });
-          await AdMob.showRewardVideoAd();
-          return;
-        } catch (err) {
-          if (window.Capacitor && window.Capacitor.Plugins.AdMob) window.Capacitor.Plugins.AdMob.removeAllListeners();
-          triggerFallback();
-          return;
-        }
-      }
-      triggerFallback();
-    }
-
-    function showSimulatedAdPlayer(onRewardSuccess) {
-      const modal = document.getElementById('modal-ad-sim'), counter = document.getElementById('ad-sim-counter'), progressBar = document.getElementById('ad-sim-progress-bar'), btnClose = document.getElementById('btn-close-ad-sim');
-      modal.classList.add('active');
-      let secLeft = 5; counter.innerText = secLeft; progressBar.style.width = '0%';
-      btnClose.disabled = true; btnClose.style.opacity = '0.5';
-
-      let timer = setInterval(() => {
-        secLeft--; counter.innerText = secLeft; progressBar.style.width = `${((5 - secLeft) / 5) * 100}%`;
-        if (secLeft <= 0) { clearInterval(timer); counter.innerText = '0'; btnClose.disabled = false; btnClose.style.opacity = '1'; }
-      }, 1000);
-
-      btnClose.onclick = () => { modal.classList.remove('active'); if (onRewardSuccess) onRewardSuccess(); alert('🎉 Đã xem xong Video Giả lập! +100 Xu đã được cộng.'); };
-    }
-
-    /* ==========================================================================
        10. UTILITIES & EVENT BINDINGS
        ========================================================================== */
     function launchConfetti() {
@@ -1477,7 +1439,6 @@
       document.getElementById('btn-quick-play').onclick = () => startLevel(State.unlockedLevel);
       document.getElementById('btn-play-audio').onclick = () => voiceEngine.speak(State.targetSentence);
 
-      // Chống Lạm Dụng Retry Giữa Chừng
       document.getElementById('btn-game-retry').onclick = () => {
         if (State.timerSec <= 5) {
             alert('⏳ Thời gian sắp hết, không thể bấm chơi lại lúc này! Hãy thử ghép xong câu!');
@@ -1487,7 +1448,7 @@
             if (State.coins >= 10) { 
               State.coins -= 10; 
               State.streak = 0; 
-              State.isPlaying = false; // Mở khóa để ko trigger Forfeit
+              State.isPlaying = false; 
               updateHUD(); 
               startLevel(State.currentLevel); 
             } else alert('Không đủ 10 Xu để thử lại!');
@@ -1506,19 +1467,25 @@
 
       document.getElementById('btn-next-level').onclick = () => { document.getElementById('modal-result').classList.remove('active'); startLevel(State.currentLevel + 1); };
 
-      document.getElementById('btn-skip-wait-ad').onclick = function() {
-        const btn = this; btn.disabled = true; btn.style.opacity = '0.5'; btn.innerText = '⏳ ĐANG TẢI...';
-        setTimeout(() => { btn.disabled = false; btn.style.opacity = '1'; btn.innerText = '🎬 SKIP WAIT TIMER (WATCH AD)'; }, 3000);
-        showRewardedAdWithFailSafe(() => {
-          State.skipWaitPasses += 10; 
-          State.nextUnlockTime = 0; // Mở khóa Bypass toàn cục
-          updateHUD(); clearInterval(State.delayTimerInterval);
-          document.getElementById('btn-next-level').disabled = false; document.getElementById('btn-next-level').style.opacity = '1';
-          document.getElementById('btn-modal-home').disabled = false; document.getElementById('btn-modal-home').style.opacity = '1';
-          document.getElementById('btn-modal-retry').disabled = false; document.getElementById('btn-modal-retry').style.opacity = '1';
-          document.getElementById('modal-delay-timer').innerText = 'Wait timer bypassed!';
-          alert('🎉 Bỏ qua đếm ngược thành công! Nhận thêm 10 passes.');
-        });
+      // Chức năng Dùng Vé Bỏ Qua Chủ Động Mới
+      document.getElementById('btn-use-skip-pass').onclick = function() {
+        if (State.skipWaitPasses > 0) {
+            State.skipWaitPasses--; 
+            State.nextUnlockTime = 0; // Mở khóa liền
+            updateHUD(); 
+            clearInterval(State.delayTimerInterval);
+            
+            document.getElementById('btn-next-level').disabled = false; 
+            document.getElementById('btn-next-level').style.opacity = '1';
+            document.getElementById('btn-modal-home').disabled = false; 
+            document.getElementById('btn-modal-home').style.opacity = '1';
+            document.getElementById('btn-modal-retry').disabled = false; 
+            document.getElementById('btn-modal-retry').style.opacity = '1';
+            
+            document.getElementById('modal-delay-timer').innerText = 'Timer Bypassed!';
+            this.style.display = 'none'; // Ẩn nút dùng vé sau khi dùng
+            sfx.coin();
+        }
       };
 
       document.getElementById('btn-modal-retry').onclick = () => {
@@ -1536,7 +1503,6 @@
       document.getElementById('btn-confirm-buy').onclick = confirmDirectPurchase;
     }
   </script>
-
 
 </body>
 </html>
