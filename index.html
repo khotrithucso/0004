@@ -520,17 +520,13 @@
         <button class="btn-secondary-action" style="width: auto; margin:0;" onclick="buyShopItem('skip_pass', 100)">100 🪙</button>
       </div>
       
-      
-      
-            <div class="shop-item-card">
+      <div class="shop-item-card">
         <div class="shop-item-info">
           <h4>🎬 Free +100 Coins Bonus</h4>
           <p>Watch a 30-second Video Ad to claim 100 free coins</p>
         </div>
         <button class="btn-main-action" style="width: auto; margin:0; padding:8px 14px; font-size:12px;" onclick="watchAdForCoins(this)">WATCH AD</button>
       </div>
-
-      
     </section>
 
     <!-- SCREEN 6: ONLINE LEADERBOARD -->
@@ -583,9 +579,6 @@
       </div>
     </div>
   </div>
-
-
-
 
   <!-- SIMULATED REWARDED AD MODAL -->
   <div class="modal-backdrop" id="modal-ad-sim">
@@ -1532,11 +1525,7 @@
       document.getElementById('btn-confirm-buy').onclick = confirmDirectPurchase;
     }
     
-    
-    
-    
-    
-        /* ==========================================================================
+    /* ==========================================================================
        9. ADMOB TỔNG HỢP & LOGIC NHẬN THƯỞNG + CHỐNG SPAM CLICK
        ========================================================================== */
     let isAdMobInitialized = false;
@@ -1595,6 +1584,7 @@
                   else grantDefaultCoins(); 
               } 
           };
+          
           AdMob.addListener('rewardedVideoAdReward', handleReward); 
           AdMob.addListener('onRewardedVideoAdReward', handleReward);
 
@@ -1603,12 +1593,14 @@
             if (isRewarded) alert('🎉 Cảm ơn bạn đã xem! Đã cộng +100 Xu vào tài khoản.');
             else if (!onRewardSuccessCallback) alert('⚠️ Bạn đã tắt video sớm nên không nhận được thưởng!');
           };
+          
           AdMob.addListener('rewardedVideoAdDismissed', handleDismiss); 
           AdMob.addListener('onRewardedVideoAdClosed', handleDismiss);
           AdMob.addListener('rewardedVideoAdFailedToLoad', triggerFallback); 
           AdMob.addListener('rewardedVideoAdFailedToShow', triggerFallback); 
 
-          await AdMob.prepareRewardVideoAd({ adId: ADMOB_TEST.rewarded, isTesting: true });
+          // FIX ADMOB_TEST error - SỬ DỤNG ID TEST CHUẨN CỦA GOOGLE
+          await AdMob.prepareRewardVideoAd({ adId: 'ca-app-pub-3940256099942544/5224354917', isTesting: true });
           await AdMob.showRewardVideoAd();
           return;
         } catch (err) {
@@ -1653,9 +1645,6 @@
           alert('🎉 Đã xem xong Video Giả lập! +100 Xu đã được cộng.'); 
       };
     }
-
-    
-    
   </script>
 
 </body>
